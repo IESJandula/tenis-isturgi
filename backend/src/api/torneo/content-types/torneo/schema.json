@@ -1,0 +1,37 @@
+{
+  "kind": "collectionType",
+  "collectionName": "torneos",
+  "info": {
+    "singularName": "torneo",
+    "pluralName": "torneos",
+    "displayName": "Torneo"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Nombre": {
+      "type": "text",
+      "required": true
+    },
+    "Descripcion": {
+      "type": "blocks",
+      "required": false
+    },
+    "Fecha": {
+      "type": "datetime"
+    },
+    "Imagen": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    }
+  }
+}
