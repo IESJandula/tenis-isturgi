@@ -1,19 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router'
-
-// Páginas
-import Home from '../pages/Home.vue'
-import Noticias from '../pages/Noticias.vue'
-import NoticiaDetalle from '../pages/NoticiaDetalle.vue'
+import Home from '../views/Home.vue'
+import Liga from '../views/Liga.vue'
 
 const routes = [
-  { path: '/', name: 'home', component: Home },
-  { path: '/noticias', name: 'noticias', component: Noticias },
-  { path: '/noticias/:id', name: 'noticia-detalle', component: NoticiaDetalle },
+  { path: '/', name: 'Home', component: Home },
+  { path: '/liga', name: 'Liga', component: Liga }
 ]
 
 const router = createRouter({
   history: createWebHistory(),
-  routes,
+  routes
 })
 
 export default router

@@ -441,10 +441,10 @@ export interface ApiNoticiaNoticia extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
-    Contenido: Schema.Attribute.Blocks;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    Descripcion: Schema.Attribute.Text;
     Fecha: Schema.Attribute.DateTime;
     Imagen: Schema.Attribute.Media<
       'images' | 'files' | 'videos' | 'audios',

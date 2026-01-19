@@ -15,8 +15,8 @@
       "type": "text",
       "required": true
     },
-    "Contenido": {
-      "type": "blocks"
+    "Descripcion": {
+      "type": "text"
     },
     "Imagen": {
       "type": "media",
