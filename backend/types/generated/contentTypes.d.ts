@@ -430,6 +430,102 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiDivisionDivision extends Struct.CollectionTypeSchema {
+  collectionName: 'divisions';
+  info: {
+    displayName: 'Divisi\u00F3n';
+    pluralName: 'divisions';
+    singularName: 'division';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    jornadas: Schema.Attribute.Relation<'oneToMany', 'api::jornada.jornada'>;
+    jugadors: Schema.Attribute.Relation<'oneToMany', 'api::jugador.jugador'>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::division.division'
+    > &
+      Schema.Attribute.Private;
+    Nombre: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    temporada: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::temporada.temporada'
+    >;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiJornadaJornada extends Struct.CollectionTypeSchema {
+  collectionName: 'jornadas';
+  info: {
+    displayName: 'Jornada';
+    pluralName: 'jornadas';
+    singularName: 'jornada';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    division: Schema.Attribute.Relation<'manyToOne', 'api::division.division'>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::jornada.jornada'
+    > &
+      Schema.Attribute.Private;
+    Nombre: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiJugadorJugador extends Struct.CollectionTypeSchema {
+  collectionName: 'jugadors';
+  info: {
+    displayName: 'Jugador';
+    pluralName: 'jugadors';
+    singularName: 'jugador';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    Apellidos: Schema.Attribute.String;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    division: Schema.Attribute.Relation<'manyToOne', 'api::division.division'>;
+    Email: Schema.Attribute.Email;
+    Foto: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::jugador.jugador'
+    > &
+      Schema.Attribute.Private;
+    Nombre: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    Telefono: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiNoticiaNoticia extends Struct.CollectionTypeSchema {
   collectionName: 'noticias';
   info: {
@@ -458,6 +554,35 @@ export interface ApiNoticiaNoticia extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
     Titulo: Schema.Attribute.Text & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiTemporadaTemporada extends Struct.CollectionTypeSchema {
+  collectionName: 'temporadas';
+  info: {
+    displayName: 'Temporada';
+    pluralName: 'temporadas';
+    singularName: 'temporada';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    divisions: Schema.Attribute.Relation<'oneToMany', 'api::division.division'>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::temporada.temporada'
+    > &
+      Schema.Attribute.Private;
+    Nombre: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1008,7 +1133,11 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
+      'api::division.division': ApiDivisionDivision;
+      'api::jornada.jornada': ApiJornadaJornada;
+      'api::jugador.jugador': ApiJugadorJugador;
       'api::noticia.noticia': ApiNoticiaNoticia;
+      'api::temporada.temporada': ApiTemporadaTemporada;
       'api::torneo.torneo': ApiTorneoTorneo;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;

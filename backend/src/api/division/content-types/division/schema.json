@@ -1,0 +1,36 @@
+{
+  "kind": "collectionType",
+  "collectionName": "divisions",
+  "info": {
+    "singularName": "division",
+    "pluralName": "divisions",
+    "displayName": "División"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Nombre": {
+      "type": "string"
+    },
+    "temporada": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::temporada.temporada",
+      "inversedBy": "divisions"
+    },
+    "jugadors": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::jugador.jugador",
+      "mappedBy": "division"
+    },
+    "jornadas": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::jornada.jornada",
+      "mappedBy": "division"
+    }
+  }
+}

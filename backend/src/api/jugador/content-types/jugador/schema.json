@@ -1,0 +1,43 @@
+{
+  "kind": "collectionType",
+  "collectionName": "jugadors",
+  "info": {
+    "singularName": "jugador",
+    "pluralName": "jugadors",
+    "displayName": "Jugador"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Nombre": {
+      "type": "string"
+    },
+    "Apellidos": {
+      "type": "string"
+    },
+    "Telefono": {
+      "type": "string"
+    },
+    "Email": {
+      "type": "email"
+    },
+    "Foto": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "division": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::division.division",
+      "inversedBy": "jugadors"
+    }
+  }
+}
