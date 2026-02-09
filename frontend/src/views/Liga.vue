@@ -113,10 +113,10 @@ onMounted(() => {
 
 <style scoped>
 .liga-container {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 24px;
-  color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  color: #eaf2ef;
 }
 
 .header {
@@ -124,18 +124,23 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   gap: 20px;
-  margin-bottom: 24px;
+  padding: 20px 24px;
+  border-radius: var(--radius-lg);
+  background: rgba(8, 15, 18, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .header h1 {
   margin: 0 0 6px;
-  color: #bfff00;
-  font-size: 2.2rem;
+  color: var(--ball);
+  font-size: 2.1rem;
+  font-family: "Bebas Neue", sans-serif;
+  letter-spacing: 1px;
 }
 
 .header p {
   margin: 0;
-  color: #cfcfcf;
+  color: rgba(234, 242, 239, 0.7);
 }
 
 .division-select {
@@ -145,9 +150,9 @@ onMounted(() => {
 }
 
 .chip {
-  background: #2c2c2c;
+  background: rgba(9, 13, 15, 0.7);
   color: #f4f4f4;
-  border: 1px solid #444;
+  border: 1px solid rgba(255, 255, 255, 0.14);
   padding: 10px 16px;
   cursor: pointer;
   border-radius: 999px;
@@ -158,21 +163,22 @@ onMounted(() => {
 }
 
 .chip.activo {
-  background: #bfff00;
-  color: #222;
-  border-color: #bfff00;
+  background: var(--ball);
+  color: var(--ink);
+  border-color: var(--ball);
 }
 
 .estado {
   padding: 16px;
-  background: #2c2c2c;
-  border-radius: 10px;
+  background: rgba(9, 13, 15, 0.7);
+  border-radius: var(--radius-md);
   text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .estado.error {
   color: #ffb3b3;
-  border: 1px solid #5a2a2a;
+  border: 1px solid rgba(255, 110, 110, 0.3);
 }
 
 .jornadas-grid {
@@ -182,11 +188,11 @@ onMounted(() => {
 }
 
 .jornada-card {
-  background: #1f1f1f;
-  border: 1px solid #353535;
-  border-radius: 16px;
+  background: rgba(9, 13, 15, 0.74);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
   padding: 18px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow);
 }
 
 .jornada-header {
@@ -200,12 +206,12 @@ onMounted(() => {
 .jornada-header h2 {
   margin: 0;
   font-size: 1.1rem;
-  color: #bfff00;
+  color: var(--ball);
 }
 
 .jornada-nombre {
   font-size: 0.8rem;
-  color: #9a9a9a;
+  color: rgba(234, 242, 239, 0.6);
 }
 
 .partidos-list {
@@ -217,10 +223,10 @@ onMounted(() => {
 }
 
 .partido-item {
-  background: #2a2a2a;
+  background: rgba(13, 18, 20, 0.76);
   border-radius: 12px;
   padding: 12px 14px;
-  border: 1px solid #3a3a3a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .jugadores {
@@ -235,7 +241,7 @@ onMounted(() => {
 }
 
 .vs {
-  color: #bfff00;
+  color: var(--ball);
   font-weight: 800;
 }
 
@@ -244,16 +250,16 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-top: 8px;
-  color: #c0c0c0;
+  color: rgba(234, 242, 239, 0.6);
   font-size: 0.8rem;
 }
 
 .estado-pill {
-  background: #3a3a3a;
+  background: rgba(199, 255, 52, 0.14);
   padding: 4px 10px;
   border-radius: 999px;
   font-weight: 700;
-  color: #bfff00;
+  color: var(--ball);
 }
 
 .detalle {
@@ -261,7 +267,7 @@ onMounted(() => {
 }
 
 .vacio {
-  color: #9a9a9a;
+  color: rgba(234, 242, 239, 0.55);
   font-style: italic;
   margin: 0;
 }

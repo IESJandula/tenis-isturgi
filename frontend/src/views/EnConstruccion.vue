@@ -1,30 +1,26 @@
 <template>
   <div class="construccion">
-    <h1>🚧 Sección en Desarrollo</h1>
+    <span class="tag">Zona en desarrollo</span>
+    <h1 class="headline">Estamos afinando esta pista</h1>
     <p>Estamos trabajando para mejorar el Club de Tenis Isturgi.</p>
-    <p>Esta funcionalidad estará disponible en el próximo Sprint.</p>
-    <router-link to="/" class="btn-volver">Volver al Inicio</router-link>
+    <p>Esta funcionalidad estara disponible en el proximo Sprint.</p>
+    <router-link to="/" class="btn btn-primary">Volver al inicio</router-link>
   </div>
 </template>
 
 <style scoped>
 .construccion {
   text-align: center;
-  margin-top: 50px;
-  color: white;
-  padding: 50px;
-  border: 2px dashed #444;
-  border-radius: 10px;
+  display: grid;
+  gap: 12px;
+  padding: 50px 32px;
+  border-radius: var(--radius-lg);
+  background: rgba(9, 13, 15, 0.75);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  box-shadow: var(--shadow);
 }
-h1 { color: #bfff00; }
-.btn-volver {
-  display: inline-block;
-  margin-top: 20px;
-  background: #bfff00;
-  color: #222;
-  padding: 10px 20px;
-  text-decoration: none;
-  border-radius: 5px;
-  font-weight: bold;
+.construccion p {
+  color: rgba(234, 242, 239, 0.7);
+  margin: 0;
 }
 </style>

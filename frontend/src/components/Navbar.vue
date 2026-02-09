@@ -1,9 +1,11 @@
 <template>
   <nav class="navbar">
-    <div class="logo">
-      <router-link to="/">
-        <span>🎾 Club Tenis Isturgi</span>
+    <div class="brand">
+      <router-link to="/" class="brand-link">
+        <span class="brand-mark headline">Isturgi</span>
+        <span class="brand-sub">Club de Tenis · Andujar</span>
       </router-link>
+      <span class="brand-tag">Tierra, pista y comunidad</span>
     </div>
 
     <div class="enlaces">
@@ -14,103 +16,108 @@
       <router-link to="/torneos">Torneos</router-link>
       <router-link to="/contacto">Contacto</router-link>
       
-      <router-link to="/login" class="btn-login">🔒 Soy Socio</router-link>
+      <router-link to="/login" class="btn-login">Soy Socio</router-link>
     </div>
   </nav>
 </template>
 
 <style scoped>
 .navbar {
-  background-color: #bfff00; /* Verde pelota */
-  padding: 1rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  position: sticky; /* Se queda pegado arriba al bajar */
-  top: 0;
-  z-index: 1000;
+  gap: 24px;
+  padding: 18px 28px;
+  background: rgba(8, 15, 18, 0.88);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.logo a {
-  text-decoration: none;
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.logo span {
-  font-weight: 800;
-  font-size: 1.5rem;
-  color: #2c3e50;
+.brand-link {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.brand-mark {
+  font-size: 1.8rem;
+  color: var(--ball);
   text-transform: uppercase;
-  letter-spacing: 1px;
+}
+
+.brand-sub {
+  font-size: 0.85rem;
+  color: rgba(234, 242, 239, 0.75);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+
+.brand-tag {
+  font-size: 0.8rem;
+  color: rgba(199, 255, 52, 0.75);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
 }
 
 .enlaces {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .enlaces a {
-  margin-left: 20px;
-  text-decoration: none;
-  color: #2c3e50;
-  font-weight: 700;
-  font-size: 0.95rem;
-  transition: color 0.3s;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: rgba(234, 242, 239, 0.82);
+  font-weight: 600;
+  font-size: 0.9rem;
   text-transform: uppercase;
+  letter-spacing: 0.6px;
+  transition: all 0.2s ease;
 }
 
 .enlaces a:hover {
-  color: #555;
-  text-decoration: none;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
 }
 
-/* El enlace activo (donde estás ahora) */
 .router-link-active {
-  border-bottom: 3px solid #2c3e50;
+  color: var(--ball);
+  background: rgba(199, 255, 52, 0.12);
 }
 
-/* --- ESTILO ESPECIAL PARA EL BOTÓN DE SOCIO --- */
 .btn-login {
-  background-color: #2c3e50;
-  color: #bfff00 !important; /* Texto verde */
-  padding: 8px 18px;
-  border-radius: 30px;
-  border: 2px solid #2c3e50;
-  margin-left: 30px !important; /* Separarlo más del resto */
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-/* Quitamos el subrayado activo del botón login para que no quede raro */
-.btn-login.router-link-active {
-  border-bottom: 2px solid #2c3e50; 
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: var(--ball);
+  color: var(--ink) !important;
+  font-weight: 800;
+  margin-left: 8px;
+  box-shadow: 0 10px 20px rgba(199, 255, 52, 0.25);
 }
 
 .btn-login:hover {
-  background-color: transparent !important;
-  color: #2c3e50 !important; /* Texto oscuro al pasar ratón */
-  border-color: #2c3e50;
-  transform: translateY(-2px); /* Efecto de elevación */
+  transform: translateY(-2px);
 }
 
-/* Ajuste para móviles (Responsive básico) */
 @media (max-width: 768px) {
   .navbar {
     flex-direction: column;
-    padding: 1rem;
+    align-items: flex-start;
   }
   .enlaces {
-    margin-top: 15px;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-  }
-  .enlaces a {
-    margin: 5px;
-    font-size: 0.8rem;
-  }
-  .btn-login {
-    margin-left: 5px !important;
+    width: 100%;
+    justify-content: flex-start;
   }
 }
 </style>

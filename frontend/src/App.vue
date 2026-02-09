@@ -2,7 +2,7 @@
   <div class="app-layout">
     <Navbar />
     
-    <main>
+    <main class="page">
       <router-view />
     </main>
   </div>
@@ -13,13 +13,7 @@ import Navbar from './components/Navbar.vue';
 </script>
 
 <style>
-body {
-  margin: 0;
-  background-color: #222;
-  color: white;
-  font-family: sans-serif;
-}
-main {
-  padding: 20px;
+.app-layout {
+  min-height: 100vh;
 }
 </style>
