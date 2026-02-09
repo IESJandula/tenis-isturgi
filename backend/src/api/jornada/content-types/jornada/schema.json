@@ -14,11 +14,20 @@
     "Nombre": {
       "type": "string"
     },
+    "numero": {
+      "type": "integer"
+    },
     "division": {
       "type": "relation",
       "relation": "manyToOne",
       "target": "api::division.division",
       "inversedBy": "jornadas"
+    },
+    "partidos": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::partido.partido",
+      "mappedBy": "jornada"
     }
   }
 }

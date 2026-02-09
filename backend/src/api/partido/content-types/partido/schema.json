@@ -1,0 +1,58 @@
+{
+  "kind": "collectionType",
+  "collectionName": "partidos",
+  "info": {
+    "singularName": "partido",
+    "pluralName": "partidos",
+    "displayName": "Partido"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "jornada": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::jornada.jornada",
+      "inversedBy": "partidos"
+    },
+    "jugador1": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::jugador.jugador"
+    },
+    "jugador2": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::jugador.jugador"
+    },
+    "estado": {
+      "type": "enumeration",
+      "enum": [
+        "Pendiente",
+        "Programado",
+        "Jugado",
+        "Aplazado"
+      ],
+      "default": "Pendiente"
+    },
+    "resultado": {
+      "type": "string"
+    },
+    "ganador": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::jugador.jugador"
+    },
+    "pista": {
+      "type": "integer"
+    },
+    "hora": {
+      "type": "time"
+    },
+    "fecha": {
+      "type": "date"
+    }
+  }
+}
