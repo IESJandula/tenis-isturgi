@@ -1,11 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
 import Liga from '../views/Liga.vue'
+import Galeria from '../views/Galeria.vue'
 import EnConstruccion from '../views/EnConstruccion.vue' // <--- Importamos la nueva
 
 const routes = [
   { path: '/', component: Home },
   { path: '/liga', component: Liga },
+  { path: '/galeria', component: Galeria },
   
   // Rutas nuevas (apuntan a "En Construcción" por ahora)
   { path: '/club', component: EnConstruccion },
