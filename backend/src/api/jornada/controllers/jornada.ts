@@ -36,13 +36,25 @@ export default factories.createCoreController('api::jornada.jornada', ({ strapi 
       const { divisionId } = ctx.params;
 
       const jornadas = await strapi.db.query('api::jornada.jornada').findMany({
-        where: { division: divisionId },
+        where: {
+          division: divisionId,
+          publishedAt: { $notNull: true },
+        },
         populate: {
           partidos: {
+            where: {
+              publishedAt: { $notNull: true },
+            },
             populate: {
-              jugador1: true,
-              jugador2: true,
-              ganador: true,
+              jugador1: {
+                where: { publishedAt: { $notNull: true } },
+              },
+              jugador2: {
+                where: { publishedAt: { $notNull: true } },
+              },
+              ganador: {
+                where: { publishedAt: { $notNull: true } },
+              },
             },
           },
         },
@@ -64,11 +76,20 @@ export default factories.createCoreController('api::jornada.jornada', ({ strapi 
       const { jornadaId } = ctx.params;
 
       const partidos = await strapi.db.query('api::partido.partido').findMany({
-        where: { jornada: jornadaId },
+        where: {
+          jornada: jornadaId,
+          publishedAt: { $notNull: true },
+        },
         populate: {
-          jugador1: true,
-          jugador2: true,
-          ganador: true,
+          jugador1: {
+            where: { publishedAt: { $notNull: true } },
+          },
+          jugador2: {
+            where: { publishedAt: { $notNull: true } },
+          },
+          ganador: {
+            where: { publishedAt: { $notNull: true } },
+          },
         },
       });
 

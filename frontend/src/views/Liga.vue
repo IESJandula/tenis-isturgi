@@ -54,17 +54,37 @@ import axios from 'axios';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:1337';
 
-const divisiones = [
-  { id: 1, label: 'Division Oro' },
-  { id: 2, label: 'Division Plata' },
-];
-
-const divisionId = ref(divisiones[0].id);
+const divisiones = ref([]);
+const divisionId = ref(null);
 const jornadas = ref([]);
 const cargando = ref(false);
 const error = ref(null);
 
+const cargarDivisiones = async () => {
+  try {
+    const respuesta = await axios.get(`${API_BASE}/api/divisions`);
+    const items = respuesta.data?.data || [];
+
+    divisiones.value = items.map((division) => ({
+      id: division.id,
+      label: division.Nombre || division.attributes?.Nombre || `Division ${division.id}`,
+    }));
+
+    if (!divisionId.value && divisiones.value.length) {
+      divisionId.value = divisiones.value[0].id;
+    }
+  } catch (err) {
+    console.error(err);
+    error.value = 'No se pudieron cargar las divisiones. Revisa Strapi.';
+  }
+};
+
 const cargarCalendario = async () => {
+  if (!divisionId.value) {
+    jornadas.value = [];
+    return;
+  }
+
   cargando.value = true;
   error.value = null;
 
@@ -107,7 +127,11 @@ watch(divisionId, () => {
 });
 
 onMounted(() => {
-  cargarCalendario();
+  cargarDivisiones().then(() => {
+    if (divisionId.value) {
+      cargarCalendario();
+    }
+  });
 });
 </script>
 

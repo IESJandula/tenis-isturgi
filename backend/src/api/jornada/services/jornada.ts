@@ -82,7 +82,11 @@ export default factories.createCoreService('api::jornada.jornada', ({ strapi }) 
       const division = await strapi.db.query('api::division.division').findOne({
         where: { id: divisionId },
         populate: {
-          jugadors: true,
+          jugadors: {
+            where: {
+              publishedAt: { $notNull: true },
+            },
+          },
           temporada: true,
         },
       });
