@@ -20,16 +20,22 @@
     },
     "Imagen": {
       "type": "media",
-      "multiple": true,
+      "multiple": false,
       "allowedTypes": [
-        "images",
-        "files",
-        "videos",
-        "audios"
+        "images"
       ]
     },
     "Fecha": {
       "type": "datetime"
+    },
+    "Archivos": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos"
+      ]
     }
   }
 }

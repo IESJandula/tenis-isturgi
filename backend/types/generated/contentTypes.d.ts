@@ -539,15 +539,13 @@ export interface ApiNoticiaNoticia extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
+    Archivos: Schema.Attribute.Media<'images' | 'files' | 'videos', true>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     Descripcion: Schema.Attribute.Text;
     Fecha: Schema.Attribute.DateTime;
-    Imagen: Schema.Attribute.Media<
-      'images' | 'files' | 'videos' | 'audios',
-      true
-    >;
+    Imagen: Schema.Attribute.Media<'images'>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',

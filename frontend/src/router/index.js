@@ -2,18 +2,22 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
 import Liga from '../views/Liga.vue'
 import Galeria from '../views/Galeria.vue'
-import EnConstruccion from '../views/EnConstruccion.vue' // <--- Importamos la nueva
+import Club from '../views/Club.vue'
+import Escuela from '../views/Escuela.vue'
+import Torneos from '../views/Torneos.vue'
+import Contacto from '../views/Contacto.vue'
+import EnConstruccion from '../views/EnConstruccion.vue'
+import NoticiaDetalle from '../pages/noticiaDetalle.vue'
 
 const routes = [
   { path: '/', component: Home },
   { path: '/liga', component: Liga },
   { path: '/galeria', component: Galeria },
-  
-  // Rutas nuevas (apuntan a "En Construcción" por ahora)
-  { path: '/club', component: EnConstruccion },
-  { path: '/escuela', component: EnConstruccion },
-  { path: '/torneos', component: EnConstruccion },
-  { path: '/contacto', component: EnConstruccion },
+  { path: '/club', component: Club },
+  { path: '/escuela', component: Escuela },
+  { path: '/torneos', component: Torneos },
+  { path: '/contacto', component: Contacto },
+  { path: '/noticia/:id', component: NoticiaDetalle },
   { path: '/login', component: EnConstruccion }
 ]
 
