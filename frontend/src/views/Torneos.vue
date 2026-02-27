@@ -818,5 +818,5 @@ onMounted(async () => {
     font-size: 1rem;
   }
 }
-}
+
 </style>

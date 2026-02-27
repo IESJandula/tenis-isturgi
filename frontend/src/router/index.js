@@ -8,6 +8,7 @@ import Torneos from '../views/Torneos.vue'
 import Contacto from '../views/Contacto.vue'
 import EnConstruccion from '../views/EnConstruccion.vue'
 import NoticiaDetalle from '../pages/noticiaDetalle.vue'
+import TorneoDetalle from '../pages/torneoDetalle.vue'
 
 const routes = [
   { path: '/', component: Home },
@@ -18,6 +19,7 @@ const routes = [
   { path: '/torneos', component: Torneos },
   { path: '/contacto', component: Contacto },
   { path: '/noticia/:id', component: NoticiaDetalle },
+  { path: '/torneo/:id', component: TorneoDetalle },
   { path: '/login', component: EnConstruccion }
 ]
 
