@@ -3,7 +3,9 @@
     <!-- Hero con banner original -->
     <section class="hero-noticias">
       <div class="hero-banner">
-        <img src="/banner-club.jpg" alt="Club de Tenis Isturgi" class="banner-image" />
+        <img src="/cancha.jpg" alt="Club de Tenis Isturgi" class="banner-image" />
+        <div class="banner-overlay"></div>
+        <h1 class="banner-title">CLUB DE TENIS ISTURGI</h1>
       </div>
     </section>
 
@@ -154,11 +156,12 @@ onMounted(async () => {
 
 .hero-banner {
   width: 100%;
-  max-height: 300px;
+  max-height: 500px;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
 .banner-image {
@@ -167,6 +170,29 @@ onMounted(async () => {
   display: block;
   object-fit: cover;
   object-position: center;
+  position: absolute;
+}
+
+.banner-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+
+.banner-title {
+  position: relative;
+  z-index: 2;
+  color: #fff;
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 900;
+  text-align: center;
+  margin: 0;
+  letter-spacing: 2px;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
 }
 
 /* ============================================

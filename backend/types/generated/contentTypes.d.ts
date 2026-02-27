@@ -639,23 +639,50 @@ export interface ApiTorneoTorneo extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
+    Categoria: Schema.Attribute.Enumeration<
+      ['Liga', 'Torneo', 'Evento especial', 'Escuela']
+    > &
+      Schema.Attribute.Required;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    Descripcion: Schema.Attribute.Blocks;
-    Fecha: Schema.Attribute.DateTime;
-    Imagen: Schema.Attribute.Media<
-      'images' | 'files' | 'videos' | 'audios',
-      true
-    >;
+    Descripcion: Schema.Attribute.RichText;
+    Descripcion_breve: Schema.Attribute.Text;
+    Destacado: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    Edicion: Schema.Attribute.Integer;
+    Estado: Schema.Attribute.Enumeration<
+      ['Pr\u00F3ximamente', 'En curso', 'Finalizado']
+    > &
+      Schema.Attribute.DefaultTo<'Pr\u00F3ximamente'>;
+    FechaFin: Schema.Attribute.Date;
+    FechaInicio: Schema.Attribute.Date;
+    Imagen: Schema.Attribute.Media<'images'>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::torneo.torneo'
     > &
       Schema.Attribute.Private;
-    Nombre: Schema.Attribute.Text & Schema.Attribute.Required;
+    Modalidad: Schema.Attribute.String;
+    NivelRequerido: Schema.Attribute.Enumeration<
+      [
+        'Principiante',
+        'Intermedio',
+        'Avanzado',
+        'Profesional',
+        'Todas las categor\u00EDas',
+      ]
+    >;
+    Nombre: Schema.Attribute.String & Schema.Attribute.Required;
+    OrdenMostrado: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    Participantes: Schema.Attribute.Integer;
+    Patrocinador: Schema.Attribute.String;
+    Premios: Schema.Attribute.Text;
     publishedAt: Schema.Attribute.DateTime;
+    Puntuable: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    TipoParticipacion: Schema.Attribute.Enumeration<
+      ['Individual', 'Dobles', 'Mixto', 'Todas']
+    >;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

@@ -12,252 +12,75 @@
       </div>
     </section>
 
-    <!-- Torneo Principal Destacado -->
-    <section class="torneo-destacado">
-      <div class="torneo-destacado-card">
-        <div class="torneo-ribbon">El más antiguo</div>
-        <div class="torneo-destacado-content">
-          <div class="torneo-numero-grande">XXXII</div>
-          <h2>Torneo de Feria de Andújar 2025</h2>
-          <p class="torneo-descripcion">El torneo tenístico con más solera de la ciudad. Categoría individual absoluta que se celebra desde hace más de 30 años coincidiendo con las fiestas de la Virgen de la Cabeza.</p>
-          <div class="torneo-detalles">
-            <div class="detalle-item">
-              <strong>📅 Fechas:</strong> 28 de agosto - 22 de septiembre
-            </div>
-            <div class="detalle-item">
-              <strong>🎾 Categoría:</strong> Individual absoluta
-            </div>
-            <div class="detalle-item">
-              <strong>🏆 Puntuable:</strong> Ranking del club
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+    <!-- Loading -->
+    <div v-if="cargando" class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando torneos...</p>
+    </div>
 
-    <!-- Grid de Torneos -->
-    <section class="torneos-grid-section">
+    <!-- Error -->
+    <div v-else-if="error" class="error-state">
+      <span class="error-icon">⚠️</span>
+      <p>{{ error }}</p>
+    </div>
+
+    <!-- Contenido -->
+    <template v-else>
+      <!-- Grid de Torneos -->
+      <section class="torneos-grid-section">
       <div class="section-header">
         <h2>Calendario de Torneos</h2>
         <p class="section-subtitle">Todos los torneos organizados por el club durante la temporada</p>
       </div>
 
-      <div class="torneos-grid">
-        <!-- Liga Municipal -->
-        <div class="torneo-card featured">
-          <div class="torneo-header">
-            <span class="torneo-numero">XXI</span>
-            <span class="torneo-badge">En curso</span>
+      <div v-if="torneosGrid.length > 0" class="torneos-grid stagger">
+        <div 
+          v-for="torneo in torneosGrid" 
+          :key="torneo.id"
+          class="torneo-card"
+        >
+          <div class="card-image-wrapper">
+            <div v-if="torneo.Imagen?.url" class="card-image-container">
+              <img 
+                :src="`http://localhost:1337${torneo.Imagen.url}`"
+                :alt="torneo.Nombre"
+                class="card-image"
+              />
+            </div>
+            <div v-else class="image-placeholder">
+              <span class="placeholder-icon">🏆</span>
+            </div>
+            <div class="image-overlay"></div>
           </div>
-          <h3>Liga Municipal "Ciudad de Andújar"</h3>
-          <p>La competición estrella del club. 5 divisiones de juego para mayores de 16 años. Un partido cada semana durante toda la temporada.</p>
-          <div class="torneo-info">
-            <div class="info-row">
-              <span class="info-icon">👥</span>
-              <span>5 divisiones</span>
+          
+          <div class="card-content">
+            <div class="card-meta">
+              <span class="card-edicion">Edición {{ torneo.Edicion || 'I' }}</span>
+              <span v-if="torneo.Estado" class="card-estado" :class="'estado-' + torneo.Estado.toLowerCase()">
+                {{ torneo.Estado }}
+              </span>
             </div>
-            <div class="info-row">
-              <span class="info-icon">📊</span>
-              <span>Sistema de clasificación</span>
-            </div>
-            <div class="info-row">
-              <span class="info-icon">🏆</span>
-              <span>Trofeos para los 3 primeros</span>
-            </div>
-          </div>
-          <router-link to="/liga" class="btn btn-secondary">Ver clasificación</router-link>
-        </div>
-
-        <!-- Memorial Manuel Solas -->
-        <div class="torneo-card">
-          <div class="torneo-header">
-            <span class="torneo-numero">VIII</span>
-          </div>
-          <h3>Memorial Manuel Solas</h3>
-          <p>Torneo nocturno de dobles en homenaje a nuestro compañero Manuel Solas. Una noche mágica de tenis que se prolonga hasta la madrugada.</p>
-          <div class="torneo-info">
-            <div class="info-row">
-              <span class="info-icon">🌙</span>
-              <span>Modalidad nocturna</span>
-            </div>
-            <div class="info-row">
-              <span class="info-icon">👥</span>
-              <span>Dobles mixtos</span>
-            </div>
-            <div class="info-row">
-              <span class="info-icon">🎾</span>
-              <span>Formato liguilla</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Torneo 16 Puntos -->
-        <div class="torneo-card">
-          <div class="torneo-header">
-            <span class="torneo-numero">VIII</span>
-          </div>
-          <h3>Torneo Social 16 Puntos</h3>
-          <p>Torneo rápido y emocionante. Modalidad de juego a 16 puntos sin descanso que arranca la temporada. Sólo para socios del club.</p>
-          <div class="torneo-info">
-            <div class="info-row">
-              <span class="info-icon">⚡</span>
-              <span>Juego rápido</span>
-            </div>
-            <div class="info-row">
-              <span class="info-icon">🎯</span>
-              <span>16 puntos sin stop</span>
-            </div>
-            <div class="info-row">
-              <span class="info-icon">📊</span>
-              <span>Puntuable ranking</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Arques & Torres -->
-        <div class="torneo-card">
-          <div class="torneo-header">
-            <span class="torneo-numero">XI</span>
-            <span class="torneo-badge sponsor">Patrocinado</span>
-          </div>
-          <h3>Torneo Arques & Torres Asesores</h3>
-          <p>Torneo patrocinado con gran participación. Competición de alto nivel técnico abierta a todos los jugadores federados.</p>
-          <div class="torneo-info">
-            <div class="info-row">
-              <span class="info-icon">🏆</span>
-              <span>Alto nivel</span>
-            </div>
-            <div class="info-row">
-              <span class="info-icon">🎾</span>
-              <span>Federados</span>
-            </div>
-            <div class="info-row">
-              <span class="info-icon">💰</span>
-              <span>Premios importantes</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Liga Escuela -->
-        <div class="torneo-card">
-          <div class="torneo-header">
-            <span class="torneo-numero">III</span>
-          </div>
-          <h3>Liga Escuela Municipal</h3>
-          <p>Competición para alumnos de la escuela municipal. Dos grupos de clasificación según nivel para fomentar el espíritu deportivo.</p>
-          <div class="torneo-info">
-            <div class="info-row">
-              <span class="info-icon">👦</span>
-              <span>Categorías infantiles</span>
-            </div>
-            <div class="info-row">
-              <span class="info-icon">📚</span>
-              <span>Formativo</span>
-            </div>
-            <div class="info-row">
-              <span class="info-icon">🎯</span>
-              <span>2 grupos</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Mix-ins Dobles -->
-        <div class="torneo-card">
-          <div class="torneo-header">
-            <span class="torneo-numero">XIV</span>
-          </div>
-          <h3>Torneo Mix-ins de Dobles</h3>
-          <p>Jornada de convivencia entre socios. Más de 30 partidos de dobles en formato liguilla con arroz y buen ambiente tenístico.</p>
-          <div class="torneo-info">
-            <div class="info-row">
-              <span class="info-icon">🎉</span>
-              <span>Social</span>
-            </div>
-            <div class="info-row">
-              <span class="info-icon">👥</span>
-              <span>Dobles variados</span>
-            </div>
-            <div class="info-row">
-              <span class="info-icon">🍚</span>
-              <span>Incluye comida</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Copa Master -->
-        <div class="torneo-card">
-          <div class="torneo-header">
-            <span class="torneo-numero">V</span>
-            <span class="torneo-badge final">Final temporada</span>
-          </div>
-          <h3>Copa Master</h3>
-          <p>Torneo de maestros que cierra la temporada. Los 8 mejores del ranking anual se enfrentan por el título de maestro del club.</p>
-          <div class="torneo-info">
-            <div class="info-row">
-              <span class="info-icon">👑</span>
-              <span>Top 8 del ranking</span>
-            </div>
-            <div class="info-row">
-              <span class="info-icon">🏆</span>
-              <span>Gran finalísima</span>
-            </div>
-            <div class="info-row">
-              <span class="info-icon">⭐</span>
-              <span>Máximo nivel</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Torneo Cantera -->
-        <div class="torneo-card">
-          <div class="torneo-header">
-            <span class="torneo-numero">VI</span>
-          </div>
-          <h3>Torneo de Tenis Cantera</h3>
-          <p>Torneo para jugadores de la escuela municipal de tenis. Diferentes categorías desde mini-tenis hasta juvenil. Trofeos para todos los participantes.</p>
-          <div class="torneo-info">
-            <div class="info-row">
-              <span class="info-icon">🌟</span>
-              <span>Categorías base</span>
-            </div>
-            <div class="info-row">
-              <span class="info-icon">🎁</span>
-              <span>Todos premiados</span>
-            </div>
-            <div class="info-row">
-              <span class="info-icon">📸</span>
-              <span>Gran ambiente</span>
-            </div>
+            
+            <h3 class="card-title">{{ torneo.Nombre }}</h3>
+            
+            <p class="card-description">
+              {{ truncarTexto(torneo.Descripcion_breve || torneo.Descripcion, 100) }}
+            </p>
+            
+            <button 
+              type="button"
+              @click="() => router.push(`/torneo/${torneo.documentId}`)"
+              class="card-link"
+              :title="`Ver: ${torneo.Nombre}`"
+            >
+              Ver detalles
+              <span class="arrow">→</span>
+            </button>
           </div>
         </div>
       </div>
-    </section>
-
-    <!-- Concentraciones y Eventos Especiales -->
-    <section class="eventos-section">
-      <div class="section-header">
-        <h2>Eventos Especiales</h2>
-        <p class="section-subtitle">Concentraciones, clinics y jornadas especiales</p>
-      </div>
-
-      <div class="eventos-grid">
-        <div class="evento-card">
-          <div class="evento-icon">🎪</div>
-          <h3>Concentraciones de Escuela</h3>
-          <p>Concentraciones periódicas para alumnos de la escuela municipal. Formato liguilla por grupos según niveles de juego. Fomentamos la participación y deportividad.</p>
-        </div>
-
-        <div class="evento-card">
-          <div class="evento-icon">🎾</div>
-          <h3>Open Isturgi Club</h3>
-          <p>Torneo del Circuito Andalucía Tenis Tour. Jugadores de toda Andalucía compiten en nuestras instalaciones. 4 categorías diferentes.</p>
-        </div>
-
-        <div class="evento-card">
-          <div class="evento-icon">🏃</div>
-          <h3>Clinics y Masterclass</h3>
-          <p>Sesiones especiales con entrenadores profesionales. Perfeccionamiento técnico y táctico para socios del club.</p>
-        </div>
+      <div v-else class="empty-state">
+        <p>No hay torneos disponibles en este momento.</p>
       </div>
     </section>
 
@@ -298,16 +121,107 @@
         <router-link to="/contacto" class="btn btn-primary btn-large">Más información</router-link>
       </div>
     </section>
+    </template>
   </div>
 </template>
 
 <script setup>
-// No se necesita lógica específica
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import axios from 'axios';
+
+const router = useRouter();
+
+const torneos = ref([]);
+const cargando = ref(true);
+const error = ref(null);
+
+const torneosGrid = computed(() => {
+  return torneos.value.sort((a, b) => (b.OrdenMostrado || 0) - (a.OrdenMostrado || 0));
+});
+
+const formatearFecha = (fecha) => {
+  if (!fecha) return '';
+  const date = new Date(fecha);
+  const opciones = { year: 'numeric', month: 'long', day: 'numeric' };
+  return date.toLocaleDateString('es-ES', opciones);
+};
+
+const truncarTexto = (texto, maxLength) => {
+  if (!texto) return '';
+  if (texto.length <= maxLength) return texto;
+  return texto.substring(0, maxLength).trim() + '...';
+};
+
+onMounted(async () => {
+  try {
+    const respuesta = await axios.get(
+      'http://localhost:1337/api/torneos?populate=*&sort=OrdenMostrado:desc,Edicion:desc'
+    );
+    torneos.value = respuesta.data.data;
+    console.log('Torneos cargados:', torneos.value);
+  } catch (e) {
+    console.error('Error cargando torneos:', e);
+    error.value = 'Error al cargar torneos. Asegúrate de que el servidor backend esté activo.';
+  } finally {
+    cargando.value = false;
+  }
+});
 </script>
 
 <style scoped>
 .torneos-page {
   width: 100%;
+}
+
+/* States: Loading, Error, Empty */
+.loading-state,
+.error-state,
+.empty-state {
+  padding: 80px 40px;
+  text-align: center;
+  border-radius: 16px;
+  background: rgba(9, 13, 15, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  max-width: 600px;
+  margin: 40px auto;
+}
+
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid rgba(199, 255, 52, 0.2);
+  border-top-color: var(--ball);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error-state {
+  background: rgba(255, 60, 60, 0.1);
+  border-color: rgba(255, 60, 60, 0.3);
+}
+
+.error-icon {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: 20px;
+}
+
+.error-state p {
+  color: #ff9999;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.empty-state p {
+  color: rgba(234, 242, 239, 0.7);
+  font-size: 1.1rem;
+  margin: 0;
 }
 
 /* Hero Torneos */
@@ -383,64 +297,29 @@
   overflow: hidden;
 }
 
-.torneo-ribbon {
-  position: absolute;
-  top: 20px;
-  right: -40px;
-  background: var(--ball);
-  color: var(--ink);
-  padding: 8px 60px;
-  font-size: 0.75rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  transform: rotate(45deg);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+/* Animaciones */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.torneo-numero-grande {
-  font-size: 5rem;
-  font-weight: 900;
-  color: var(--ball);
-  text-shadow: 0 0 30px rgba(199, 255, 52, 0.4);
-  font-family: 'Georgia', serif;
-  margin-bottom: 16px;
+.stagger > * {
+  animation: fadeInUp 0.6s ease backwards;
 }
 
-.torneo-destacado-card h2 {
-  font-size: 2.5rem;
-  font-weight: 900;
-  color: #fff;
-  margin: 0 0 20px;
-  letter-spacing: -0.5px;
-}
-
-.torneo-descripcion {
-  font-size: 1.1rem;
-  color: rgba(234, 242, 239, 0.85);
-  line-height: 1.7;
-  margin: 0 0 32px;
-}
-
-.torneo-detalles {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.detalle-item {
-  background: rgba(9, 13, 15, 0.5);
-  padding: 12px 20px;
-  border-radius: 10px;
-  border-left: 3px solid var(--ball);
-  color: rgba(234, 242, 239, 0.85);
-  font-size: 1rem;
-}
-
-.detalle-item strong {
-  color: var(--ball);
-  margin-right: 8px;
-}
+.stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger > *:nth-child(6) { animation-delay: 0.3s; }
+.stagger > *:nth-child(n+7) { animation-delay: 0.35s; }
 
 /* Grid de Torneos */
 .torneos-grid-section,
@@ -482,98 +361,191 @@
 .torneo-card {
   background: rgba(9, 13, 15, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  padding: 32px;
-  transition: all 0.3s ease;
+  border-radius: 20px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  transition: all 0.3s ease;
+  position: relative;
 }
 
-.torneo-card.featured {
-  background: linear-gradient(135deg, rgba(199, 255, 52, 0.1), rgba(15, 45, 35, 0.25));
-  border-color: rgba(199, 255, 52, 0.3);
+.torneo-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  padding: 2px;
+  background: linear-gradient(135deg, var(--ball), rgba(201, 106, 58, 0.5));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
 }
 
 .torneo-card:hover {
-  transform: translateY(-8px);
-  border-color: rgba(199, 255, 52, 0.4);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+  transform: translateY(-12px);
+  box-shadow: 
+    0 30px 60px rgba(0, 0, 0, 0.4),
+    0 0 60px rgba(199, 255, 52, 0.2);
 }
 
-.torneo-header {
+.torneo-card:hover::after {
+  opacity: 1;
+}
+
+/* Imagen de la tarjeta */
+.card-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 260px;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(199, 255, 52, 0.08), rgba(201, 106, 58, 0.08));
+}
+
+.card-image-container,
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.torneo-card:hover .card-image {
+  transform: none;
+}
+
+.image-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(8, 12, 14, 0.7));
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.torneo-card:hover .image-overlay {
+  opacity: 1;
+}
+
+.image-placeholder {
+  width: 100%;
+  height: 100%;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(199, 255, 52, 0.12), rgba(201, 106, 58, 0.12));
 }
 
-.torneo-numero {
-  font-size: 2.5rem;
-  font-weight: 900;
-  color: var(--ball);
-  text-shadow: 0 0 20px rgba(199, 255, 52, 0.3);
-  font-family: 'Georgia', serif;
+.placeholder-icon {
+  font-size: 5rem;
+  filter: drop-shadow(0 4px 20px rgba(199, 255, 52, 0.3));
 }
 
-.torneo-badge {
-  background: rgba(199, 255, 52, 0.2);
-  color: var(--ball);
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 0.7rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  border: 1px solid rgba(199, 255, 52, 0.4);
-}
-
-.torneo-badge.sponsor {
-  background: rgba(201, 106, 58, 0.2);
-  color: rgba(201, 106, 58, 1);
-  border-color: rgba(201, 106, 58, 0.4);
-}
-
-.torneo-badge.final {
-  background: rgba(255, 215, 0, 0.2);
-  color: rgba(255, 215, 0, 1);
-  border-color: rgba(255, 215, 0, 0.4);
-}
-
-.torneo-card h3 {
-  font-size: 1.4rem;
-  color: #fff;
-  margin: 0;
-  font-weight: 700;
-  line-height: 1.3;
-}
-
-.torneo-card > p {
-  color: rgba(234, 242, 239, 0.8);
-  line-height: 1.7;
-  margin: 0;
-  font-size: 0.95rem;
+/* Contenido de la tarjeta */
+.card-content {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
   flex: 1;
 }
 
-.torneo-info {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 8px;
-}
-
-.info-row {
+.card-meta {
   display: flex;
   align-items: center;
-  gap: 10px;
-  color: rgba(234, 242, 239, 0.75);
-  font-size: 0.9rem;
-  font-weight: 600;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-.info-icon {
+.card-edicion {
+  background: rgba(199, 255, 52, 0.15);
+  color: var(--ball);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: 1px solid rgba(199, 255, 52, 0.3);
+}
+
+.card-estado {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: 1px solid;
+}
+
+.card-estado.estado-en\ curso {
+  background: rgba(199, 255, 52, 0.2);
+  color: var(--ball);
+  border-color: rgba(199, 255, 52, 0.4);
+}
+
+.card-estado.estado-próximamente {
+  background: rgba(100, 150, 255, 0.2);
+  color: rgba(100, 150, 255, 1);
+  border-color: rgba(100, 150, 255, 0.4);
+}
+
+.card-estado.estado-finalizado {
+  background: rgba(180, 180, 180, 0.2);
+  color: rgba(200, 200, 200, 1);
+  border-color: rgba(180, 180, 180, 0.4);
+}
+
+.card-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0;
+  line-height: 1.3;
+  letter-spacing: -0.3px;
+}
+
+.card-description {
+  color: rgba(234, 242, 239, 0.8);
+  line-height: 1.7;
+  margin: 0;
+  flex: 1;
+  font-size: 0.95rem;
+}
+
+.card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ball);
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 0.95rem;
+  margin-top: auto;
+  transition: all 0.3s ease;
+  width: fit-content;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+}
+
+.card-link .arrow {
+  transition: transform 0.3s ease;
   font-size: 1.2rem;
+}
+
+.card-link:hover {
+  gap: 12px;
+  color: rgba(199, 255, 52, 1);
+}
+
+.card-link:hover .arrow {
+  transform: translateX(4px);
 }
 
 /* Eventos */
@@ -740,14 +712,6 @@
     grid-template-columns: 1fr;
   }
 
-  .eventos-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .info-grid {
-    grid-template-columns: 1fr;
-  }
-
   .cta-content {
     padding: 40px 28px;
   }
@@ -755,5 +719,104 @@
   .cta-content h2 {
     font-size: 2rem;
   }
+}
+
+@media (max-width: 1024px) {
+  .torneos-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .torneos-hero {
+    min-height: 300px;
+    border-radius: 0 0 16px 16px;
+  }
+  
+  .hero-content {
+    padding: 40px 20px;
+  }
+
+  .torneos-grid-section {
+    padding: 0 20px 60px;
+  }
+  
+  .torneos-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+  }
+  
+  .card-image-wrapper {
+    height: 220px;
+  }
+  
+  .card-title {
+    font-size: 1.3rem;
+  }
+
+  .section-header {
+    margin-bottom: 40px;
+  }
+
+  .info-general-section {
+    padding: 40px 20px;
+  }
+
+  .cta-section {
+    padding: 60px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .torneos-hero {
+    min-height: 250px;
+  }
+
+  .torneos-grid-section {
+    padding: 0 16px 40px;
+  }
+  
+  .hero-content h1 {
+    font-size: 2rem;
+  }
+  
+  .hero-lead {
+    font-size: 1rem;
+  }
+  
+  .section-header h2 {
+    font-size: 1.8rem;
+  }
+  
+  .section-subtitle {
+    font-size: 1rem;
+  }
+  
+  .card-content {
+    padding: 20px;
+  }
+
+  .section-header {
+    margin-bottom: 32px;
+  }
+
+  .loading-state,
+  .error-state,
+  .empty-state {
+    padding: 60px 28px;
+  }
+
+  .info-general-content h2 {
+    font-size: 2rem;
+  }
+
+  .cta-content h2 {
+    font-size: 1.5rem;
+  }
+
+  .cta-content p {
+    font-size: 1rem;
+  }
+}
 }
 </style>

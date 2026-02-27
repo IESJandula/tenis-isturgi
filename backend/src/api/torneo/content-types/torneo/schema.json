@@ -12,26 +12,104 @@
   "pluginOptions": {},
   "attributes": {
     "Nombre": {
-      "type": "text",
+      "type": "string",
       "required": true
     },
-    "Descripcion": {
-      "type": "blocks",
+    "Edicion": {
+      "type": "integer",
       "required": false
     },
-    "Fecha": {
-      "type": "datetime"
+    "Descripcion": {
+      "type": "richtext",
+      "required": false
+    },
+    "Categoria": {
+      "type": "enumeration",
+      "enum": [
+        "Liga",
+        "Torneo",
+        "Evento especial",
+        "Escuela"
+      ],
+      "required": true
+    },
+    "Estado": {
+      "type": "enumeration",
+      "enum": [
+        "Próximamente",
+        "En curso",
+        "Finalizado"
+      ],
+      "default": "Próximamente"
+    },
+    "FechaInicio": {
+      "type": "date",
+      "required": false
+    },
+    "FechaFin": {
+      "type": "date",
+      "required": false
+    },
+    "Descripcion_breve": {
+      "type": "text",
+      "required": false
+    },
+    "Modalidad": {
+      "type": "string",
+      "required": false
+    },
+    "TipoParticipacion": {
+      "type": "enumeration",
+      "enum": [
+        "Individual",
+        "Dobles",
+        "Mixto",
+        "Todas"
+      ],
+      "required": false
+    },
+    "NivelRequerido": {
+      "type": "enumeration",
+      "enum": [
+        "Principiante",
+        "Intermedio",
+        "Avanzado",
+        "Profesional",
+        "Todas las categorías"
+      ],
+      "required": false
+    },
+    "Participantes": {
+      "type": "integer",
+      "required": false
+    },
+    "Premios": {
+      "type": "text",
+      "required": false
+    },
+    "Puntuable": {
+      "type": "boolean",
+      "default": false
+    },
+    "Patrocinador": {
+      "type": "string",
+      "required": false
     },
     "Imagen": {
       "type": "media",
-      "multiple": true,
+      "multiple": false,
       "required": false,
       "allowedTypes": [
-        "images",
-        "files",
-        "videos",
-        "audios"
+        "images"
       ]
+    },
+    "Destacado": {
+      "type": "boolean",
+      "default": false
+    },
+    "OrdenMostrado": {
+      "type": "integer",
+      "default": 0
     }
   }
 }
