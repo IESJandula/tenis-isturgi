@@ -42,7 +42,7 @@
           <div class="card-image-wrapper">
             <div v-if="torneo.Imagen?.url" class="card-image-container">
               <img 
-                :src="`http://localhost:1337${torneo.Imagen.url}`"
+                :src="`${apiUrl}${torneo.Imagen.url}`"
                 :alt="torneo.Nombre"
                 class="card-image"
               />
@@ -71,7 +71,6 @@
               type="button"
               @click="() => router.push(`/torneo/${torneo.documentId}`)"
               class="card-link"
-              :title="`Ver: ${torneo.Nombre}`"
             >
               Ver detalles
               <span class="arrow">→</span>
@@ -129,7 +128,9 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { formatearFecha, truncarTexto } from '../utils/formatters';
 
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337';
 const router = useRouter();
 
 const torneos = ref([]);
@@ -137,26 +138,13 @@ const cargando = ref(true);
 const error = ref(null);
 
 const torneosGrid = computed(() => {
-  return torneos.value.sort((a, b) => (b.OrdenMostrado || 0) - (a.OrdenMostrado || 0));
+  return torneos.value;
 });
-
-const formatearFecha = (fecha) => {
-  if (!fecha) return '';
-  const date = new Date(fecha);
-  const opciones = { year: 'numeric', month: 'long', day: 'numeric' };
-  return date.toLocaleDateString('es-ES', opciones);
-};
-
-const truncarTexto = (texto, maxLength) => {
-  if (!texto) return '';
-  if (texto.length <= maxLength) return texto;
-  return texto.substring(0, maxLength).trim() + '...';
-};
 
 onMounted(async () => {
   try {
     const respuesta = await axios.get(
-      'http://localhost:1337/api/torneos?populate=*&sort=OrdenMostrado:desc,Edicion:desc'
+      `${apiUrl}/api/torneos?populate=*&sort=FechaInicio:desc`
     );
     torneos.value = respuesta.data.data;
     console.log('Torneos cargados:', torneos.value);

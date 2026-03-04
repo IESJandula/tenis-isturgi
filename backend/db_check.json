@@ -1,0 +1,127 @@
+{
+  "matches": [
+    {
+      "id": 2,
+      "documentId": "fzb0xvyw1ia89kxgh1sf7bm0",
+      "estado": "Pendiente",
+      "resultado": null,
+      "pista": null,
+      "hora": null,
+      "fecha": null,
+      "createdAt": "2026-03-04T09:32:50.792Z",
+      "updatedAt": "2026-03-04T09:32:50.792Z",
+      "publishedAt": "2026-03-04T09:32:50.803Z",
+      "jornada": {
+        "id": 2,
+        "documentId": "smvaz0wzpwr2tjnfjvnf0iia",
+        "Nombre": "Jornada 1 - Liga Invierno",
+        "numero": 1,
+        "createdAt": "2026-03-04T09:06:13.172Z",
+        "updatedAt": "2026-03-04T09:06:17.706Z",
+        "publishedAt": "2026-03-04T09:06:17.715Z"
+      },
+      "jugador1": {
+        "id": 2,
+        "documentId": "thnvjnfth71j8wccf85c2af2",
+        "Nombre": "Pepe",
+        "Apellidos": "Pérez",
+        "Telefono": "123456789",
+        "Email": "pepe@gmail.com",
+        "createdAt": "2026-03-04T09:29:14.041Z",
+        "updatedAt": "2026-03-04T09:29:15.392Z",
+        "publishedAt": "2026-03-04T09:29:15.428Z"
+      },
+      "jugador2": {
+        "id": 6,
+        "documentId": "l9gl0y6uvsk6dk6zriac2g7x",
+        "Nombre": "Jugador",
+        "Apellidos": "Prueba 2",
+        "Telefono": null,
+        "Email": "jugador2@test.com",
+        "createdAt": "2026-03-04T09:32:50.740Z",
+        "updatedAt": "2026-03-04T09:32:50.740Z",
+        "publishedAt": "2026-03-04T09:32:50.766Z"
+      },
+      "ganador": null
+    }
+  ],
+  "disponibilidades": [
+    {
+      "id": 1,
+      "documentId": "i4qa477y30unqa0nbsu9cwxk",
+      "slots": {
+        "viernes": {
+          "16:00": true
+        },
+        "sabado": {
+          "16:00": true
+        },
+        "domingo": {
+          "16:00": true
+        }
+      },
+      "createdAt": "2026-03-04T09:29:32.641Z",
+      "updatedAt": "2026-03-04T09:29:32.641Z",
+      "publishedAt": "2026-03-04T09:29:32.636Z",
+      "jugador": null,
+      "jornada": {
+        "id": 2,
+        "documentId": "smvaz0wzpwr2tjnfjvnf0iia",
+        "Nombre": "Jornada 1 - Liga Invierno",
+        "numero": 1,
+        "createdAt": "2026-03-04T09:06:13.172Z",
+        "updatedAt": "2026-03-04T09:06:17.706Z",
+        "publishedAt": "2026-03-04T09:06:17.715Z"
+      }
+    },
+    {
+      "id": 2,
+      "documentId": "a790qf72nme6lvzsibg4eobj",
+      "slots": {
+        "viernes": {
+          "16:00": true
+        },
+        "sabado": {
+          "16:00": true
+        },
+        "domingo": {
+          "16:00": true
+        }
+      },
+      "createdAt": "2026-03-04T09:32:50.836Z",
+      "updatedAt": "2026-03-04T09:32:50.836Z",
+      "publishedAt": "2026-03-04T09:32:50.835Z",
+      "jugador": {
+        "id": 6,
+        "documentId": "l9gl0y6uvsk6dk6zriac2g7x",
+        "Nombre": "Jugador",
+        "Apellidos": "Prueba 2",
+        "Telefono": null,
+        "Email": "jugador2@test.com",
+        "createdAt": "2026-03-04T09:32:50.740Z",
+        "updatedAt": "2026-03-04T09:32:50.740Z",
+        "publishedAt": "2026-03-04T09:32:50.766Z"
+      },
+      "jornada": {
+        "id": 2,
+        "documentId": "smvaz0wzpwr2tjnfjvnf0iia",
+        "Nombre": "Jornada 1 - Liga Invierno",
+        "numero": 1,
+        "createdAt": "2026-03-04T09:06:13.172Z",
+        "updatedAt": "2026-03-04T09:06:17.706Z",
+        "publishedAt": "2026-03-04T09:06:17.715Z"
+      }
+    }
+  ],
+  "jornadas": [
+    {
+      "id": 2,
+      "documentId": "smvaz0wzpwr2tjnfjvnf0iia",
+      "Nombre": "Jornada 1 - Liga Invierno",
+      "numero": 1,
+      "createdAt": "2026-03-04T09:06:13.172Z",
+      "updatedAt": "2026-03-04T09:06:17.706Z",
+      "publishedAt": "2026-03-04T09:06:17.715Z"
+    }
+  ]
+}

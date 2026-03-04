@@ -14,6 +14,5 @@ export default factories.createCoreRouter('api::jornada.jornada', {
       auth: false,
     },
   },
-  prefix: '/jornadas',
   type: 'content-api',
 });

@@ -1,0 +1,28 @@
+{
+    "kind": "collectionType",
+    "collectionName": "disponibilidades",
+    "info": {
+        "singularName": "disponibilidad",
+        "pluralName": "disponibilidades",
+        "displayName": "Disponibilidad",
+        "description": "Disponibilidad semanal de los jugadores para la liga"
+    },
+    "options": {
+        "draftAndPublish": false
+    },
+    "attributes": {
+        "jugador": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::jugador.jugador"
+        },
+        "jornada": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::jornada.jornada"
+        },
+        "slots": {
+            "type": "json"
+        }
+    }
+}

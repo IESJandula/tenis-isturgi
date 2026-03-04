@@ -1,101 +1,71 @@
 /**
- * jornada controller
+ * Custom controller for Jornada actions
  */
 
 import { factories } from '@strapi/strapi';
 
 export default factories.createCoreController('api::jornada.jornada', ({ strapi }) => ({
-  /**
-   * Endpoint: POST /api/jornadas/generar-calendario/:divisionId
-   * Genera automáticamente todas las jornadas y partidos para una división
-   */
-  async generarCalendario(ctx) {
+  async schedule(ctx) {
+    const { id } = ctx.params;
+
     try {
-      const { divisionId } = ctx.params;
+      strapi.log.info(`[CONTROLLER] Ejecutando schedule para jornada: ${id}`);
+      // @ts-ignore
+      const service = strapi.service('api::jornada.jornada');
+      strapi.log.info(`[CONTROLLER] Cargado servicio Jornada: ${!!service}`);
 
-      if (!divisionId) {
-        return ctx.badRequest('divisionId es requerido');
-      }
-
-      const result = await strapi
-        .service('api::jornada.jornada')
-        .generarCalenarioParaDivision(parseInt(divisionId));
-
-      ctx.body = result;
-    } catch (error: any) {
-      ctx.throw(400, error.message);
+      const results = await service.generarHorarios(id);
+      strapi.log.info(`[CONTROLLER] Resultados obtenidos: ${JSON.stringify(results)}`);
+      ctx.body = { data: results };
+    } catch (err) {
+      strapi.log.error(`[CONTROLLER] Error en schedule: ${err.message}`);
+      ctx.body = err;
     }
   },
 
-  /**
-    * Endpoint: GET /api/jornadas/division/:divisionId/jornadas
-   * Obtiene todas las jornadas de una división con sus partidos
-   */
   async obtenerJornadasPorDivision(ctx) {
+    const { divisionId } = ctx.params;
     try {
-      const { divisionId } = ctx.params;
-
       const jornadas = await strapi.db.query('api::jornada.jornada').findMany({
-        where: {
-          division: divisionId,
-          publishedAt: { $notNull: true },
-        },
+        where: { division: divisionId },
         populate: {
           partidos: {
-            where: {
-              publishedAt: { $notNull: true },
-            },
             populate: {
-              jugador1: {
-                where: { publishedAt: { $notNull: true } },
-              },
-              jugador2: {
-                where: { publishedAt: { $notNull: true } },
-              },
-              ganador: {
-                where: { publishedAt: { $notNull: true } },
-              },
+              jugador1: true,
+              jugador2: true,
             },
           },
         },
         orderBy: { numero: 'asc' },
       });
-
       ctx.body = jornadas;
-    } catch (error: any) {
-      ctx.throw(400, error.message);
+    } catch (err) {
+      ctx.body = err;
     }
   },
 
-  /**
-   * Endpoint: GET /api/jornadas/:jornadaId/partidos
-   * Obtiene todos los partidos de una jornada específica
-   */
   async obtenerPartidosPorJornada(ctx) {
+    const { jornadaId } = ctx.params;
     try {
-      const { jornadaId } = ctx.params;
-
       const partidos = await strapi.db.query('api::partido.partido').findMany({
-        where: {
-          jornada: jornadaId,
-          publishedAt: { $notNull: true },
-        },
-        populate: {
-          jugador1: {
-            where: { publishedAt: { $notNull: true } },
-          },
-          jugador2: {
-            where: { publishedAt: { $notNull: true } },
-          },
-          ganador: {
-            where: { publishedAt: { $notNull: true } },
-          },
-        },
+        where: { jornada: jornadaId },
+        populate: ['jugador1', 'jugador2'],
       });
-
       ctx.body = partidos;
-    } catch (error: any) {
-      ctx.throw(400, error.message);
+    } catch (err) {
+      ctx.body = err;
+    }
+  },
+
+  async generarCalendario(ctx) {
+    const { divisionId } = ctx.params;
+    try {
+      // @ts-ignore
+      const service = strapi.service('api::jornada.jornada');
+      const results = await service.generarCalenarioParaDivision(parseInt(divisionId));
+      ctx.body = results;
+    } catch (err) {
+      ctx.body = err;
     }
   },
 }));

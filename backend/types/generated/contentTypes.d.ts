@@ -430,6 +430,38 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiDisponibilidadDisponibilidad
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'disponibilidades';
+  info: {
+    description: 'Disponibilidad semanal de los jugadores para la liga';
+    displayName: 'Disponibilidad';
+    pluralName: 'disponibilidades';
+    singularName: 'disponibilidad';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    jornada: Schema.Attribute.Relation<'manyToOne', 'api::jornada.jornada'>;
+    jugador: Schema.Attribute.Relation<'manyToOne', 'api::jugador.jugador'>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::disponibilidad.disponibilidad'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    slots: Schema.Attribute.JSON;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiDivisionDivision extends Struct.CollectionTypeSchema {
   collectionName: 'divisions';
   info: {
@@ -1199,6 +1231,7 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
+      'api::disponibilidad.disponibilidad': ApiDisponibilidadDisponibilidad;
       'api::division.division': ApiDivisionDivision;
       'api::jornada.jornada': ApiJornadaJornada;
       'api::jugador.jugador': ApiJugadorJugador;

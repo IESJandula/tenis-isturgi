@@ -26,7 +26,7 @@
             <div class="article-imagen">
               <img
                 v-if="torneo.Imagen?.url"
-                :src="`http://localhost:1337${torneo.Imagen.url}`"
+                :src="`${apiUrl}${torneo.Imagen.url}`"
                 :alt="torneo.Nombre"
                 class="imagen-completa"
               />
@@ -99,17 +99,13 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 
+import { formatearFecha } from '../utils/formatters';
+
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337';
 const route = useRoute();
 const torneo = ref(null);
 const cargando = ref(true);
 const error = ref(null);
-
-const formatearFecha = (fecha) => {
-  if (!fecha) return '';
-  const date = new Date(fecha);
-  const opciones = { year: 'numeric', month: 'long', day: 'numeric' };
-  return date.toLocaleDateString('es-ES', opciones);
-};
 
 const fechaRango = computed(() => {
   const inicio = formatearFecha(torneo.value?.FechaInicio);
@@ -126,7 +122,7 @@ const estadoClass = computed(() => {
 onMounted(async () => {
   try {
     const id = route.params.id;
-    const respuesta = await axios.get(`http://localhost:1337/api/torneos/${id}?populate=*`);
+    const respuesta = await axios.get(`${apiUrl}/api/torneos/${id}?populate=*`);
     torneo.value = respuesta.data.data;
   } catch (e) {
     error.value = 'No se pudo cargar el torneo. Intenta de nuevo.';

@@ -1,18 +1,15 @@
 /**
- * Custom routes for Sprint 2
+ * Custom routes for Jornada
  */
 
 export default {
   routes: [
     {
       method: 'POST',
-      path: '/jornadas/generar-calendario/:divisionId',
-      handler: 'api::jornada.jornada.generarCalendario',
+      path: '/jornadas/:id/schedule',
+      handler: 'api::jornada.jornada.schedule',
       config: {
-        auth: {
-          scope: [],
-        },
-        policies: [],
+        auth: false,
       },
     },
     {
@@ -21,7 +18,6 @@ export default {
       handler: 'api::jornada.jornada.obtenerJornadasPorDivision',
       config: {
         auth: false,
-        policies: [],
       },
     },
     {
@@ -30,7 +26,6 @@ export default {
       handler: 'api::jornada.jornada.obtenerPartidosPorJornada',
       config: {
         auth: false,
-        policies: [],
       },
     },
   ],

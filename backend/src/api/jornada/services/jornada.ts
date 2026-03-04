@@ -14,7 +14,118 @@ interface Enfrentamiento {
   jugador2_id: number;
 }
 
+const SLOTS = [
+  { dia: 'viernes', hora: '16:00' },
+  { dia: 'viernes', hora: '18:00' },
+  { dia: 'sabado', hora: '09:00' },
+  { dia: 'sabado', hora: '11:00' },
+  { dia: 'sabado', hora: '16:00' },
+  { dia: 'sabado', hora: '18:00' },
+  { dia: 'domingo', hora: '09:00' },
+  { dia: 'domingo', hora: '11:00' },
+  { dia: 'domingo', hora: '16:00' },
+  { dia: 'domingo', hora: '18:00' },
+];
+
+const PISTAS_POR_SLOT = 3;
+
 export default factories.createCoreService('api::jornada.jornada', ({ strapi }) => ({
+  /**
+   * Generates schedule for a given Jornada ID using availability
+   */
+  async generarHorarios(jornadaId: string) {
+    const log = (msg: string) => {
+      strapi.log.info(`[MATCHMAKER] ${msg}`);
+    };
+
+    log(`--- Iniciando Matchmaker para Jornada: ${jornadaId}`);
+
+    // 1. Obtener todos los partidos de la jornada
+    const partidosRes = await (strapi as any).documents('api::partido.partido').findMany({
+      populate: ['jornada', 'jugador1', 'jugador2'],
+      status: 'published'
+    });
+
+    const allPartidos = Array.isArray(partidosRes) ? partidosRes : (partidosRes?.data || []);
+    log(`Total partidos en sistema: ${allPartidos.length}`);
+
+    const partidos = allPartidos.filter((p: any) => p.jornada?.documentId === jornadaId);
+    log(`Partidos filtrados para jornada ${jornadaId}: ${partidos.length}`);
+
+    // 2. Obtener todas las disponibilidades de esa jornada
+    // Usamos db.query ya que Document API populated relations return null for manual entries in junction tables
+    const allDisponibilidades = await (strapi.db as any).query('api::disponibilidad.disponibilidad').findMany({
+      populate: ['jornada', 'jugador']
+    });
+
+    log(`Total disponibilidades en sistema: ${allDisponibilidades.length}`);
+
+    const disponibilidades = allDisponibilidades.filter((d: any) => d.jornada?.documentId === jornadaId);
+    log(`Disponibilidades filtradas para jornada ${jornadaId}: ${disponibilidades.length}`);
+
+    const ocupacionSlots = SLOTS.map(() => 0);
+    const resultados = [];
+
+    for (const partido of partidos) {
+      log(`Procesando Partido ID: ${partido.id}`);
+      const j1DocId = partido.jugador1?.documentId;
+      const j2DocId = partido.jugador2?.documentId;
+
+      if (!j1DocId || !j2DocId) {
+        log(`Falta algún jugador en el partido ${partido.id}`);
+        continue;
+      }
+
+      const disp1 = disponibilidades.find((d: any) => d.jugador?.documentId === j1DocId);
+      const disp2 = disponibilidades.find((d: any) => d.jugador?.documentId === j2DocId);
+
+      log(`Disp1: ${!!disp1}, Disp2: ${!!disp2}`);
+
+      let slotEncontrado = false;
+
+      if (disp1 && disp2) {
+        for (let i = 0; i < SLOTS.length; i++) {
+          const slot = SLOTS[i];
+          const puedeJ1 = disp1.slots?.[slot.dia]?.[slot.hora];
+          const puedeJ2 = disp2.slots?.[slot.dia]?.[slot.hora];
+          const hayPista = ocupacionSlots[i] < PISTAS_POR_SLOT;
+
+          if (puedeJ1 && puedeJ2 && hayPista) {
+            ocupacionSlots[i]++;
+            log(`Actualizando Documento Partition: ${partido.documentId}`);
+            // Actualizar partido en DB
+            await (strapi as any).documents('api::partido.partido').update({
+              documentId: partido.documentId,
+              data: {
+                estado: 'Programado',
+                pista: ocupacionSlots[i],
+                hora: `${slot.hora}:00`,
+                fecha: new Date().toISOString().split('T')[0], // Placeholder
+              },
+              status: 'published'
+            });
+            slotEncontrado = true;
+            resultados.push(`Partido ${partido.id} programado: ${slot.dia} ${slot.hora}`);
+            log(`Partido ${partido.id} programado satisfactoriamente`);
+            break;
+          }
+        }
+      }
+
+      if (!slotEncontrado) {
+        await (strapi as any).documents('api::partido.partido').update({
+          documentId: partido.documentId,
+          data: { estado: 'Aplazado' },
+          status: 'published'
+        });
+        resultados.push(`Partido ${partido.id} aplazado por falta de coincidencia.`);
+        log(`Partido ${partido.id} aplazado`);
+      }
+    }
+
+    return resultados;
+  },
+
   /**
    * Algoritmo Berger para generar todos contra todos
    * @param jugadores Array de jugadores ordenados
@@ -105,9 +216,25 @@ export default factories.createCoreService('api::jornada.jornada', ({ strapi }) 
       }));
 
       // Generar calendario usando algoritmo Berger
-      const jornadas = this.generarCalendarioRoundRobin(jugadores);
+      const jornadas = (this as any).generarCalendarioRoundRobin(jugadores);
 
       return await strapi.db.transaction(async ({ trx }) => {
+        // Limpiar calendario previo para esta división
+        const jornadasPrevias = await strapi.db.query('api::jornada.jornada').findMany({
+          where: { division: divisionId },
+        });
+
+        for (const j of jornadasPrevias) {
+          // Eliminar partidos de la jornada
+          await strapi.db.query('api::partido.partido').deleteMany({
+            where: { jornada: j.id },
+          });
+          // Eliminar jornada
+          await strapi.db.query('api::jornada.jornada').delete({
+            where: { id: j.id },
+          });
+        }
+
         // Guardar en la BD de forma atomica
         const jornadasCreadas = [];
 
@@ -120,7 +247,6 @@ export default factories.createCoreService('api::jornada.jornada', ({ strapi }) 
               division: divisionId,
               publishedAt: new Date(),
             },
-            transaction: trx,
           } as any);
 
           // Crear los partidos para esta jornada
@@ -133,7 +259,6 @@ export default factories.createCoreService('api::jornada.jornada', ({ strapi }) 
                 estado: 'Pendiente',
                 publishedAt: new Date(),
               },
-              transaction: trx,
             } as any);
           }
 
@@ -152,4 +277,5 @@ export default factories.createCoreService('api::jornada.jornada', ({ strapi }) 
       throw error;
     }
   },
+
 }));

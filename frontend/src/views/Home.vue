@@ -43,12 +43,13 @@
           class="noticia-card"
         >
           <div class="card-image-wrapper">
-            <img 
-              v-if="noticia.Imagen?.url"
-              :src="`http://localhost:1337${noticia.Imagen.url}`"
+            <template v-if="noticia.Imagen?.url">
+              <img 
+                :src="`${apiUrl}${noticia.Imagen.url}`"
               :alt="noticia.Titulo"
               class="card-image"
             />
+            </template>
             <div v-else class="image-placeholder">
               <span class="placeholder-icon">🎾</span>
             </div>
@@ -71,7 +72,7 @@
             
             <button 
               type="button"
-              @click="irAlDetalle(noticia.documentId)" 
+              @click="() => router.push(`/noticia/${noticia.documentId}`)" 
               class="card-link"
               :title="`Leer: ${noticia.Titulo}`"
             >
@@ -82,55 +83,122 @@
         </article>
       </div>
     </section>
+
+    <!-- Sección de Próximos Torneos -->
+    <section class="noticias-section">
+      <div class="section-header-main">
+        <div>
+          <h2 class="section-title-main">Próximos Torneos</h2>
+          <p class="section-subtitle-main">Las mejores competiciones de tenis del club</p>
+        </div>
+      </div>
+
+      <!-- Loading, Error y Sin torneos -->
+      <div v-if="cargandoTorneos" class="loading-state">
+        <div class="spinner"></div>
+        <p>Cargando torneos...</p>
+      </div>
+
+      <div v-else-if="errorTorneos" class="error-state glass-card">
+        <span class="error-icon">⚠️</span>
+        <p>{{ errorTorneos }}</p>
+      </div>
+
+      <div v-else-if="torneos.length === 0" class="empty-state glass-card">
+        <span class="empty-icon">🏆</span>
+        <h3>No hay torneos disponibles</h3>
+        <p>Vuelve pronto para conocer los próximos eventos</p>
+      </div>
+
+      <!-- Grid de Torneos -->
+      <div v-else class="noticias-grid stagger">
+        <article 
+          v-for="(torneo, index) in torneos" 
+          :key="torneo.id" 
+          class="noticia-card"
+        >
+          <div class="card-image-wrapper">
+            <template v-if="torneo.Imagen?.url">
+              <img 
+                :src="`${apiUrl}${torneo.Imagen.url}`"
+              :alt="torneo.Nombre"
+              class="card-image"
+            />
+            </template>
+            <div v-else class="image-placeholder">
+              <span class="placeholder-icon">🎾</span>
+            </div>
+            <div class="image-overlay"></div>
+          </div>
+          
+          <div class="card-content">
+            <div class="card-meta">
+              <span class="tag-news">Torneo</span>
+              <time v-if="torneo.FechaInicio" class="card-date">
+                {{ formatearFecha(torneo.FechaInicio) }}
+              </time>
+            </div>
+            
+            <h3 class="card-title">{{ torneo.Nombre }}</h3>
+            
+            <p class="card-description">
+              {{ truncarTexto(torneo.Descripcion_breve || torneo.Descripcion, 120) }}
+            </p>
+            
+            <button 
+              type="button"
+              @click="() => router.push(`/torneo/${torneo.documentId}`)" 
+              class="card-link"
+              :title="`Ver torneo: ${torneo.Nombre}`"
+            >
+              Ver torneo
+              <span class="arrow">→</span>
+            </button>
+          </div>
+        </article>
+      </div>
+    </section>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 
+import { formatearFecha, truncarTexto } from '../utils/formatters';
+
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337';
 const router = useRouter();
 
-// --- LÓGICA DE NOTICIAS (REAL) ---
+// --- LÓGICA DE NOTICIAS Y TORNEOS ---
 const noticias = ref([]);
 const cargando = ref(true);
 const error = ref(null);
 
-const formatearFecha = (fecha) => {
-  const date = new Date(fecha);
-  const opciones = { year: 'numeric', month: 'long', day: 'numeric' };
-  return date.toLocaleDateString('es-ES', opciones);
-};
-
-const truncarTexto = (texto, maxLength) => {
-  if (!texto) return '';
-  if (texto.length <= maxLength) return texto;
-  return texto.substring(0, maxLength).trim() + '...';
-};
-
-const irAlDetalle = (id) => {
-  if (!id) {
-    console.error('Error: ID de noticia no disponible');
-    return;
-  }
-  console.log('Navegando a noticia con ID:', id);
-  window.location.href = `/noticia/${id}`;
-};
+const torneos = ref([]);
+const cargandoTorneos = ref(true);
+const errorTorneos = ref(null);
 
 onMounted(async () => {
   try {
-    const respuesta = await axios.get('http://localhost:1337/api/noticias?populate=*&sort=Fecha:desc');
+    const respuesta = await axios.get(`${apiUrl}/api/noticias?pagination[limit]=4&populate=*&sort=Fecha:desc`);
     noticias.value = respuesta.data.data;
-    console.log('Noticias cargadas:', noticias.value);
-    if (noticias.value.length > 0) {
-      console.log('Ejemplo de noticia:', noticias.value[0]);
-    }
   } catch (e) {
     console.error(e);
     error.value = 'Error al cargar noticias. Asegúrate de que el servidor backend esté activo.';
   } finally {
     cargando.value = false;
+  }
+
+  try {
+    const resTorneos = await axios.get(`${apiUrl}/api/torneos?pagination[limit]=4&populate=*&sort=FechaInicio:desc`);
+    torneos.value = resTorneos.data.data;
+  } catch (e) {
+    console.error(e);
+    errorTorneos.value = 'Error al cargar torneos.';
+  } finally {
+    cargandoTorneos.value = false;
   }
 });
 </script>

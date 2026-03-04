@@ -7,6 +7,9 @@ import Escuela from '../views/Escuela.vue'
 import Torneos from '../views/Torneos.vue'
 import Contacto from '../views/Contacto.vue'
 import EnConstruccion from '../views/EnConstruccion.vue'
+import Noticias from '../views/Noticias.vue'
+import Disponibilidad from '../views/Disponibilidad.vue'
+import AdminGestion from '../views/AdminGestion.vue'
 import NoticiaDetalle from '../pages/noticiaDetalle.vue'
 import TorneoDetalle from '../pages/torneoDetalle.vue'
 
@@ -17,6 +20,9 @@ const routes = [
   { path: '/club', component: Club },
   { path: '/escuela', component: Escuela },
   { path: '/torneos', component: Torneos },
+  { path: '/noticias', component: Noticias },
+  { path: '/disponibilidad', component: Disponibilidad },
+  { path: '/admin/gestion', component: AdminGestion },
   { path: '/contacto', component: Contacto },
   { path: '/noticia/:id', component: NoticiaDetalle },
   { path: '/torneo/:id', component: TorneoDetalle },

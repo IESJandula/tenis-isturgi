@@ -21,9 +21,11 @@
       <router-link to="/galeria">Galeria</router-link>
       <router-link to="/escuela">Escuela</router-link>
       <router-link to="/liga">Liga</router-link>
+      <router-link to="/noticias">Noticias</router-link>
       <router-link to="/torneos">Torneos</router-link>
       <router-link to="/contacto">Contacto</router-link>
       
+      <router-link to="/disponibilidad">Mi Disponibilidad</router-link>
       <router-link to="/login" class="btn-login">Soy Socio</router-link>
     </div>
   </nav>

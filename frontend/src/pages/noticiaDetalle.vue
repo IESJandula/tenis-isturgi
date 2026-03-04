@@ -30,7 +30,7 @@
             <div class="article-imagen" @click="abrirImagenCompleta" :class="{ 'imagen-clickeable': noticia.Imagen?.url }">
               <img 
                 v-if="noticia.Imagen?.url"
-                :src="`http://localhost:1337${noticia.Imagen.url}`"
+                :src="`${apiUrl}${noticia.Imagen.url}`"
                 :alt="noticia.Titulo"
                 class="imagen-completa"
               />
@@ -69,7 +69,7 @@
                 <a 
                   v-for="archivo in noticia.Archivos" 
                   :key="archivo.id"
-                  :href="`http://localhost:1337${archivo.url}`"
+                  :href="`${apiUrl}${archivo.url}`"
                   :download="archivo.name"
                   target="_blank"
                   class="archivo-item"
@@ -109,7 +109,7 @@
         <div class="lightbox-content" @click.stop>
           <img 
             v-if="noticia?.Imagen?.url"
-            :src="`http://localhost:1337${noticia.Imagen.url}`"
+            :src="`${apiUrl}${noticia.Imagen.url}`"
             :alt="noticia.Titulo"
             class="lightbox-imagen"
           />
@@ -123,18 +123,14 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
+import { formatearFecha, formatearTamano } from '../utils/formatters';
 
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337';
 const route = useRoute();
 const noticia = ref(null);
 const cargando = ref(true);
 const error = ref(null);
 const imagenPantallaCompleta = ref(false);
-
-const formatearFecha = (fecha) => {
-  const date = new Date(fecha);
-  const opciones = { year: 'numeric', month: 'long', day: 'numeric' };
-  return date.toLocaleDateString('es-ES', opciones);
-};
 
 // Funciones para archivos adjuntos
 const esPDF = (archivo) => {
@@ -154,14 +150,6 @@ const obtenerTipoArchivo = (archivo) => {
   if (esImagen(archivo)) return 'Imagen JPEG';
   if (esVideo(archivo)) return 'Video';
   return archivo.ext?.replace('.', '').toUpperCase() || 'Archivo';
-};
-
-const formatearTamano = (bytes) => {
-  if (!bytes) return '0 KB';
-  const kb = bytes / 1024;
-  if (kb < 1024) return `${kb.toFixed(1)} KB`;
-  const mb = kb / 1024;
-  return `${mb.toFixed(1)} MB`;
 };
 
 const abrirImagenCompleta = () => {
@@ -203,7 +191,7 @@ onMounted(async () => {
     const id = route.params.id;
     console.log('Cargando noticia con ID:', id);
     const respuesta = await axios.get(
-      `http://localhost:1337/api/noticias/${id}?populate=*`
+      `${apiUrl}/api/noticias/${id}?populate=*`
     );
     console.log('Respuesta de API:', respuesta.data);
     noticia.value = respuesta.data.data;
