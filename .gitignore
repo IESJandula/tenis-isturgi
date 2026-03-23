@@ -13,3 +13,12 @@ build/
 .vscode/
 *.swp
 *.swo
+
+# Java / Maven
+**/target/
+
+# Local secrets
+**/.env
+**/.env.*
+firebase-service-account.json
+**/firebase-service-account.json

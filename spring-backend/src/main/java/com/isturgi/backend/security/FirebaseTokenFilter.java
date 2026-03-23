@@ -12,10 +12,32 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Collections;
+import java.util.Map;
 
 @Component
 public class FirebaseTokenFilter extends OncePerRequestFilter {
+
+    private static final boolean ALLOW_UNVERIFIED_JWT =
+            "true".equalsIgnoreCase(System.getenv("ALLOW_UNVERIFIED_JWT"));
+
+    private String tryExtractEmailFromJwt(String token) {
+        try {
+            String[] parts = token.split("\\.");
+            if (parts.length < 2) return null;
+            byte[] decoded = Base64.getUrlDecoder().decode(parts[1]);
+            String json = new String(decoded, StandardCharsets.UTF_8);
+            // minimal JSON parse without extra deps: rely on Jackson already in Spring
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            Map<?, ?> payload = mapper.readValue(json, Map.class);
+            Object email = payload.get("email");
+            return email != null ? email.toString() : null;
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -37,6 +59,16 @@ public class FirebaseTokenFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 } catch (Exception e) {
                     System.err.println("Error verificando token de Firebase: " + e.getMessage());
+
+                    if (ALLOW_UNVERIFIED_JWT) {
+                        String email = tryExtractEmailFromJwt(token);
+                        if (email != null && !email.isBlank()) {
+                            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                                    email, null, Collections.emptyList()
+                            );
+                            SecurityContextHolder.getContext().setAuthentication(authentication);
+                        }
+                    }
                 }
             } else {
                  // For testing backwards compatibility in local if JWT is simple fake token

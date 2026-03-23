@@ -23,12 +23,12 @@
       </router-link>
 
       <!-- Perfil Card (Only if not Admin) -->
-      <div v-if="!isAdmin()" class="dashboard-card disabled">
+      <router-link v-if="!isAdmin()" to="/mi-perfil" class="dashboard-card">
         <div class="card-icon">👤</div>
         <h3>Mi Perfil</h3>
         <p>Consulta tus estadísticas y datos personales.</p>
-        <span class="card-status">Próximamente</span>
-      </div>
+        <span class="card-action">Ver perfil →</span>
+      </router-link>
 
       <!-- Mis Partidos Card (Only if not Admin) -->
       <router-link v-if="!isAdmin()" to="/mis-partidos" class="dashboard-card action-card">

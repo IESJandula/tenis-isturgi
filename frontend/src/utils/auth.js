@@ -73,11 +73,29 @@ const logout = async () => {
     await fbSignOut(auth);
 };
 
+const refreshProfile = async () => {
+    if (!state.jwt) return { success: false, error: 'No autenticado' };
+    try {
+        const res = await axios.get(`${apiUrl}/api/jugadors/me`, {
+            headers: { Authorization: `Bearer ${state.jwt}` }
+        });
+        if (res.data && res.data.data) {
+            const merged = { ...(state.user || {}), ...res.data.data };
+            state.user = merged;
+            localStorage.setItem('user', JSON.stringify(merged));
+        }
+        return { success: true };
+    } catch (err) {
+        return { success: false, error: err?.message || 'No se pudo refrescar el perfil' };
+    }
+};
+
 export const useAuth = () => {
     return {
         state: readonly(state),
         login,
         logout,
+        refreshProfile,
         isAuthenticated: () => !!state.jwt,
         isAdmin: () => state.user?.isAdmin === true
     };

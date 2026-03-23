@@ -143,11 +143,13 @@ const cargarDatos = async () => {
       throw new Error('No hay jornadas activas configuradas.');
     }
 
-    // 3. Intentar cargar disponibilidad existente usando el jugadorId
-    const resDisp = await axios.get(`${apiUrl}/api/disponibilidades`, config);
-    const alldisp = resDisp.data.data || resDisp.data || [];
-    const filteredDisp = alldisp.filter(d => d.jugador?.id === jugadorId.value && d.jornada?.id === jornadaActual.value.id);
-    
+    // 3. Intentar cargar disponibilidad existente usando filtros server-side
+    const resDisp = await axios.get(`${apiUrl}/api/disponibilidades`, {
+      ...config,
+      params: { jugadorId: jugadorId.value, jornadaId: jornadaActual.value.id }
+    });
+
+    const filteredDisp = resDisp.data.data || resDisp.data || [];
     if (filteredDisp.length > 0) {
       const existingStr = filteredDisp[0].slots;
       const existing = typeof existingStr === 'string' ? JSON.parse(existingStr) : existingStr;
@@ -172,10 +174,12 @@ const guardarDisponibilidad = async () => {
     const config = {
       headers: { Authorization: `Bearer ${state.jwt}` }
     };
-    // Buscar si ya existe para hacer PUT o POST
-    const resDisp = await axios.get(`${apiUrl}/api/disponibilidades`, config);
-    const alldisp = resDisp.data.data || resDisp.data || [];
-    const resExistente = alldisp.filter(d => d.jugador?.id === jugadorId.value && d.jornada?.id === jornadaActual.value.id);
+    // Buscar si ya existe para hacer PUT o POST (server-side filters)
+    const resDisp = await axios.get(`${apiUrl}/api/disponibilidades`, {
+      ...config,
+      params: { jugadorId: jugadorId.value, jornadaId: jornadaActual.value.id }
+    });
+    const resExistente = resDisp.data.data || resDisp.data || [];
     
     const payload = {
       jugador: { id: jugadorId.value },
