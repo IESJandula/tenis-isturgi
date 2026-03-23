@@ -1,6 +1,8 @@
 package com.isturgi.backend.controllers;
-import com.isturgi.backend.models.Partido;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.isturgi.backend.dto.PartidoResultadoRequest;
+import com.isturgi.backend.models.Partido;
 import com.isturgi.backend.repositories.PartidoRepository;
 import com.isturgi.backend.services.ClasificacionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import static org.springframework.http.HttpStatus.*;
 
 @RestController
@@ -22,6 +23,7 @@ import static org.springframework.http.HttpStatus.*;
 public class PartidoController {
     @Autowired private PartidoRepository repository;
     @Autowired private ClasificacionService clasificacionService;
+    @Autowired private ObjectMapper objectMapper;
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAll(
@@ -31,8 +33,11 @@ public class PartidoController {
         }
         return ResponseEntity.ok(ApiResponse.of(repository.findAll()));
     }
-    @PostMapping public ResponseEntity<Map<String, Object>> create(@RequestBody Partido item) { return ResponseEntity.ok(ApiResponse.of(repository.save(item))); }
-    @Autowired private ObjectMapper objectMapper;
+
+    @PostMapping
+    public ResponseEntity<Map<String, Object>> create(@RequestBody Partido item) {
+        return ResponseEntity.ok(ApiResponse.of(repository.save(item)));
+    }
 
     @PutMapping("/{id}/resultado")
     public ResponseEntity<Map<String, Object>> guardarResultado(@PathVariable Long id, @RequestBody PartidoResultadoRequest body) {
@@ -75,39 +80,42 @@ public class PartidoController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, Object>> update(@PathVariable Long id, @RequestBody Map<String, Object> payload) {
-        Partido existing = repository.findById(id).orElse(null);
-        if (existing == null) return ResponseEntity.notFound().build();
+        Partido existing = repository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND));
 
-        Object nestedData = payload.get("data");
         Map<String, Object> data = payload;
+        Object nestedData = payload.get("data");
         if (nestedData instanceof Map) {
             data = (Map<String, Object>) nestedData;
         }
 
-        if (data.containsKey("resultado")) {
-            existing.setResultado((String) data.get("resultado"));
-        }
-        if (data.containsKey("estado")) {
-            existing.setEstado((String) data.get("estado"));
-        }
-        if (data.containsKey("fecha")) {
-            existing.setFecha((String) data.get("fecha"));
-        }
-        if (data.containsKey("hora")) {
-            existing.setHora((String) data.get("hora"));
-        }
-        if (data.containsKey("pista") && data.get("pista") != null) {
-            Object pista = data.get("pista");
-            if (pista instanceof Number) {
-                existing.setPista(((Number) pista).intValue());
-            }
-        }
+        Partido patch = objectMapper.convertValue(data, Partido.class);
 
+        if (patch.getJugador1() != null) existing.setJugador1(patch.getJugador1());
+        if (patch.getJugador2() != null) existing.setJugador2(patch.getJugador2());
+        if (patch.getGanador() != null) existing.setGanador(patch.getGanador());
+        if (patch.getJornada() != null) existing.setJornada(patch.getJornada());
+
+        if (patch.getFecha() != null) existing.setFecha(patch.getFecha());
+        if (patch.getHora() != null) existing.setHora(patch.getHora());
+        if (patch.getPista() != null) existing.setPista(patch.getPista());
+        if (patch.getEstado() != null) existing.setEstado(patch.getEstado());
+        if (patch.getResultado() != null) existing.setResultado(patch.getResultado());
+        if (patch.getSetsFavor() != null) existing.setSetsFavor(patch.getSetsFavor());
+        if (patch.getSetsContra() != null) existing.setSetsContra(patch.getSetsContra());
+        if (patch.getJuegosFavor() != null) existing.setJuegosFavor(patch.getJuegosFavor());
+        if (patch.getJuegosContra() != null) existing.setJuegosContra(patch.getJuegosContra());
+        if (patch.getJugadorQueGuardo() != null) existing.setJugadorQueGuardo(patch.getJugadorQueGuardo());
+
+        existing.setUpdatedAt(LocalDateTime.now());
         Partido updated = repository.save(existing);
         return ResponseEntity.ok(ApiResponse.of(updated));
     }
 
-    @DeleteMapping("/{id}") public ResponseEntity<Void> delete(@PathVariable Long id) { repository.deleteById(id); return ResponseEntity.ok().build(); }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        repository.deleteById(id);
+        return ResponseEntity.ok().build();
+    }
 
     private static class ResultadoParsed {
         final int j1Sets;
