@@ -25,11 +25,18 @@
       <router-link to="/torneos">Torneos</router-link>
       <router-link to="/contacto">Contacto</router-link>
       
-      <router-link to="/disponibilidad">Mi Disponibilidad</router-link>
-      <router-link to="/login" class="btn-login">Soy Socio</router-link>
+      <router-link v-if="isAuthenticated() && !isAdmin()" to="/disponibilidad">Mi Disponibilidad</router-link>
+      
+      <router-link v-if="!isAuthenticated()" to="/login" class="btn-login">Soy Socio</router-link>
+      <router-link v-else to="/socio-dashboard" class="btn-login">Mi Panel</router-link>
     </div>
   </nav>
 </template>
+
+<script setup>
+import { useAuth } from '../utils/auth';
+const { isAuthenticated, isAdmin } = useAuth();
+</script>
 
 <style scoped>
 .navbar {

@@ -113,7 +113,7 @@ export default {
             status: 'published'
           });
         }
-        console.log('Torneos reales creados correctamente.');
+        console.log('Torneos reales creadas correctamente.');
       }
 
     } catch (e) {

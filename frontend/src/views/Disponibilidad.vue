@@ -81,10 +81,14 @@
 </template>
 
 <script setup>
+// Final fix to ensure form reactive state is detected
 import { ref, onMounted, reactive } from 'vue';
 import axios from 'axios';
+import { useAuth } from '../utils/auth';
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337';
+const { state } = useAuth();
+
+const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 const cargando = ref(true);
 const guardando = ref(false);
 const error = ref(null);
@@ -105,55 +109,85 @@ const form = reactive({
   domingo: {}
 });
 
+const jugadorId = ref(null);
+
 const cargarDatos = async () => {
   cargando.value = true;
   error.value = null;
   try {
-    // 1. Obtener jornada activa (por ahora tomamos la última creada para simplificar)
-    const resJornada = await axios.get(`${apiUrl}/api/jornadas?sort=id:desc&pagination[limit]=1`);
-    if (resJornada.data.data.length > 0) {
-      jornadaActual.value = resJornada.data.data[0];
+    const config = {
+      headers: { Authorization: `Bearer ${state.jwt}` }
+    };
+
+    // 1. Obtener el perfil de jugador (Nuevo endpoint robusto en Strapi v5)
+    try {
+      const resMe = await axios.get(`${apiUrl}/api/jugadors/me`, config);
+      if (resMe.data.data) {
+        jugadorId.value = resMe.data.data.id;
+      }
+    } catch (e) {
+      console.error('Error fetching /jugadors/me:', e);
+    }
+
+    if (!jugadorId.value) {
+      throw new Error('No se encontró un perfil de jugador vinculado a tu cuenta.');
+    }
+
+    // 2. Obtener jornada activa
+    const resJornada = await axios.get(`${apiUrl}/api/jornadas`, config);
+    let allJornadas = resJornada.data.data || resJornada.data || [];
+    if (allJornadas.length > 0) {
+      allJornadas.sort((a, b) => b.id - a.id);
+      jornadaActual.value = allJornadas[0];
     } else {
       throw new Error('No hay jornadas activas configuradas.');
     }
 
-    // 2. Intentar cargar disponibilidad existente (Simulando usuario ID 1 por ahora hasta tener Auth)
-    const resDisp = await axios.get(`${apiUrl}/api/disponibilidades?filters[jugador][id][$eq]=1&filters[jornada][id][$eq]=${jornadaActual.value.id}`);
+    // 3. Intentar cargar disponibilidad existente usando el jugadorId
+    const resDisp = await axios.get(`${apiUrl}/api/disponibilidades`, config);
+    const alldisp = resDisp.data.data || resDisp.data || [];
+    const filteredDisp = alldisp.filter(d => d.jugador?.id === jugadorId.value && d.jornada?.id === jornadaActual.value.id);
     
-    if (resDisp.data.data.length > 0) {
-      const existing = resDisp.data.data[0].slots;
+    if (filteredDisp.length > 0) {
+      const existingStr = filteredDisp[0].slots;
+      const existing = typeof existingStr === 'string' ? JSON.parse(existingStr) : existingStr;
       if (existing) {
         Object.assign(form, existing);
       }
     }
   } catch (e) {
     console.error(e);
-    error.value = 'No se pudo cargar la información de la jornada.';
+    error.value = e.message || 'No se pudo cargar la información de la jornada.';
   } finally {
     cargando.value = false;
   }
 };
 
 const guardarDisponibilidad = async () => {
+  if (!jugadorId.value) return;
+  
   guardando.value = true;
   mensajeExito.value = false;
   try {
+    const config = {
+      headers: { Authorization: `Bearer ${state.jwt}` }
+    };
     // Buscar si ya existe para hacer PUT o POST
-    const resExistente = await axios.get(`${apiUrl}/api/disponibilidades?filters[jugador][id][$eq]=1&filters[jornada][id][$eq]=${jornadaActual.value.id}`);
+    const resDisp = await axios.get(`${apiUrl}/api/disponibilidades`, config);
+    const alldisp = resDisp.data.data || resDisp.data || [];
+    const resExistente = alldisp.filter(d => d.jugador?.id === jugadorId.value && d.jornada?.id === jornadaActual.value.id);
     
     const payload = {
-      data: {
-        jugador: 1, // Hardcoded user 1 for now
-        jornada: jornadaActual.value.id,
-        slots: { ...form }
-      }
+      jugador: { id: jugadorId.value },
+      jornada: { id: jornadaActual.value.id },
+      slots: JSON.stringify({ ...form })
     };
 
-    if (resExistente.data.data.length > 0) {
-      const docId = resExistente.data.data[0].documentId;
-      await axios.put(`${apiUrl}/api/disponibilidades/${docId}`, payload);
+    if (resExistente.length > 0) {
+      const docId = resExistente[0].id || resExistente[0].documentId;
+      await axios.put(`${apiUrl}/api/disponibilidades/${docId}`, payload, config);
     } else {
-      await axios.post(`${apiUrl}/api/disponibilidades`, payload);
+      await axios.post(`${apiUrl}/api/disponibilidades`, payload, config);
     }
 
     mensajeExito.value = true;

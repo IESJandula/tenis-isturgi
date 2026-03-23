@@ -1,0 +1,218 @@
+[
+  {
+    "id": 1,
+    "action": "plugin::users-permissions.user.me"
+  },
+  {
+    "id": 2,
+    "action": "plugin::users-permissions.auth.changePassword"
+  },
+  {
+    "id": 3,
+    "action": "plugin::users-permissions.auth.callback"
+  },
+  {
+    "id": 4,
+    "action": "plugin::users-permissions.auth.connect"
+  },
+  {
+    "id": 5,
+    "action": "plugin::users-permissions.auth.forgotPassword"
+  },
+  {
+    "id": 6,
+    "action": "plugin::users-permissions.auth.resetPassword"
+  },
+  {
+    "id": 7,
+    "action": "plugin::users-permissions.auth.register"
+  },
+  {
+    "id": 8,
+    "action": "plugin::users-permissions.auth.emailConfirmation"
+  },
+  {
+    "id": 9,
+    "action": "plugin::users-permissions.auth.sendEmailConfirmation"
+  },
+  {
+    "id": 10,
+    "action": "api::division.division.find"
+  },
+  {
+    "id": 11,
+    "action": "api::division.division.findOne"
+  },
+  {
+    "id": 12,
+    "action": "api::division.division.create"
+  },
+  {
+    "id": 13,
+    "action": "api::division.division.update"
+  },
+  {
+    "id": 14,
+    "action": "api::division.division.delete"
+  },
+  {
+    "id": 18,
+    "action": "api::jornada.jornada.find"
+  },
+  {
+    "id": 19,
+    "action": "api::jornada.jornada.findOne"
+  },
+  {
+    "id": 20,
+    "action": "api::jornada.jornada.create"
+  },
+  {
+    "id": 21,
+    "action": "api::jornada.jornada.update"
+  },
+  {
+    "id": 22,
+    "action": "api::jornada.jornada.delete"
+  },
+  {
+    "id": 23,
+    "action": "api::jugador.jugador.find"
+  },
+  {
+    "id": 24,
+    "action": "api::jugador.jugador.findOne"
+  },
+  {
+    "id": 25,
+    "action": "api::jugador.jugador.create"
+  },
+  {
+    "id": 26,
+    "action": "api::jugador.jugador.update"
+  },
+  {
+    "id": 27,
+    "action": "api::jugador.jugador.delete"
+  },
+  {
+    "id": 28,
+    "action": "api::noticia.noticia.find"
+  },
+  {
+    "id": 29,
+    "action": "api::noticia.noticia.findOne"
+  },
+  {
+    "id": 30,
+    "action": "api::noticia.noticia.create"
+  },
+  {
+    "id": 31,
+    "action": "api::noticia.noticia.update"
+  },
+  {
+    "id": 32,
+    "action": "api::noticia.noticia.delete"
+  },
+  {
+    "id": 33,
+    "action": "api::partido.partido.find"
+  },
+  {
+    "id": 34,
+    "action": "api::partido.partido.findOne"
+  },
+  {
+    "id": 35,
+    "action": "api::partido.partido.create"
+  },
+  {
+    "id": 36,
+    "action": "api::partido.partido.update"
+  },
+  {
+    "id": 37,
+    "action": "api::partido.partido.delete"
+  },
+  {
+    "id": 38,
+    "action": "api::temporada.temporada.find"
+  },
+  {
+    "id": 39,
+    "action": "api::temporada.temporada.findOne"
+  },
+  {
+    "id": 40,
+    "action": "api::temporada.temporada.create"
+  },
+  {
+    "id": 41,
+    "action": "api::temporada.temporada.update"
+  },
+  {
+    "id": 42,
+    "action": "api::temporada.temporada.delete"
+  },
+  {
+    "id": 43,
+    "action": "api::torneo.torneo.find"
+  },
+  {
+    "id": 44,
+    "action": "api::torneo.torneo.findOne"
+  },
+  {
+    "id": 45,
+    "action": "api::torneo.torneo.create"
+  },
+  {
+    "id": 46,
+    "action": "api::torneo.torneo.update"
+  },
+  {
+    "id": 47,
+    "action": "api::torneo.torneo.delete"
+  },
+  {
+    "id": 48,
+    "action": "api::disponibilidad.disponibilidad.find"
+  },
+  {
+    "id": 49,
+    "action": "api::disponibilidad.disponibilidad.findOne"
+  },
+  {
+    "id": 50,
+    "action": "api::disponibilidad.disponibilidad.create"
+  },
+  {
+    "id": 51,
+    "action": "api::disponibilidad.disponibilidad.update"
+  },
+  {
+    "id": 52,
+    "action": "api::disponibilidad.disponibilidad.delete"
+  },
+  {
+    "id": 53,
+    "action": "api::clasificacion.clasificacion.find"
+  },
+  {
+    "id": 54,
+    "action": "api::clasificacion.clasificacion.findOne"
+  },
+  {
+    "id": 55,
+    "action": "api::clasificacion.clasificacion.create"
+  },
+  {
+    "id": 56,
+    "action": "api::clasificacion.clasificacion.update"
+  },
+  {
+    "id": 57,
+    "action": "api::clasificacion.clasificacion.delete"
+  }
+]

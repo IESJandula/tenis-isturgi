@@ -1,0 +1,154 @@
+﻿
+> 
+> backend@0.1.0 dev
+> strapi develop
+
+[2026-03-09 14:33:12.501] 
+[33mwarn[39m: admin.auth.
+options.expiresIn is 
+deprecated and will be 
+removed in Strapi 6. 
+Please configure admin.auth
+.sessions.maxRefreshTokenLi
+fespan and admin.auth.sessi
+ons.maxSessionLifespan.
+
+[INFO] Including the 
+following ENV variables as 
+part of the JS bundle:
+    - ADMIN_PATH
+    - 
+STRAPI_ADMIN_BACKEND_URL
+    - 
+STRAPI_TELEMETRY_DISABLED
+    - STRAPI_AI_URL
+    - STRAPI_ANALYTICS_URL
+
+ Project information
+
+[90mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇ[39m[90mÔö¼
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ[39m
+[90mÔöé[39m Time         
+      [90mÔöé[39m Mon 
+Mar 09 2026 14:33:16 
+GMT+0100 (hora est├índaÔÇª 
+[90mÔöé[39m
+[90mÔöé[39m Launched in  
+      [90mÔöé[39m 5196 
+ms                         
+                 
+[90mÔöé[39m
+[90mÔöé[39m Environment  
+      [90mÔöé[39m 
+development                
+                      
+[90mÔöé[39m
+[90mÔöé[39m Process PID  
+      [90mÔöé[39m 8496   
+                           
+               
+[90mÔöé[39m
+[90mÔöé[39m Version      
+      [90mÔöé[39m 5.31.2 
+(node v22.20.0)            
+               
+[90mÔöé[39m
+[90mÔöé[39m Edition      
+      [90mÔöé[39m 
+Community                  
+                      
+[90mÔöé[39m
+[90mÔöé[39m Database     
+      [90mÔöé[39m sqlite 
+                           
+               
+[90mÔöé[39m
+[90mÔöé[39m Database 
+name      [90mÔöé[39m 
+.tmp\data.db               
+                      
+[90mÔöé[39m
+[90mÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇ[39m[90mÔö┤
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[39m
+
+ Actions available
+
+Welcome back!
+To access the server 
+ÔÜí´©Å, go to:
+http://localhost:1337
+
+[2026-03-09 14:33:16.309] 
+[32minfo[39m: Strapi 
+started successfully
+[2026-03-09 14:33:29.972] 
+[32minfo[39m: 
+[LIFECYCLE] --- 
+afterUpdate START (ID: 1) 
+---
+[2026-03-09 14:33:29.972] 
+[32minfo[39m: 
+[LIFECYCLE] Detectado 
+draft en 'Jugado'. 
+Auto-publicando...
+[2026-03-09 14:33:29.995] 
+[32minfo[39m: 
+[LIFECYCLE] Publicaci├│n 
+solicitada para 
+fzb0xvyw1ia89kxgh1sf7bm0
+[2026-03-09 14:33:29.995] 
+[32minfo[39m: 
+[LIFECYCLE] Actualizando 
+clasificaci├│n para 
+resultado: 6-3, 6-2
+[2026-03-09 14:33:29.999] 
+[32minfo[39m: 
+[LIFECYCLE] Procesando 
+para Divisi├│n ID: 2
+[2026-03-09 14:33:29.999] 
+[32minfo[39m: 
+[LIFECYCLE] Jugador 2: Pts 
+3, Sets 2-0, Juegos 12-5
+[2026-03-09 14:33:29.999] 
+[32minfo[39m: 
+[LIFECYCLE] Creando nueva 
+clasificaci├│n para 
+jugador 2
+[2026-03-09 14:33:30.004] 
+[32minfo[39m: 
+[LIFECYCLE] Jugador 6: Pts 
+1, Sets 0-2, Juegos 5-12
+[2026-03-09 14:33:30.004] 
+[32minfo[39m: 
+[LIFECYCLE] Creando nueva 
+clasificaci├│n para 
+jugador 6
+[2026-03-09 14:33:30.005] 
+[32minfo[39m: 
+[LIFECYCLE] Clasificaci├│n 
+actualizada con ├®xito.
+[2026-03-09 14:33:30.005] 
+[32minfo[39m: 
+[LIFECYCLE] --- 
+afterUpdate END ---
+[2026-03-09 14:33:30.025] 
+[32mhttp[39m: PUT /api/pa
+rtidos/fzb0xvyw1ia89kxgh1sf
+7bm0 (112 ms) 200
+
+
+

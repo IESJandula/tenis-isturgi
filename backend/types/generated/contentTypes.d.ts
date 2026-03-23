@@ -430,6 +430,45 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiClasificacionClasificacion
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'clasificacions';
+  info: {
+    description: 'Tabla de puntos y estad\u00EDsticas por divisi\u00F3n y temporada';
+    displayName: 'Clasificaci\u00F3n';
+    pluralName: 'clasificacions';
+    singularName: 'clasificacion';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    division: Schema.Attribute.Relation<'manyToOne', 'api::division.division'>;
+    ganados: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    juegosContra: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    juegosFavor: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    jugador: Schema.Attribute.Relation<'manyToOne', 'api::jugador.jugador'>;
+    jugados: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::clasificacion.clasificacion'
+    > &
+      Schema.Attribute.Private;
+    perdidos: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    publishedAt: Schema.Attribute.DateTime;
+    puntos: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    setsContra: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    setsFavor: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiDisponibilidadDisponibilidad
   extends Struct.CollectionTypeSchema {
   collectionName: 'disponibilidades';
@@ -440,7 +479,7 @@ export interface ApiDisponibilidadDisponibilidad
     singularName: 'disponibilidad';
   };
   options: {
-    draftAndPublish: false;
+    draftAndPublish: true;
   };
   attributes: {
     createdAt: Schema.Attribute.DateTime;
@@ -557,6 +596,10 @@ export interface ApiJugadorJugador extends Struct.CollectionTypeSchema {
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    user: Schema.Attribute.Relation<
+      'oneToOne',
+      'plugin::users-permissions.user'
+    >;
   };
 }
 
@@ -1231,6 +1274,7 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
+      'api::clasificacion.clasificacion': ApiClasificacionClasificacion;
       'api::disponibilidad.disponibilidad': ApiDisponibilidadDisponibilidad;
       'api::division.division': ApiDivisionDivision;
       'api::jornada.jornada': ApiJornadaJornada;

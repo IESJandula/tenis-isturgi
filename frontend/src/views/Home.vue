@@ -43,9 +43,9 @@
           class="noticia-card"
         >
           <div class="card-image-wrapper">
-            <template v-if="noticia.Imagen?.url">
+            <template v-if="noticia.Imagen">
               <img 
-                :src="`${apiUrl}${noticia.Imagen.url}`"
+                :src="noticia.Imagen"
               :alt="noticia.Titulo"
               class="card-image"
             />
@@ -72,7 +72,7 @@
             
             <button 
               type="button"
-              @click="() => router.push(`/noticia/${noticia.documentId}`)" 
+              @click="() => router.push(`/noticia/${noticia.id || noticia.documentId}`)" 
               class="card-link"
               :title="`Leer: ${noticia.Titulo}`"
             >
@@ -118,9 +118,9 @@
           class="noticia-card"
         >
           <div class="card-image-wrapper">
-            <template v-if="torneo.Imagen?.url">
+            <template v-if="torneo.Cartel">
               <img 
-                :src="`${apiUrl}${torneo.Imagen.url}`"
+                :src="torneo.Cartel"
               :alt="torneo.Nombre"
               class="card-image"
             />
@@ -147,7 +147,7 @@
             
             <button 
               type="button"
-              @click="() => router.push(`/torneo/${torneo.documentId}`)" 
+              @click="() => router.push(`/torneo/${torneo.id || torneo.documentId}`)" 
               class="card-link"
               :title="`Ver torneo: ${torneo.Nombre}`"
             >
@@ -168,7 +168,7 @@ import axios from 'axios';
 
 import { formatearFecha, truncarTexto } from '../utils/formatters';
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337';
+const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 const router = useRouter();
 
 // --- LÓGICA DE NOTICIAS Y TORNEOS ---
@@ -182,8 +182,11 @@ const errorTorneos = ref(null);
 
 onMounted(async () => {
   try {
-    const respuesta = await axios.get(`${apiUrl}/api/noticias?pagination[limit]=4&populate=*&sort=Fecha:desc`);
-    noticias.value = respuesta.data.data;
+    const respuesta = await axios.get(`${apiUrl}/api/noticias`);
+    let n = respuesta.data.data || [];
+    // Sort and limit on client side to emulate Strapi's behavior temporarily
+    n.sort((a,b) => new Date(b.FechaPublicacion || b.createdAt) - new Date(a.FechaPublicacion || a.createdAt));
+    noticias.value = n.slice(0, 4);
   } catch (e) {
     console.error(e);
     error.value = 'Error al cargar noticias. Asegúrate de que el servidor backend esté activo.';
@@ -192,8 +195,10 @@ onMounted(async () => {
   }
 
   try {
-    const resTorneos = await axios.get(`${apiUrl}/api/torneos?pagination[limit]=4&populate=*&sort=FechaInicio:desc`);
-    torneos.value = resTorneos.data.data;
+    const resTorneos = await axios.get(`${apiUrl}/api/torneos`);
+    let t = resTorneos.data.data || [];
+    t.sort((a,b) => new Date(b.FechaInicio || b.createdAt) - new Date(a.FechaInicio || a.createdAt));
+    torneos.value = t.slice(0, 4);
   } catch (e) {
     console.error(e);
     errorTorneos.value = 'Error al cargar torneos.';

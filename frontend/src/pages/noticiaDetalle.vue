@@ -27,17 +27,17 @@
         <div class="article-layout">
           <!-- Columna izquierda: Imagen -->
           <div class="article-imagen-wrapper">
-            <div class="article-imagen" @click="abrirImagenCompleta" :class="{ 'imagen-clickeable': noticia.Imagen?.url }">
+            <div class="article-imagen" @click="abrirImagenCompleta" :class="{ 'imagen-clickeable': noticia.Imagen }">
               <img 
-                v-if="noticia.Imagen?.url"
-                :src="`${apiUrl}${noticia.Imagen.url}`"
+                v-if="noticia.Imagen"
+                :src="noticia.Imagen"
                 :alt="noticia.Titulo"
                 class="imagen-completa"
               />
               <div v-else class="image-placeholder">
                 <span class="placeholder-icon">🎾</span>
               </div>
-              <div v-if="noticia.Imagen?.url" class="imagen-overlay">
+              <div v-if="noticia.Imagen" class="imagen-overlay">
                 <span class="zoom-icon">🔍</span>
                 <span class="zoom-text">Click para ampliar</span>
               </div>
@@ -108,8 +108,8 @@
         </button>
         <div class="lightbox-content" @click.stop>
           <img 
-            v-if="noticia?.Imagen?.url"
-            :src="`${apiUrl}${noticia.Imagen.url}`"
+            v-if="noticia?.Imagen"
+            :src="noticia.Imagen"
             :alt="noticia.Titulo"
             class="lightbox-imagen"
           />
@@ -125,7 +125,7 @@ import { useRoute } from 'vue-router';
 import axios from 'axios';
 import { formatearFecha, formatearTamano } from '../utils/formatters';
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337';
+const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 const route = useRoute();
 const noticia = ref(null);
 const cargando = ref(true);
@@ -153,7 +153,7 @@ const obtenerTipoArchivo = (archivo) => {
 };
 
 const abrirImagenCompleta = () => {
-  if (noticia.value?.Imagen?.url) {
+  if (noticia.value?.Imagen) {
     imagenPantallaCompleta.value = true;
     document.body.style.overflow = 'hidden';
   }
@@ -191,10 +191,10 @@ onMounted(async () => {
     const id = route.params.id;
     console.log('Cargando noticia con ID:', id);
     const respuesta = await axios.get(
-      `${apiUrl}/api/noticias/${id}?populate=*`
+      `${apiUrl}/api/noticias/${id}`
     );
     console.log('Respuesta de API:', respuesta.data);
-    noticia.value = respuesta.data.data;
+    noticia.value = respuesta.data.data || respuesta.data;
   } catch (e) {
     console.error('Error al cargar noticia:', e);
     error.value = 'No se pudo cargar la noticia. Intenta de nuevo.';

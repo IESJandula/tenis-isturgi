@@ -1,0 +1,58 @@
+{
+    "kind": "collectionType",
+    "collectionName": "clasificacions",
+    "info": {
+        "singularName": "clasificacion",
+        "pluralName": "clasificacions",
+        "displayName": "Clasificación",
+        "description": "Tabla de puntos y estadísticas por división y temporada"
+    },
+    "options": {
+        "draftAndPublish": false
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "jugador": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::jugador.jugador"
+        },
+        "division": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::division.division"
+        },
+        "puntos": {
+            "type": "integer",
+            "default": 0
+        },
+        "jugados": {
+            "type": "integer",
+            "default": 0
+        },
+        "ganados": {
+            "type": "integer",
+            "default": 0
+        },
+        "perdidos": {
+            "type": "integer",
+            "default": 0
+        },
+        "setsFavor": {
+            "type": "integer",
+            "default": 0
+        },
+        "setsContra": {
+            "type": "integer",
+            "default": 0
+        },
+        "juegosFavor": {
+            "type": "integer",
+            "default": 0
+        },
+        "juegosContra": {
+            "type": "integer",
+            "default": 0
+        }
+    }
+}

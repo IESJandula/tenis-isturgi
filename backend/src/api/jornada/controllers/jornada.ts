@@ -24,22 +24,43 @@ export default factories.createCoreController('api::jornada.jornada', ({ strapi 
   },
 
   async obtenerJornadasPorDivision(ctx) {
-    const { divisionId } = ctx.params;
+    const { divisionId: rawDivisionId } = ctx.params;
     try {
-      const jornadas = await strapi.db.query('api::jornada.jornada').findMany({
-        where: { division: divisionId },
+      // Intentar buscar por documentId o por ID numérico
+      const filter = isNaN(parseInt(rawDivisionId))
+        ? { division: { documentId: rawDivisionId } }
+        : { division: { id: parseInt(rawDivisionId) } };
+
+      const jornadas = await strapi.documents('api::jornada.jornada').findMany({
+        filters: filter,
         populate: {
           partidos: {
-            populate: {
-              jugador1: true,
-              jugador2: true,
-            },
+            populate: ['jugador1', 'jugador2'],
           },
         },
-        orderBy: { numero: 'asc' },
+        sort: 'numero:asc',
+        status: 'published',
       });
-      ctx.body = jornadas;
+
+      // Asegurar que los partidos sean únicos por documentId (fix Strapi v5 duplicates)
+      const jornadasUnicas = jornadas.map(j => {
+        const partidosMap = new Map();
+        if (j.partidos) {
+          j.partidos.forEach((p: any) => {
+            if (!partidosMap.has(p.documentId)) {
+              partidosMap.set(p.documentId, p);
+            }
+          });
+        }
+        return {
+          ...j,
+          partidos: Array.from(partidosMap.values())
+        };
+      });
+
+      ctx.body = jornadasUnicas;
     } catch (err) {
+      strapi.log.error(`[CONTROLLER] Error en obtenerJornadasPorDivision: ${err.message}`);
       ctx.body = err;
     }
   },
@@ -47,12 +68,18 @@ export default factories.createCoreController('api::jornada.jornada', ({ strapi 
   async obtenerPartidosPorJornada(ctx) {
     const { jornadaId } = ctx.params;
     try {
-      const partidos = await strapi.db.query('api::partido.partido').findMany({
-        where: { jornada: jornadaId },
+      const filter = isNaN(parseInt(jornadaId))
+        ? { jornada: { documentId: jornadaId } }
+        : { jornada: { id: parseInt(jornadaId) } };
+
+      const partidos = await strapi.documents('api::partido.partido').findMany({
+        filters: filter,
         populate: ['jugador1', 'jugador2'],
+        status: 'published',
       });
       ctx.body = partidos;
     } catch (err) {
+      strapi.log.error(`[CONTROLLER] Error en obtenerPartidosPorJornada: ${err.message}`);
       ctx.body = err;
     }
   },

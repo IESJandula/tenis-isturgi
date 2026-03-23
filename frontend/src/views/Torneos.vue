@@ -40,9 +40,9 @@
           class="torneo-card"
         >
           <div class="card-image-wrapper">
-            <div v-if="torneo.Imagen?.url" class="card-image-container">
+            <div v-if="torneo.Cartel" class="card-image-container">
               <img 
-                :src="`${apiUrl}${torneo.Imagen.url}`"
+                :src="torneo.Cartel"
                 :alt="torneo.Nombre"
                 class="card-image"
               />
@@ -69,7 +69,7 @@
             
             <button 
               type="button"
-              @click="() => router.push(`/torneo/${torneo.documentId}`)"
+              @click="() => router.push(`/torneo/${torneo.id || torneo.documentId}`)"
               class="card-link"
             >
               Ver detalles
@@ -130,7 +130,7 @@ import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { formatearFecha, truncarTexto } from '../utils/formatters';
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337';
+const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 const router = useRouter();
 
 const torneos = ref([]);
@@ -143,10 +143,10 @@ const torneosGrid = computed(() => {
 
 onMounted(async () => {
   try {
-    const respuesta = await axios.get(
-      `${apiUrl}/api/torneos?populate=*&sort=FechaInicio:desc`
-    );
-    torneos.value = respuesta.data.data;
+    const respuesta = await axios.get(`${apiUrl}/api/torneos`);
+    let t = respuesta.data.data || [];
+    t.sort((a,b) => new Date(b.FechaInicio || b.createdAt) - new Date(a.FechaInicio || a.createdAt));
+    torneos.value = t;
     console.log('Torneos cargados:', torneos.value);
   } catch (e) {
     console.error('Error cargando torneos:', e);

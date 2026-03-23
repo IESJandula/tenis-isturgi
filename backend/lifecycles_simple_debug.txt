@@ -1,0 +1,127 @@
+﻿
+> 
+> backend@0.1.0 dev
+> strapi develop
+
+[2026-03-09 13:47:24.299] 
+[33mwarn[39m: admin.auth.
+options.expiresIn is 
+deprecated and will be 
+removed in Strapi 6. 
+Please configure admin.auth
+.sessions.maxRefreshTokenLi
+fespan and admin.auth.sessi
+ons.maxSessionLifespan.
+
+[INFO] Including the 
+following ENV variables as 
+part of the JS bundle:
+    - ADMIN_PATH
+    - 
+STRAPI_ADMIN_BACKEND_URL
+    - 
+STRAPI_TELEMETRY_DISABLED
+    - STRAPI_AI_URL
+    - STRAPI_ANALYTICS_URL
+
+ Project information
+
+[90mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇ[39m[90mÔö¼
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ[39m
+[90mÔöé[39m Time         
+      [90mÔöé[39m Mon 
+Mar 09 2026 13:47:28 
+GMT+0100 (hora est├índaÔÇª 
+[90mÔöé[39m
+[90mÔöé[39m Launched in  
+      [90mÔöé[39m 5069 
+ms                         
+                 
+[90mÔöé[39m
+[90mÔöé[39m Environment  
+      [90mÔöé[39m 
+development                
+                      
+[90mÔöé[39m
+[90mÔöé[39m Process PID  
+      [90mÔöé[39m 4856   
+                           
+               
+[90mÔöé[39m
+[90mÔöé[39m Version      
+      [90mÔöé[39m 5.31.2 
+(node v22.20.0)            
+               
+[90mÔöé[39m
+[90mÔöé[39m Edition      
+      [90mÔöé[39m 
+Community                  
+                      
+[90mÔöé[39m
+[90mÔöé[39m Database     
+      [90mÔöé[39m sqlite 
+                           
+               
+[90mÔöé[39m
+[90mÔöé[39m Database 
+name      [90mÔöé[39m 
+.tmp\data.db               
+                      
+[90mÔöé[39m
+[90mÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇ[39m[90mÔö┤
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[39m
+
+ Actions available
+
+Welcome back!
+To access the server 
+ÔÜí´©Å, go to:
+http://localhost:1337
+
+[2026-03-09 13:47:28.013] 
+[32minfo[39m: Strapi 
+started successfully
+[2026-03-09 13:47:41.973] 
+[32mhttp[39m: POST /api/p
+artidos/fzb0xvyw1ia89kxgh1s
+f7bm0/publish (19 ms) 405
+[2026-03-09 13:47:44.048] 
+[32minfo[39m: 
+[LIFECYCLE] --- 
+afterUpdate START ---
+[2026-03-09 13:47:44.048] 
+[32minfo[39m: 
+[LIFECYCLE] Condici├│n 
+cumplida. Resultado: 6-3, 
+6-2
+[2026-03-09 13:47:44.050] 
+[32minfo[39m: 
+[LIFECYCLE] Partido 
+cargado. Div: undefined, 
+J1: 2, J2: 6
+[2026-03-09 13:47:44.051] 
+[33mwarn[39m: 
+[LIFECYCLE] Faltan 
+relaciones 
+(jugador/divisi├│n)
+[2026-03-09 13:47:44.087] 
+[32mhttp[39m: PUT /api/pa
+rtidos/fzb0xvyw1ia89kxgh1sf
+7bm0 (82 ms) 200
+
+
+

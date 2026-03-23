@@ -8,7 +8,7 @@
         "description": "Disponibilidad semanal de los jugadores para la liga"
     },
     "options": {
-        "draftAndPublish": false
+        "draftAndPublish": true
     },
     "attributes": {
         "jugador": {

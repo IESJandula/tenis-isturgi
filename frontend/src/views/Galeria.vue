@@ -86,79 +86,16 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import axios from 'axios';
 
 const filtros = ['Todos', 'Pistas', 'Escuela', 'Liga', 'Torneos', 'Club', 'Eventos'];
 const filtroActivo = ref('Todos');
 
-const mediaItems = [
-  {
-    id: 1,
-    categoria: 'Pistas',
-    titulo: 'Tierra batida al amanecer',
-    texto: 'Preparando las lineas para el primer turno.',
-    src: 'https://images.unsplash.com/photo-1503945438517-f65904a52ce6?q=80&w=1600&auto=format&fit=crop',
-  },
-  {
-    id: 2,
-    categoria: 'Escuela',
-    titulo: 'Sesion tecnica en pista 3',
-    texto: 'Trabajo de pies y control de profundidad.',
-    src: 'https://images.unsplash.com/photo-1521412644187-c49fa049e84d?q=80&w=1600&auto=format&fit=crop',
-  },
-  {
-    id: 3,
-    categoria: 'Liga',
-    titulo: 'Partido nocturno',
-    texto: 'Ambiente social despues del trabajo.',
-    src: 'https://images.unsplash.com/photo-1483721310020-03333e577078?q=80&w=1600&auto=format&fit=crop',
-  },
-  {
-    id: 4,
-    categoria: 'Club',
-    titulo: 'Zona social',
-    texto: 'Cafe, conversa y analisis del partido.',
-    src: 'https://images.unsplash.com/photo-1500634245200-e5245c7574ef?q=80&w=1600&auto=format&fit=crop',
-  },
-  {
-    id: 5,
-    categoria: 'Torneos',
-    titulo: 'Final de primavera',
-    texto: 'Gradas completas y mucha energia.',
-    src: 'https://images.unsplash.com/photo-1502899576159-f224dc2349fa?q=80&w=1600&auto=format&fit=crop',
-  },
-  {
-    id: 6,
-    categoria: 'Eventos',
-    titulo: 'Clinic de fin de semana',
-    texto: 'Sesion abierta para nuevos socios.',
-    src: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=1600&auto=format&fit=crop',
-  },
-  {
-    id: 7,
-    categoria: 'Pistas',
-    titulo: 'Lineas perfectas',
-    texto: 'Cuidado diario para un bote limpio.',
-    src: 'https://images.unsplash.com/photo-1521412644187-c49fa049e84d?q=80&w=1600&auto=format&fit=crop',
-  },
-  {
-    id: 8,
-    categoria: 'Liga',
-    titulo: 'Dobles mixtos',
-    texto: 'Parejas nuevas cada jornada.',
-    src: 'https://images.unsplash.com/photo-1502899576159-f224dc2349fa?q=80&w=1600&auto=format&fit=crop',
-  },
-  {
-    id: 9,
-    categoria: 'Club',
-    titulo: 'Equipo tecnico',
-    texto: 'Seguimiento personalizado para mejorar tu juego.',
-    src: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=1600&auto=format&fit=crop',
-  },
-];
+const mediaItems = ref([]);
 
 const itemsFiltrados = computed(() => {
-  if (filtroActivo.value === 'Todos') return mediaItems;
-  return mediaItems.filter((item) => item.categoria === filtroActivo.value);
+  if (filtroActivo.value === 'Todos') return mediaItems.value;
+  return mediaItems.value.filter((item) => item.categoria === filtroActivo.value);
 });
 
 const lightboxActivo = ref(null);
@@ -177,8 +114,19 @@ const onKeydown = (event) => {
   }
 };
 
-onMounted(() => {
+const cargando = ref(true);
+
+onMounted(async () => {
   window.addEventListener('keydown', onKeydown);
+  try {
+    const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+    const res = await axios.get(`${apiUrl}/api/galeria`);
+    mediaItems.value = res.data.data || [];
+  } catch (error) {
+    console.error('Error cargando galería:', error);
+  } finally {
+    cargando.value = false;
+  }
 });
 
 onBeforeUnmount(() => {

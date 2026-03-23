@@ -38,6 +38,11 @@
       "relation": "manyToOne",
       "target": "api::division.division",
       "inversedBy": "jugadors"
+    },
+    "user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
     }
   }
 }

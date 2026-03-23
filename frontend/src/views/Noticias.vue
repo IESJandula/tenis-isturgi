@@ -38,9 +38,9 @@
             class="noticia-card"
           >
             <div class="card-image-wrapper">
-              <div v-if="noticia.Imagen?.url" class="card-image-container">
+              <div v-if="noticia.Imagen" class="card-image-container">
                 <img 
-                  :src="`${apiUrl}${noticia.Imagen.url}`"
+                  :src="noticia.Imagen"
                   :alt="noticia.Titulo"
                   class="card-image"
                 />
@@ -59,12 +59,12 @@
               <h3 class="card-title">{{ noticia.Titulo }}</h3>
               
               <p class="card-description">
-                {{ truncarTexto(noticia.Resumen || noticia.Contenido, 120) }}
+                {{ truncarTexto(noticia.Resumen || noticia.Descripcion, 120) }}
               </p>
               
               <button 
                 type="button"
-                @click="() => router.push(`/noticia/${noticia.documentId}`)"
+                @click="() => router.push(`/noticia/${noticia.id || noticia.documentId}`)"
                 class="card-link"
                 :title="`Leer más: ${noticia.Titulo}`"
               >
@@ -88,7 +88,7 @@ import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { formatearFecha, truncarTexto } from '../utils/formatters';
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337';
+const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 const router = useRouter();
 
 const noticias = ref([]);
@@ -97,10 +97,10 @@ const error = ref(null);
 
 onMounted(async () => {
   try {
-    const respuesta = await axios.get(
-      `${apiUrl}/api/noticias?populate=*&sort=Fecha:desc`
-    );
-    noticias.value = respuesta.data.data;
+    const respuesta = await axios.get(`${apiUrl}/api/noticias`);
+    let n = respuesta.data.data || [];
+    n.sort((a,b) => new Date(b.Fecha || b.createdAt) - new Date(a.Fecha || a.createdAt));
+    noticias.value = n;
     console.log('Noticias cargadas:', noticias.value);
   } catch (e) {
     console.error('Error cargando noticias:', e);
