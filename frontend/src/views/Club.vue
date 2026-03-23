@@ -101,6 +101,20 @@
       </div>
     </section>
 
+    <!-- Galería del Club -->
+    <section class="club-galeria-section">
+      <div class="section-header">
+        <h2>Galería del Club</h2>
+        <p class="section-subtitle">Momentos y vida del club en imágenes</p>
+      </div>
+
+      <div class="club-galeria-grid">
+        <figure v-for="(file, idx) in fotos" :key="file" class="club-galeria-item">
+          <img :src="fotoUrl(file)" :alt="`Foto del club ${idx + 1}`" loading="lazy" />
+        </figure>
+      </div>
+    </section>
+
     <!-- Estadísticas del Club -->
     <section class="stats-section">
       <div class="stats-grid">
@@ -175,7 +189,10 @@
 </template>
 
 <script setup>
-// No se necesita lógica específica por ahora
+import { FOTOS_TENIS_FILES, fotoTenisUrl } from '../utils/fotosTenis';
+
+const fotos = FOTOS_TENIS_FILES;
+const fotoUrl = (fileName) => fotoTenisUrl(fileName);
 </script>
 
 <style scoped>
@@ -334,6 +351,35 @@
 /* Instalaciones */
 .instalaciones-section {
   background: rgba(9, 13, 15, 0.3);
+}
+
+/* Galería */
+.club-galeria-section {
+  padding: 60px 20px;
+}
+
+.club-galeria-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.club-galeria-item {
+  margin: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(9, 13, 15, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+}
+
+.club-galeria-item img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
 }
 
 .instalaciones-grid {

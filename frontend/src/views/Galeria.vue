@@ -87,6 +87,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import axios from 'axios';
+import { fotosTenisAsGaleriaItems } from '../utils/fotosTenis';
 
 const filtros = ['Todos', 'Pistas', 'Escuela', 'Liga', 'Torneos', 'Club', 'Eventos'];
 const filtroActivo = ref('Todos');
@@ -118,10 +119,13 @@ const cargando = ref(true);
 
 onMounted(async () => {
   window.addEventListener('keydown', onKeydown);
+  const fotosLocal = fotosTenisAsGaleriaItems();
+  mediaItems.value = fotosLocal;
   try {
     const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
     const res = await axios.get(`${apiUrl}/api/galeria`);
-    mediaItems.value = res.data.data || [];
+    const apiItems = res.data.data || [];
+    mediaItems.value = [...fotosLocal, ...apiItems];
   } catch (error) {
     console.error('Error cargando galería:', error);
   } finally {
