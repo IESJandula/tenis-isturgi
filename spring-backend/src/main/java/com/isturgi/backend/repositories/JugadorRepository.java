@@ -8,4 +8,5 @@ import java.util.Optional;
 @Repository
 public interface JugadorRepository extends JpaRepository<Jugador, Long> {
     Optional<Jugador> findByEmail(String email);
+    java.util.List<Jugador> findByDivisionId(Long divisionId);
 }

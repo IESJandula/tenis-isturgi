@@ -1,0 +1,10 @@
+﻿Tables_in_tenis_isturgi
+disponibilidades
+divisiones
+galeria
+jornadas
+jugadores
+noticias
+partidos
+temporadas
+torneos

@@ -1,0 +1,16 @@
+﻿Field	Type	Null	Key	Default	Extra
+id	bigint(20)	NO	PRI	NULL	auto_increment
+nombre	varchar(255)	NO		NULL	
+apellidos	varchar(255)	YES		NULL	
+telefono	varchar(255)	YES		NULL	
+email	varchar(255)	YES		NULL	
+foto	varchar(255)	YES		NULL	
+firebase_uid	varchar(255)	YES	UNI	NULL	
+division_id	bigint(20)	YES	MUL	NULL	
+created_at	timestamp	NO		current_timestamp()	
+updated_at	timestamp	NO		current_timestamp()	on update current_timestamp()
+categoria	varchar(255)	YES		NULL	
+fecha_nacimiento	varchar(255)	YES		NULL	
+nivel	varchar(255)	YES		NULL	
+numero_socio	varchar(255)	YES		NULL	
+puntos	int(11)	YES		NULL	

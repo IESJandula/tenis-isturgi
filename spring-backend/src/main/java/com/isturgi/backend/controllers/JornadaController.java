@@ -50,6 +50,12 @@ public class JornadaController {
         return ResponseEntity.ok(ApiResponse.of(List.of("Algoritmo de horarios pronto disponible en Spring Boot...")));
     }
 
+    @GetMapping("/division/{divisionId}/jornadas")
+    public ResponseEntity<List<Jornada>> getByDivision(@PathVariable Long divisionId) {
+        List<Jornada> list = repository.findByDivisionId(divisionId);
+        return ResponseEntity.ok(list);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         if (!repository.existsById(id)) return ResponseEntity.notFound().build();

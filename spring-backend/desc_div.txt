@@ -1,0 +1,6 @@
+﻿Field	Type	Null	Key	Default	Extra
+id	bigint(20)	NO	PRI	NULL	auto_increment
+nombre	varchar(255)	NO		NULL	
+temporada_id	bigint(20)	YES	MUL	NULL	
+created_at	timestamp	NO		current_timestamp()	
+updated_at	timestamp	NO		current_timestamp()	on update current_timestamp()

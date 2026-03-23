@@ -16,6 +16,9 @@ public class DivisionController {
     @Autowired
     private DivisionRepository repository;
 
+    @Autowired
+    private com.isturgi.backend.services.LeagueService leagueService;
+
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAll() {
         List<Division> list = repository.findAll();
@@ -31,8 +34,6 @@ public class DivisionController {
 
     @PostMapping
     public ResponseEntity<Map<String, Object>> create(@RequestBody Division item) {
-        // En Strapi, Vue envía { data: { Nombre: "..." } } 
-        // Para simplificar, asumimos que aquí adaptaremos Vue a enviar el JSON directo o extraemos "data"
         Division saved = repository.save(item);
         return ResponseEntity.ok(ApiResponse.of(saved));
     }
@@ -47,7 +48,11 @@ public class DivisionController {
 
     @PostMapping("/{id}/generar-calendario")
     public ResponseEntity<Map<String, Object>> generarCalendario(@PathVariable Long id) {
-        return ResponseEntity.ok(Map.of("message", "Algoritmo Berger de Spring Boot en construcción", "jornadas", 0, "partidos", 0));
+        Map<String, Object> result = leagueService.generarCalendarioBerger(id);
+        if (result.containsKey("error")) {
+            return ResponseEntity.badRequest().body(result);
+        }
+        return ResponseEntity.ok(result);
     }
 
     @DeleteMapping("/{id}")

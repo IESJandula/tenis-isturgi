@@ -142,12 +142,12 @@ const getFilaClass = (index) => {
 
 const cargarDivisiones = async () => {
   try {
-    const respuesta = await axios.get(`${API_BASE}/api/divisiones`);
+    const respuesta = await axios.get(`${API_BASE}/api/divisions`);
     const items = respuesta.data?.data || [];
 
     divisiones.value = items.map((division) => ({
       id: division.id,
-      label: division.Nombre || division.attributes?.Nombre || `Division ${division.id}`,
+      label: division.Nombre || `División ${division.id}`,
     }));
 
     if (!divisionId.value && divisiones.value.length) {
@@ -155,7 +155,7 @@ const cargarDivisiones = async () => {
     }
   } catch (err) {
     console.error(err);
-    error.value = 'No se pudieron cargar las divisiones. Revisa Strapi.';
+    error.value = 'No se pudieron cargar las divisiones. Revisa el servidor.';
   }
 };
 
@@ -179,24 +179,17 @@ const cargarClasificacion = async () => {
   if (!divisionId.value) return;
   cargando.value = true;
   try {
-    // Sort logic matching Gesliga: Pt > DS > DJ
     const respuesta = await axios.get(`${API_BASE}/api/clasificacions`, {
       params: {
-        'filters[division][id]': divisionId.value,
-        'populate': 'jugador',
-        'sort': [
-          'puntos:desc', 
-          'setsFavor:desc', // Using setsFavor/Contra as proxy for DS if simple sort
-          'juegosFavor:desc'
-        ]
+        'filters[division][id]': divisionId.value
       }
     });
 
     let data = respuesta.data?.data || [];
     
-    // Client-side tie-breaking for perfect sorting
+    // El ordenamiento lo seguimos haciendo en cliente para asegurar Pt > DS > DJ
     data.sort((a, b) => {
-      if (b.puntos !== a.puntos) return b.puntos - a.puntos;
+      if ((b.puntos || 0) !== (a.puntos || 0)) return (b.puntos || 0) - (a.puntos || 0);
       const dsA = (a.setsFavor || 0) - (a.setsContra || 0);
       const dsB = (b.setsFavor || 0) - (b.setsContra || 0);
       if (dsB !== dsA) return dsB - dsA;

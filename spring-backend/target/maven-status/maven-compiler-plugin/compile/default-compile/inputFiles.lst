@@ -1,5 +1,6 @@
 C:\Users\jball\OneDrive\Escritorio\Club de tenis\tenis-isturgi\spring-backend\src\main\java\com\isturgi\backend\BackendApplication.java
 C:\Users\jball\OneDrive\Escritorio\Club de tenis\tenis-isturgi\spring-backend\src\main\java\com\isturgi\backend\controllers\ApiResponse.java
+C:\Users\jball\OneDrive\Escritorio\Club de tenis\tenis-isturgi\spring-backend\src\main\java\com\isturgi\backend\controllers\ClasificacionController.java
 C:\Users\jball\OneDrive\Escritorio\Club de tenis\tenis-isturgi\spring-backend\src\main\java\com\isturgi\backend\controllers\DisponibilidadController.java
 C:\Users\jball\OneDrive\Escritorio\Club de tenis\tenis-isturgi\spring-backend\src\main\java\com\isturgi\backend\controllers\DivisionController.java
 C:\Users\jball\OneDrive\Escritorio\Club de tenis\tenis-isturgi\spring-backend\src\main\java\com\isturgi\backend\controllers\GaleriaController.java
@@ -9,6 +10,7 @@ C:\Users\jball\OneDrive\Escritorio\Club de tenis\tenis-isturgi\spring-backend\sr
 C:\Users\jball\OneDrive\Escritorio\Club de tenis\tenis-isturgi\spring-backend\src\main\java\com\isturgi\backend\controllers\PartidoController.java
 C:\Users\jball\OneDrive\Escritorio\Club de tenis\tenis-isturgi\spring-backend\src\main\java\com\isturgi\backend\controllers\TemporadaController.java
 C:\Users\jball\OneDrive\Escritorio\Club de tenis\tenis-isturgi\spring-backend\src\main\java\com\isturgi\backend\controllers\TorneoController.java
+C:\Users\jball\OneDrive\Escritorio\Club de tenis\tenis-isturgi\spring-backend\src\main\java\com\isturgi\backend\models\Clasificacion.java
 C:\Users\jball\OneDrive\Escritorio\Club de tenis\tenis-isturgi\spring-backend\src\main\java\com\isturgi\backend\models\Disponibilidad.java
 C:\Users\jball\OneDrive\Escritorio\Club de tenis\tenis-isturgi\spring-backend\src\main\java\com\isturgi\backend\models\Division.java
 C:\Users\jball\OneDrive\Escritorio\Club de tenis\tenis-isturgi\spring-backend\src\main\java\com\isturgi\backend\models\Galeria.java
@@ -18,6 +20,7 @@ C:\Users\jball\OneDrive\Escritorio\Club de tenis\tenis-isturgi\spring-backend\sr
 C:\Users\jball\OneDrive\Escritorio\Club de tenis\tenis-isturgi\spring-backend\src\main\java\com\isturgi\backend\models\Partido.java
 C:\Users\jball\OneDrive\Escritorio\Club de tenis\tenis-isturgi\spring-backend\src\main\java\com\isturgi\backend\models\Temporada.java
 C:\Users\jball\OneDrive\Escritorio\Club de tenis\tenis-isturgi\spring-backend\src\main\java\com\isturgi\backend\models\Torneo.java
+C:\Users\jball\OneDrive\Escritorio\Club de tenis\tenis-isturgi\spring-backend\src\main\java\com\isturgi\backend\repositories\ClasificacionRepository.java
 C:\Users\jball\OneDrive\Escritorio\Club de tenis\tenis-isturgi\spring-backend\src\main\java\com\isturgi\backend\repositories\DisponibilidadRepository.java
 C:\Users\jball\OneDrive\Escritorio\Club de tenis\tenis-isturgi\spring-backend\src\main\java\com\isturgi\backend\repositories\DivisionRepository.java
 C:\Users\jball\OneDrive\Escritorio\Club de tenis\tenis-isturgi\spring-backend\src\main\java\com\isturgi\backend\repositories\GaleriaRepository.java
@@ -31,3 +34,4 @@ C:\Users\jball\OneDrive\Escritorio\Club de tenis\tenis-isturgi\spring-backend\sr
 C:\Users\jball\OneDrive\Escritorio\Club de tenis\tenis-isturgi\spring-backend\src\main\java\com\isturgi\backend\security\FirebaseService.java
 C:\Users\jball\OneDrive\Escritorio\Club de tenis\tenis-isturgi\spring-backend\src\main\java\com\isturgi\backend\security\FirebaseTokenFilter.java
 C:\Users\jball\OneDrive\Escritorio\Club de tenis\tenis-isturgi\spring-backend\src\main\java\com\isturgi\backend\security\SecurityConfig.java
+C:\Users\jball\OneDrive\Escritorio\Club de tenis\tenis-isturgi\spring-backend\src\main\java\com\isturgi\backend\services\LeagueService.java
