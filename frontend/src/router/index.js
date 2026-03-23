@@ -13,6 +13,7 @@ import AdminMantenimiento from '../views/AdminMantenimiento.vue'
 import Login from '../views/Login.vue'
 import SocioDashboard from '../views/SocioDashboard.vue'
 import MisPartidos from '../views/MisPartidos.vue'
+import PerfilSocio from '../views/PerfilSocio.vue'
 import NoticiaDetalle from '../pages/noticiaDetalle.vue'
 import TorneoDetalle from '../pages/torneoDetalle.vue'
 import { useAuth } from '../utils/auth'
@@ -50,6 +51,11 @@ const routes = [
     path: '/mis-partidos',
     component: MisPartidos,
     meta: { requiresAuth: true, title: 'Mis partidos' }
+  },
+  {
+    path: '/mi-perfil',
+    component: PerfilSocio,
+    meta: { requiresAuth: true, title: 'Mi perfil' }
   },
   { path: '/contacto', component: Contacto, meta: { title: 'Contacto' } },
   { path: '/noticia/:id', component: NoticiaDetalle, meta: { title: 'Noticia' } },

@@ -286,6 +286,9 @@
 
 <script setup>
 import { ref, reactive } from 'vue';
+import axios from 'axios';
+
+const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
 // Form data
 const formData = reactive({
@@ -300,24 +303,35 @@ const isSubmitting = ref(false);
 const submitMessage = ref('');
 const submitSuccess = ref(false);
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   isSubmitting.value = true;
   submitMessage.value = '';
+  submitSuccess.value = false;
 
-  // Simulación de envío (en producción esto haría una llamada al backend)
-  setTimeout(() => {
-    isSubmitting.value = false;
+  try {
+    await axios.post(`${apiUrl}/api/contacto`, {
+      nombre: formData.nombre,
+      email: formData.email,
+      telefono: formData.telefono,
+      asunto: formData.asunto,
+      mensaje: formData.mensaje
+    });
+
     submitSuccess.value = true;
     submitMessage.value = '¡Mensaje enviado correctamente! Te responderemos pronto.';
 
-    // Reset form
     Object.keys(formData).forEach(key => formData[key] = '');
-
-    // Clear message after 5 seconds
+  } catch (e) {
+    console.error(e);
+    const msg = e.response?.data?.message || e.response?.data?.error || e.message;
+    submitSuccess.value = false;
+    submitMessage.value = `No se pudo enviar el mensaje. ${msg || ''}`.trim();
+  } finally {
+    isSubmitting.value = false;
     setTimeout(() => {
       submitMessage.value = '';
     }, 5000);
-  }, 1500);
+  }
 };
 </script>
 

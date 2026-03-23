@@ -170,9 +170,8 @@ const guardarResultado = async (partido) => {
   const config = { headers: { Authorization: `Bearer ${state.jwt}` } };
 
   try {
-    await axios.put(`${apiUrl}/api/partidos/${partido.id}`, {
-      resultado: resStr,
-      estado: 'Jugado'
+    await axios.put(`${apiUrl}/api/partidos/${partido.id}/resultado`, {
+      resultado: resStr
     }, config);
     
     alert('¡Resultado guardado correctamente! La clasificación se actualizará.');
@@ -211,11 +210,8 @@ const cargarDatos = async () => {
 
     // 2. Cargar partidos del jugador
     const urlPartidos = `${apiUrl}/api/partidos`;
-    const resPartidos = await axios.get(urlPartidos, config);
-    
-    // Client-side filtering because of custom Spring Controller
+    const resPartidos = await axios.get(urlPartidos, { ...config, params: { jugadorId: pId } });
     let data = resPartidos.data.data || resPartidos.data || [];
-    data = data.filter(p => (p.jugador1 && p.jugador1.id === pId) || (p.jugador2 && p.jugador2.id === pId));
     
     partidos.value = data.sort((a, b) => {
       if (a.estado !== 'Jugado' && b.estado === 'Jugado') return -1;

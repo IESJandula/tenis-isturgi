@@ -7,6 +7,9 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.FileInputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Configuration
 public class FirebaseConfig {
@@ -15,8 +18,22 @@ public class FirebaseConfig {
     public void init() {
         if (FirebaseApp.getApps().isEmpty()) {
             try {
-                // El usuario debe colocar su clave JSON de service account en esta ruta o usar variables de entorno
-                FileInputStream serviceAccount = new FileInputStream("firebase-service-account.json");
+                // Configurable sin commitear el JSON al repo:
+                // - FIREBASE_SERVICE_ACCOUNT_PATH=C:\ruta\service-account.json
+                // - o fallback: ./firebase-service-account.json
+                String envPath = System.getenv("FIREBASE_SERVICE_ACCOUNT_PATH");
+                Path serviceAccountPath;
+                if (envPath != null && !envPath.isBlank()) {
+                    serviceAccountPath = Paths.get(envPath);
+                } else {
+                    serviceAccountPath = Paths.get("firebase-service-account.json");
+                }
+
+                if (!Files.exists(serviceAccountPath)) {
+                    throw new IllegalStateException("No existe el service account en: " + serviceAccountPath.toAbsolutePath());
+                }
+
+                FileInputStream serviceAccount = new FileInputStream(serviceAccountPath.toFile());
                 
                 FirebaseOptions options = FirebaseOptions.builder()
                         .setCredentials(GoogleCredentials.fromStream(serviceAccount))

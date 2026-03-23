@@ -222,11 +222,8 @@ const guardarResultado = async (partido) => {
   if (!confirm(`¿Confirmar resultado ${resStr} para el partido ${partido.jugador1?.Nombre} vs ${partido.jugador2?.Nombre}?`)) return;
 
   try {
-    await axios.put(`${apiUrl}/api/partidos/${partido.id}`, {
-      data: {
-        resultado: resStr,
-        estado: 'Jugado'
-      }
+    await axios.put(`${apiUrl}/api/partidos/${partido.id}/resultado`, {
+      resultado: resStr
     }, config);
     
     alert('Resultado guardado correctamente.');
