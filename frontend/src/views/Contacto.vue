@@ -23,7 +23,7 @@
               <div class="item-icon">📍</div>
               <div class="item-content">
                 <h4>Ubicación</h4>
-                <p>Pistas Municipales de Andújar<br/>Andújar, Jaén<br/>España</p>
+                <p>C. Egido del Puente, s/n<br/>23740 Andújar, Jaén<br/>España</p>
               </div>
             </div>
 
@@ -31,7 +31,7 @@
               <div class="item-icon">✉️</div>
               <div class="item-content">
                 <h4>Email</h4>
-                <a href="mailto:info@clubtenisisturgi.com">info@clubtenisisturgi.com</a>
+                <a href="mailto:tenisturgi@gmail.com">tenisturgi@gmail.com</a>
                 <p class="item-note">Respuesta en menos de 24 horas</p>
               </div>
             </div>
@@ -40,8 +40,8 @@
               <div class="item-icon">📞</div>
               <div class="item-content">
                 <h4>Teléfono</h4>
-                <p>Disponible en horario de pistas</p>
-                <p class="item-note">Consultar horarios</p>
+                <a href="tel:+34653360638">+34 653 360 638</a>
+                <p class="item-note">Pedro Ballesta</p>
               </div>
             </div>
 
@@ -213,8 +213,8 @@
               <div class="llegar-icon">📍</div>
               <div>
                 <h4>Dirección</h4>
-                <p><strong>Pistas Municipales de Andújar</strong><br/>
-                Andújar, Jaén<br/>
+                <p><strong>C. Egido del Puente, s/n</strong><br/>
+                23740 Andújar, Jaén<br/>
                 Andalucía, España</p>
               </div>
             </div>
@@ -224,8 +224,8 @@
             <div class="mapa-overlay">
               <div class="mapa-icon">🗺️</div>
               <p>Pistas Municipales de Tenis</p>
-              <p class="mapa-ubicacion">Andújar, Jaén</p>
-              <a href="https://www.google.com/maps/search/pistas+tenis+andujar+jaen" target="_blank" rel="noopener" class="btn btn-secondary">
+              <p class="mapa-ubicacion">C. Egido del Puente, s/n, 23740 Andújar, Jaén</p>
+              <a href="https://www.google.com/maps/search/C.+Egido+del+Puente,+s%2Fn,+23740+And%C3%BAjar,+Ja%C3%A9n" target="_blank" rel="noopener" class="btn btn-secondary">
                 Ver en Google Maps
               </a>
             </div>

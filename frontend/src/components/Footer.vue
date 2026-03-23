@@ -25,16 +25,17 @@
         <div class="footer-card">
           <h3>Contacto</h3>
           <ul>
-            <li>Av. de la Dehesa, Andujar</li>
+            <li>C. Egido del Puente, s/n, 23740 Andújar, Jaén</li>
             <li>
-              <a href="tel:+34000000000">+34 000 000 000</a>
+              <a href="tel:+34653360638">+34 653 360 638</a>
             </li>
             <li>
-              <a href="mailto:club@isturgi.es">club@isturgi.es</a>
+              <a href="mailto:tenisturgi@gmail.com">tenisturgi@gmail.com</a>
             </li>
+            <li>Contacto: Pedro Ballesta</li>
             <li>
               <a
-                href="https://wa.me/34000000000"
+                href="https://wa.me/34653360638"
                 target="_blank"
                 rel="noopener noreferrer"
               >

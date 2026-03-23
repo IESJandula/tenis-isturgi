@@ -96,7 +96,7 @@
         <div class="instalacion-card">
           <div class="instalacion-icon">📍</div>
           <h3>Ubicación Céntrica</h3>
-          <p>Fácil acceso desde cualquier punto de Andújar. Las pistas municipales están en el corazón de la ciudad, facilitando la llegada a todos los socios.</p>
+          <p>Fácil acceso desde cualquier punto de Andújar. Dirección: C. Egido del Puente, s/n, 23740 Andújar, Jaén.</p>
         </div>
       </div>
     </section>
