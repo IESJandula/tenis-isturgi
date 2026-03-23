@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS jugadores (
   apellidos VARCHAR(255),
   telefono VARCHAR(255),
   email VARCHAR(255),
+  contrasena VARCHAR(255),
   foto VARCHAR(500),
   firebase_uid VARCHAR(255) UNIQUE COMMENT 'ID generado por Google Firebase para login',
   division_id BIGINT,

@@ -25,6 +25,10 @@ public class Jugador {
     @JsonProperty("Email")
     private String email;
 
+    @JsonProperty("Contrasena")
+    @Column(name = "contrasena")
+    private String contrasena;
+
     @JsonProperty("Foto")
     private String foto; // URL of the photo
 

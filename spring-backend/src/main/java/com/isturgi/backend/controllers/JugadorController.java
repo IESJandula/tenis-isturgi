@@ -119,6 +119,7 @@ public class JugadorController {
         if (item.getApellidos() != null) existing.setApellidos(item.getApellidos());
         if (item.getTelefono() != null) existing.setTelefono(item.getTelefono());
         if (item.getEmail() != null) existing.setEmail(item.getEmail());
+        if (item.getContrasena() != null) existing.setContrasena(item.getContrasena());
         if (item.getFoto() != null) existing.setFoto(item.getFoto());
         if (item.getFirebaseUid() != null) existing.setFirebaseUid(item.getFirebaseUid());
         if (item.getDivision() != null) existing.setDivision(item.getDivision());
