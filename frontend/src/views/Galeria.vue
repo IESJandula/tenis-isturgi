@@ -207,9 +207,13 @@ onBeforeUnmount(() => {
   min-height: 220px;
   padding: 18px;
   border-radius: var(--radius-md);
-  background:
+  background-image:
     linear-gradient(180deg, rgba(8, 12, 14, 0.08), rgba(8, 12, 14, 0.78)),
-    var(--frame-image) center/cover no-repeat;
+    var(--frame-image);
+  background-position: center, center;
+  background-size: cover, contain;
+  background-repeat: no-repeat, no-repeat;
+  background-color: rgba(9, 13, 15, 0.6);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -318,7 +322,8 @@ onBeforeUnmount(() => {
   width: 100%;
   border-radius: var(--radius-md);
   max-height: 520px;
-  object-fit: cover;
+  object-fit: contain;
+  background: rgba(9, 13, 15, 0.6);
 }
 
 .lightbox-close {

@@ -377,8 +377,10 @@ const fotoUrl = (fileName) => fotoTenisUrl(fileName);
 
 .club-galeria-item img {
   width: 100%;
-  height: 220px;
-  object-fit: cover;
+  aspect-ratio: 4 / 3;
+  height: auto;
+  object-fit: contain;
+  background: rgba(9, 13, 15, 0.6);
   display: block;
 }
 
