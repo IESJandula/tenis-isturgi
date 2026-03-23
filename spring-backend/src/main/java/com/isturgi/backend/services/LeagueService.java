@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -25,9 +24,32 @@ public class LeagueService {
     private DivisionRepository divisionRepository;
 
     @Transactional
+    public Map<String, Object> regenerarCalendarioBerger(Long divisionId) {
+        Division division = divisionRepository.findById(divisionId).orElse(null);
+        if (division == null) return Map.of("error", "Division no encontrada");
+
+        List<Jornada> jornadas = jornadaRepository.findByDivisionId(divisionId);
+        if (!jornadas.isEmpty()) {
+            List<Long> jornadaIds = jornadas.stream().map(Jornada::getId).toList();
+            partidoRepository.deleteByJornadaIdIn(jornadaIds);
+            jornadaRepository.deleteByDivisionId(divisionId);
+        }
+
+        return generarCalendarioBerger(divisionId);
+    }
+
+    @Transactional
     public Map<String, Object> generarCalendarioBerger(Long divisionId) {
         Division division = divisionRepository.findById(divisionId).orElse(null);
         if (division == null) return Map.of("error", "Division no encontrada");
+
+        long jornadasExistentes = jornadaRepository.countByDivisionId(divisionId);
+        if (jornadasExistentes > 0) {
+            return Map.of(
+                "error", "Esta division ya tiene calendario generado.",
+                "jornadasExistentes", jornadasExistentes
+            );
+        }
 
         List<Jugador> jugadores = jugadorRepository.findByDivisionId(divisionId);
         if (jugadores.size() < 2) return Map.of("error", "No hay suficientes jugadores");
@@ -46,12 +68,15 @@ public class LeagueService {
         List<Jugador> lista = new ArrayList<>(jugadores);
         if (bye) lista.add(null); // Representa jornada de descanso
 
+        int partidosCreados = 0;
         for (int j = 0; j < numJornadas; j++) {
             Jornada jornada = new Jornada();
             jornada.setNombre("Jornada " + (j + 1));
             jornada.setNumero(j + 1);
             jornada.setDivision(division);
             jornada = jornadaRepository.save(jornada);
+
+            List<Partido> partidosDeJornada = new ArrayList<>();
 
             for (int p = 0; p < partidosPorJornada; p++) {
                 Jugador j1 = lista.get(p);
@@ -63,8 +88,13 @@ public class LeagueService {
                     partido.setJugador2(j2);
                     partido.setJornada(jornada);
                     partido.setEstado("Pendiente");
-                    partidoRepository.save(partido);
+                    partidosDeJornada.add(partido);
                 }
+            }
+
+            if (!partidosDeJornada.isEmpty()) {
+                partidoRepository.saveAll(partidosDeJornada);
+                partidosCreados += partidosDeJornada.size();
             }
 
             // Rotación: el primero se queda fijo, el resto rota
@@ -75,7 +105,7 @@ public class LeagueService {
         return Map.of(
             "message", "Calendario generado con éxito",
             "jornadas", numJornadas,
-            "partidos", (numJornadas * (n / 2))
+            "partidos", partidosCreados
         );
     }
 }

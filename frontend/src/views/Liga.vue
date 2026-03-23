@@ -164,9 +164,12 @@ const cargarCalendario = async () => {
   cargando.value = true;
   try {
     const respuesta = await axios.get(
-      `${API_BASE}/api/jornadas/division/${divisionId.value}/jornadas`
+      `${API_BASE}/api/jornadas/division/${divisionId.value}/jornadas?limit=100`
     );
-    jornadas.value = respuesta.data || [];
+    const data = respuesta.data || [];
+    jornadas.value = data
+      .slice()
+      .sort((a, b) => (a.numero ?? a.Numero ?? 0) - (b.numero ?? b.Numero ?? 0));
   } catch (err) {
     console.error(err);
     error.value = 'No se pudo cargar el calendario.';

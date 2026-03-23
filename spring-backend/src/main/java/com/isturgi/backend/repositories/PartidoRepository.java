@@ -10,5 +10,9 @@ public interface PartidoRepository extends JpaRepository<Partido, Long> {
 
 	List<Partido> findByJornada_Id(Long jornadaId);
 
+	List<Partido> findByJornada_IdOrderByIdAsc(Long jornadaId);
+
+	void deleteByJornada_IdIn(List<Long> jornadaIds);
+
 	List<Partido> findByJornada_Division_IdAndEstadoIgnoreCase(Long divisionId, String estado);
 }

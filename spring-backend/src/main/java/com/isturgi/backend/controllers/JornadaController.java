@@ -1,12 +1,21 @@
 package com.isturgi.backend.controllers;
 
 import com.isturgi.backend.models.Jornada;
+import com.isturgi.backend.models.Partido;
 import com.isturgi.backend.repositories.JornadaRepository;
+import com.isturgi.backend.repositories.PartidoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/jornadas")
@@ -16,9 +25,32 @@ public class JornadaController {
     @Autowired
     private JornadaRepository repository;
 
+    @Autowired
+    private PartidoRepository partidoRepository;
+
     @GetMapping
-    public ResponseEntity<Map<String, Object>> getAll() {
-        List<Jornada> list = repository.findAll();
+    public ResponseEntity<Map<String, Object>> getAll(
+            @RequestParam(required = false) Long divisionId,
+            @RequestParam(defaultValue = "200") int limit) {
+        int safeLimit = Math.max(1, Math.min(limit, 1000));
+        Pageable pageable = PageRequest.of(0, safeLimit, Sort.by(Sort.Direction.DESC, "id"));
+
+        List<Jornada> jornadas;
+        if (divisionId != null) {
+            jornadas = repository.findByDivisionIdOrderByIdDesc(divisionId, pageable);
+        } else {
+            jornadas = repository.findAll(pageable).getContent();
+        }
+
+        // Resumen ligero para evitar bloquear frontend al listar jornadas.
+        List<Map<String, Object>> list = jornadas.stream().map(j -> {
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("id", j.getId());
+            item.put("Nombre", j.getNombre());
+            item.put("Numero", j.getNumero());
+            item.put("division", j.getDivision());
+            return item;
+        }).collect(Collectors.toList());
         return ResponseEntity.ok(ApiResponse.of(list));
     }
 
@@ -51,9 +83,30 @@ public class JornadaController {
     }
 
     @GetMapping("/division/{divisionId}/jornadas")
-    public ResponseEntity<List<Jornada>> getByDivision(@PathVariable Long divisionId) {
-        List<Jornada> list = repository.findByDivisionId(divisionId);
+    public ResponseEntity<List<Jornada>> getByDivision(
+            @PathVariable Long divisionId,
+            @RequestParam(defaultValue = "100") int limit) {
+        int safeLimit = Math.max(1, Math.min(limit, 500));
+        Pageable pageable = PageRequest.of(0, safeLimit, Sort.by(Sort.Direction.DESC, "id"));
+        List<Jornada> recientes = repository.findByDivisionIdOrderByIdDesc(divisionId, pageable);
+
+        // Si existen jornadas duplicadas por numero, nos quedamos con la mas reciente.
+        Map<Integer, Jornada> porNumero = new LinkedHashMap<>();
+        for (Jornada j : recientes) {
+            Integer numero = j.getNumero() != null ? j.getNumero() : -1;
+            porNumero.putIfAbsent(numero, j);
+        }
+
+        List<Jornada> list = new ArrayList<>(porNumero.values());
+        list.sort(Comparator.comparing(Jornada::getNumero, Comparator.nullsLast(Integer::compareTo)));
         return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/{id}/partidos")
+    public ResponseEntity<List<Partido>> getPartidosByJornada(@PathVariable Long id) {
+        if (!repository.existsById(id)) return ResponseEntity.notFound().build();
+        List<Partido> partidos = partidoRepository.findByJornadaIdOrderByIdAsc(id);
+        return ResponseEntity.ok(partidos);
     }
 
     @DeleteMapping("/{id}")

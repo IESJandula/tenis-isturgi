@@ -134,7 +134,7 @@ const cargarDatos = async () => {
     }
 
     // 2. Obtener jornada activa
-    const resJornada = await axios.get(`${apiUrl}/api/jornadas`, config);
+    const resJornada = await axios.get(`${apiUrl}/api/jornadas?limit=1`, config);
     let allJornadas = resJornada.data.data || resJornada.data || [];
     if (allJornadas.length > 0) {
       allJornadas.sort((a, b) => b.id - a.id);
