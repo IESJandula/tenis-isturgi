@@ -27,6 +27,13 @@
     </section>
 
     <section class="galeria-grid">
+      <p v-if="cargando" class="galeria-state" role="status" aria-live="polite">
+        Cargando galería...
+      </p>
+      <p v-else-if="itemsFiltrados.length === 0" class="galeria-state">
+        No hay fotos para este filtro.
+      </p>
+
       <article v-for="item in itemsFiltrados" :key="item.id" class="galeria-item">
         <div
           class="media-frame"
@@ -48,7 +55,13 @@
 
     <div v-if="lightboxActivo" class="lightbox" @click.self="cerrarLightbox">
       <div class="lightbox-card" role="dialog" aria-modal="true">
-        <button class="lightbox-close" type="button" @click="cerrarLightbox">
+        <button
+          ref="lightboxCloseRef"
+          class="lightbox-close"
+          type="button"
+          aria-label="Cerrar imagen"
+          @click="cerrarLightbox"
+        >
           Cerrar
         </button>
         <img :src="lightboxActivo.src" :alt="lightboxActivo.titulo" />
@@ -71,7 +84,7 @@
         class="highlight-card"
         href="https://www.youtube.com/results?search_query=tenis+club+highlights"
         target="_blank"
-        rel="noreferrer"
+        rel="noopener noreferrer"
       >
         <div class="highlight-media"></div>
         <div class="highlight-copy">
@@ -85,7 +98,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import axios from 'axios';
 import { fotosTenisAsGaleriaItems } from '../utils/fotosTenis';
 
@@ -100,8 +113,11 @@ const itemsFiltrados = computed(() => {
 });
 
 const lightboxActivo = ref(null);
+const lightboxCloseRef = ref(null);
+const lastFocusedElement = ref(null);
 
 const abrirLightbox = (item) => {
+  lastFocusedElement.value = document.activeElement;
   lightboxActivo.value = item;
 };
 
@@ -116,6 +132,17 @@ const onKeydown = (event) => {
 };
 
 const cargando = ref(true);
+
+watch(lightboxActivo, async (value) => {
+  if (value) {
+    document.body.style.overflow = 'hidden';
+    await nextTick();
+    lightboxCloseRef.value?.focus?.();
+  } else {
+    document.body.style.overflow = '';
+    lastFocusedElement.value?.focus?.();
+  }
+});
 
 onMounted(async () => {
   window.addEventListener('keydown', onKeydown);
@@ -198,6 +225,15 @@ onBeforeUnmount(() => {
   column-gap: 16px;
 }
 
+.galeria-state {
+  padding: 18px;
+  margin: 0 0 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(9, 13, 15, 0.6);
+  color: rgba(234, 242, 239, 0.75);
+}
+
 .galeria-item {
   break-inside: avoid;
   margin-bottom: 16px;
@@ -207,9 +243,14 @@ onBeforeUnmount(() => {
   min-height: 220px;
   padding: 18px;
   border-radius: var(--radius-md);
-  background:
-    linear-gradient(180deg, rgba(8, 12, 14, 0.08), rgba(8, 12, 14, 0.78)),
-    var(--frame-image) center/cover no-repeat;
+  background-image:
+    linear-gradient(180deg, rgba(8, 12, 14, 0.18), rgba(8, 12, 14, 0.88)),
+    var(--frame-image),
+    var(--frame-image);
+  background-position: center, center, center;
+  background-size: cover, cover, contain;
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-color: rgba(9, 13, 15, 0.6);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -318,7 +359,8 @@ onBeforeUnmount(() => {
   width: 100%;
   border-radius: var(--radius-md);
   max-height: 520px;
-  object-fit: cover;
+  object-fit: contain;
+  background: rgba(9, 13, 15, 0.6);
 }
 
 .lightbox-close {

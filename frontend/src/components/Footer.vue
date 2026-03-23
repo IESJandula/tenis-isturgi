@@ -26,8 +26,21 @@
           <h3>Contacto</h3>
           <ul>
             <li>Av. de la Dehesa, Andujar</li>
-            <li>+34 000 000 000</li>
-            <li>club@isturgi.es</li>
+            <li>
+              <a href="tel:+34000000000">+34 000 000 000</a>
+            </li>
+            <li>
+              <a href="mailto:club@isturgi.es">club@isturgi.es</a>
+            </li>
+            <li>
+              <a
+                href="https://wa.me/34000000000"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                WhatsApp
+              </a>
+            </li>
           </ul>
         </div>
         <div class="footer-card">

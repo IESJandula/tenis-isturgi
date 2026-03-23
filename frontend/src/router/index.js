@@ -18,42 +18,42 @@ import TorneoDetalle from '../pages/torneoDetalle.vue'
 import { useAuth } from '../utils/auth'
 
 const routes = [
-  { path: '/', component: Home },
-  { path: '/liga', component: Liga },
-  { path: '/galeria', component: Galeria },
-  { path: '/club', component: Club },
-  { path: '/escuela', component: Escuela },
-  { path: '/torneos', component: Torneos },
-  { path: '/noticias', component: Noticias },
+  { path: '/', component: Home, meta: { title: 'Inicio' } },
+  { path: '/liga', component: Liga, meta: { title: 'Liga' } },
+  { path: '/galeria', component: Galeria, meta: { title: 'Galería' } },
+  { path: '/club', component: Club, meta: { title: 'El Club' } },
+  { path: '/escuela', component: Escuela, meta: { title: 'Escuela' } },
+  { path: '/torneos', component: Torneos, meta: { title: 'Torneos' } },
+  { path: '/noticias', component: Noticias, meta: { title: 'Noticias' } },
   {
     path: '/disponibilidad',
     component: Disponibilidad,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, title: 'Disponibilidad' }
   },
   {
     path: '/admin-gestion',
     component: AdminGestion,
-    meta: { requiresAuth: true, requiresAdmin: true }
+    meta: { requiresAuth: true, requiresAdmin: true, title: 'Admin · Gestión' }
   },
   {
     path: '/admin-mantenimiento',
     component: AdminMantenimiento,
-    meta: { requiresAuth: true, requiresAdmin: true }
+    meta: { requiresAuth: true, requiresAdmin: true, title: 'Admin · Mantenimiento' }
   },
-  { path: '/login', component: Login },
+  { path: '/login', component: Login, meta: { title: 'Acceder' } },
   {
     path: '/socio-dashboard',
     component: SocioDashboard,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, title: 'Mi cuenta' }
   },
   {
     path: '/mis-partidos',
     component: MisPartidos,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, title: 'Mis partidos' }
   },
-  { path: '/contacto', component: Contacto },
-  { path: '/noticia/:id', component: NoticiaDetalle },
-  { path: '/torneo/:id', component: TorneoDetalle }
+  { path: '/contacto', component: Contacto, meta: { title: 'Contacto' } },
+  { path: '/noticia/:id', component: NoticiaDetalle, meta: { title: 'Noticia' } },
+  { path: '/torneo/:id', component: TorneoDetalle, meta: { title: 'Torneo' } }
 ]
 
 const router = createRouter({
@@ -71,6 +71,12 @@ router.beforeEach((to, from, next) => {
   } else {
     next();
   }
+});
+
+router.afterEach((to) => {
+  const base = 'Club de Tenis Isturgi';
+  const title = to.meta?.title ? `${to.meta.title} · ${base}` : base;
+  document.title = title;
 });
 
 export default router

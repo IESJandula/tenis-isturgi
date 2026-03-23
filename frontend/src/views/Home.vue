@@ -16,6 +16,7 @@
           <h2 class="section-title-main">Últimas Noticias</h2>
           <p class="section-subtitle-main">Toda la actualidad del Club de Tenis Isturgi</p>
         </div>
+        <router-link to="/noticias" class="btn btn-secondary">Ver todas</router-link>
       </div>
 
       <!-- Loading, Error y Sin noticias -->
@@ -91,6 +92,7 @@
           <h2 class="section-title-main">Próximos Torneos</h2>
           <p class="section-subtitle-main">Las mejores competiciones de tenis del club</p>
         </div>
+        <router-link to="/torneos" class="btn btn-secondary">Ver todos</router-link>
       </div>
 
       <!-- Loading, Error y Sin torneos -->
@@ -197,8 +199,31 @@ onMounted(async () => {
   try {
     const resTorneos = await axios.get(`${apiUrl}/api/torneos`);
     let t = resTorneos.data.data || [];
-    t.sort((a,b) => new Date(b.FechaInicio || b.createdAt) - new Date(a.FechaInicio || a.createdAt));
-    torneos.value = t.slice(0, 4);
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    const parseFecha = (value) => {
+      if (!value) return null;
+      const d = new Date(value);
+      return Number.isNaN(d.getTime()) ? null : d;
+    };
+
+    const conFecha = t.map((item) => ({
+      item,
+      fecha: parseFecha(item.FechaInicio) || parseFecha(item.createdAt)
+    }));
+
+    const proximos = conFecha
+      .filter((x) => x.fecha && x.fecha >= hoy)
+      .sort((a, b) => a.fecha - b.fecha)
+      .map((x) => x.item);
+
+    const pasados = conFecha
+      .filter((x) => !x.fecha || x.fecha < hoy)
+      .sort((a, b) => (b.fecha || 0) - (a.fecha || 0))
+      .map((x) => x.item);
+
+    torneos.value = [...proximos, ...pasados].slice(0, 4);
   } catch (e) {
     console.error(e);
     errorTorneos.value = 'Error al cargar torneos.';
