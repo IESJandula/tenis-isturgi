@@ -33,10 +33,17 @@
               <div class="card-actions">
                 <button 
                   @click="generarCalendarioDivision(div)" 
-                  :disabled="procesando === 'div_' + div.id"
+                  :disabled="procesando !== null"
                   class="btn-algorithm"
                 >
                   {{ procesando === 'div_' + div.id ? 'Procesando...' : 'Realizar Sorteo Automático' }}
+                </button>
+                <button 
+                  @click="regenerarCalendarioDivision(div)" 
+                  :disabled="procesando !== null"
+                  class="btn-reset"
+                >
+                  {{ procesando === 'reset_' + div.id ? 'Regenerando...' : 'Limpiar y Regenerar' }}
                 </button>
               </div>
             </div>
@@ -48,13 +55,13 @@
           <div v-for="jornada in jornadas" :key="jornada.id" class="jornada-admin-card">
             <div class="card-info">
               <h3>{{ jornada.Nombre }}</h3>
-              <p class="meta">Temporada: {{ jornada.temporada?.Nombre || 'N/A' }}</p>
+              <p class="meta">Temporada: {{ jornada.division?.temporada?.Nombre || 'N/A' }}</p>
             </div>
             
             <div class="card-actions">
               <button 
                 @click="lanzarAlgoritmo(jornada)" 
-                :disabled="procesando === jornada.id"
+                :disabled="procesando !== null"
                 class="btn-algorithm"
               >
                 {{ procesando === jornada.id ? 'Procesando...' : 'Generar Horarios' }}
@@ -134,13 +141,14 @@ const resultados = reactive({});
 const mostrandoPartidos = reactive({});
 const partidosJornada = reactive({});
 const formResultados = reactive({});
+const cargandoPartidos = reactive({});
 
 const cargarJornadas = async () => {
   try {
-    const res = await axios.get(`${apiUrl}/api/jornadas?populate=division.temporada`, config);
+    const res = await axios.get(`${apiUrl}/api/jornadas?limit=300`, config);
     jornadas.value = res.data.data;
     
-    const resDiv = await axios.get(`${apiUrl}/api/divisiones`, config);
+    const resDiv = await axios.get(`${apiUrl}/api/divisions`, config);
     divisiones.value = resDiv.data.data;
   } catch (e) {
     console.error(e);
@@ -150,6 +158,7 @@ const cargarJornadas = async () => {
 };
 
 const generarCalendarioDivision = async (division) => {
+  if (procesando.value !== null) return;
   if (!confirm(`¿Deseas generar el calendario completo para ${division.Nombre}? Esto creará jornadas y partidos automáticamente en base al número de jugadores.`)) return;
   
   procesando.value = 'div_' + division.id;
@@ -159,7 +168,38 @@ const generarCalendarioDivision = async (division) => {
     await cargarJornadas();
   } catch (e) {
     console.error(e);
-    alert(e.response?.data?.error?.message || 'Error al generar calendario.');
+    const msg = e.response?.data?.error || e.response?.data?.message || '';
+    if (msg && msg.includes('ya tiene calendario generado')) {
+      const confirmar = confirm(`${division.Nombre} ya tiene calendario. ¿Quieres regenerarlo desde cero? (borra jornadas y partidos de esa división)`);
+      if (confirmar) {
+        const r2 = await axios.post(`${apiUrl}/api/divisions/${division.id}/regenerar-calendario`, {}, config);
+        alert(`Calendario regenerado. Jornadas: ${r2.data.jornadas}, partidos: ${r2.data.partidos}.`);
+        await cargarJornadas();
+      }
+    } else {
+      alert(msg || 'Error al generar calendario.');
+    }
+  } finally {
+    procesando.value = null;
+  }
+};
+
+const regenerarCalendarioDivision = async (division) => {
+  if (procesando.value !== null) return;
+  const confirmar = confirm(
+    `Vas a borrar el calendario actual de ${division.Nombre} y generarlo de nuevo. Esta acción elimina jornadas y partidos de esa división. ¿Continuar?`
+  );
+  if (!confirmar) return;
+
+  procesando.value = 'reset_' + division.id;
+  try {
+    const res = await axios.post(`${apiUrl}/api/divisions/${division.id}/regenerar-calendario`, {}, config);
+    alert(`Calendario regenerado. Jornadas: ${res.data.jornadas}, partidos: ${res.data.partidos}.`);
+    await cargarJornadas();
+  } catch (e) {
+    console.error(e);
+    const msg = e.response?.data?.error || e.response?.data?.message || 'Error al regenerar calendario.';
+    alert(msg);
   } finally {
     procesando.value = null;
   }
@@ -181,16 +221,12 @@ const lanzarAlgoritmo = async (jornada) => {
   }
 };
 
-const togglePartidos = async (jornada) => {
-  const docId = jornada.id;
-  if (mostrandoPartidos[docId]) {
-    mostrandoPartidos[docId] = false;
-    return;
-  }
-
+const cargarPartidosDeJornada = async (jornadaId) => {
+  if (cargandoPartidos[jornadaId]) return;
+  cargandoPartidos[jornadaId] = true;
   try {
-    const res = await axios.get(`${apiUrl}/api/jornadas/${docId}/partidos`, config);
-    partidosJornada[docId] = res.data;
+    const res = await axios.get(`${apiUrl}/api/jornadas/${jornadaId}/partidos`, config);
+    partidosJornada[jornadaId] = res.data;
     
     // Inicializar formularios
     res.data.forEach(p => {
@@ -202,12 +238,23 @@ const togglePartidos = async (jornada) => {
         };
       }
     });
-
-    mostrandoPartidos[docId] = true;
   } catch (e) {
     console.error(e);
     alert('Error al cargar los partidos.');
+  } finally {
+    cargandoPartidos[jornadaId] = false;
   }
+};
+
+const togglePartidos = async (jornada) => {
+  const docId = jornada.id;
+  if (mostrandoPartidos[docId]) {
+    mostrandoPartidos[docId] = false;
+    return;
+  }
+
+  await cargarPartidosDeJornada(docId);
+  mostrandoPartidos[docId] = true;
 };
 
 const guardarResultado = async (partido) => {
@@ -223,18 +270,16 @@ const guardarResultado = async (partido) => {
 
   try {
     await axios.put(`${apiUrl}/api/partidos/${partido.id}`, {
-      data: {
-        resultado: resStr,
-        estado: 'Jugado'
-      }
+      resultado: resStr,
+      estado: 'Jugado'
     }, config);
     
     alert('Resultado guardado correctamente.');
     // Recargar partidos de la jornada
     const jornadaId = Object.keys(partidosJornada).find(jid => partidosJornada[jid].some(p => p.id === partido.id));
     if (jornadaId) {
-      mostrandoPartidos[jornadaId] = false;
-      togglePartidos({ id: jornadaId });
+      await cargarPartidosDeJornada(Number(jornadaId));
+      mostrandoPartidos[jornadaId] = true;
     }
   } catch (e) {
     console.error(e);
@@ -330,6 +375,21 @@ onMounted(cargarJornadas);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+}
+
+.btn-reset {
+  background: #451111;
+  color: #ffdede;
+  border: 1px solid #a33;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-reset:hover {
+  background: #5b1515;
 }
 
 .btn-view-matches:hover {

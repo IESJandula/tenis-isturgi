@@ -6,4 +6,6 @@ import java.util.List;
 
 @Repository
 public interface PartidoRepository extends JpaRepository<Partido, Long> {
+	List<Partido> findByJornadaIdOrderByIdAsc(Long jornadaId);
+	void deleteByJornadaIdIn(List<Long> jornadaIds);
 }

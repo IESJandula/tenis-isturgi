@@ -26,7 +26,7 @@ public class Jornada {
     @JsonProperty("division")
     private Division division;
 
-    @OneToMany(mappedBy = "jornada", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "jornada", fetch = FetchType.LAZY)
     @JsonProperty("partidos")
     private List<Partido> partidos;
 

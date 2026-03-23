@@ -3,6 +3,7 @@ package com.isturgi.backend.models;
 import jakarta.persistence.*;
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDateTime;
 
 @Data
@@ -30,7 +31,7 @@ public class Partido {
 
     @ManyToOne
     @JoinColumn(name = "jornada_id")
-    @JsonProperty("jornada")
+    @JsonIgnore
     private Jornada jornada;
 
     @JsonProperty("fecha")

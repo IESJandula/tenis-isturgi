@@ -55,6 +55,15 @@ public class DivisionController {
         return ResponseEntity.ok(result);
     }
 
+    @PostMapping("/{id}/regenerar-calendario")
+    public ResponseEntity<Map<String, Object>> regenerarCalendario(@PathVariable Long id) {
+        Map<String, Object> result = leagueService.regenerarCalendarioBerger(id);
+        if (result.containsKey("error")) {
+            return ResponseEntity.badRequest().body(result);
+        }
+        return ResponseEntity.ok(result);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         if (!repository.existsById(id)) return ResponseEntity.notFound().build();
