@@ -10,15 +10,12 @@ public interface PartidoRepository extends JpaRepository<Partido, Long> {
 
 	List<Partido> findByJornada_Id(Long jornadaId);
 
+	// Alias methods: keep for source compatibility.
+	List<Partido> findByJornadaIdOrderByIdAsc(Long jornadaId);
 	List<Partido> findByJornada_IdOrderByIdAsc(Long jornadaId);
 
-	// Alias compatibles con llamadas existentes en servicios/controladores
-	List<Partido> findByJornadaIdOrderByIdAsc(Long jornadaId);
-
-	void deleteByJornada_IdIn(List<Long> jornadaIds);
-
-	// Alias compatible con llamadas existentes en servicios/controladores
 	void deleteByJornadaIdIn(List<Long> jornadaIds);
+	void deleteByJornada_IdIn(List<Long> jornadaIds);
 
 	List<Partido> findByJornada_Division_IdAndEstadoIgnoreCase(Long divisionId, String estado);
 }
