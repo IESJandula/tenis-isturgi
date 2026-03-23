@@ -34,7 +34,6 @@ public class PartidoController {
     @PostMapping public ResponseEntity<Map<String, Object>> create(@RequestBody Partido item) { return ResponseEntity.ok(ApiResponse.of(repository.save(item))); }
     @Autowired private ObjectMapper objectMapper;
 
-<<<<<<< HEAD
     @PutMapping("/{id}/resultado")
     public ResponseEntity<Map<String, Object>> guardarResultado(@PathVariable Long id, @RequestBody PartidoResultadoRequest body) {
         Partido partido = repository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND));
@@ -75,28 +74,6 @@ public class PartidoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> update(@PathVariable Long id, @RequestBody Partido patch) {
-        Partido existing = repository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND));
-
-        if (patch.getJugador1() != null) existing.setJugador1(patch.getJugador1());
-        if (patch.getJugador2() != null) existing.setJugador2(patch.getJugador2());
-        if (patch.getGanador() != null) existing.setGanador(patch.getGanador());
-        if (patch.getJornada() != null) existing.setJornada(patch.getJornada());
-
-        if (patch.getFecha() != null) existing.setFecha(patch.getFecha());
-        if (patch.getHora() != null) existing.setHora(patch.getHora());
-        if (patch.getPista() != null) existing.setPista(patch.getPista());
-        if (patch.getEstado() != null) existing.setEstado(patch.getEstado());
-        if (patch.getResultado() != null) existing.setResultado(patch.getResultado());
-        if (patch.getSetsFavor() != null) existing.setSetsFavor(patch.getSetsFavor());
-        if (patch.getSetsContra() != null) existing.setSetsContra(patch.getSetsContra());
-        if (patch.getJuegosFavor() != null) existing.setJuegosFavor(patch.getJuegosFavor());
-        if (patch.getJuegosContra() != null) existing.setJuegosContra(patch.getJuegosContra());
-        if (patch.getJugadorQueGuardo() != null) existing.setJugadorQueGuardo(patch.getJugadorQueGuardo());
-
-        existing.setUpdatedAt(LocalDateTime.now());
-=======
-    @PutMapping("/{id}")
     public ResponseEntity<Map<String, Object>> update(@PathVariable Long id, @RequestBody Map<String, Object> payload) {
         Partido existing = repository.findById(id).orElse(null);
         if (existing == null) return ResponseEntity.notFound().build();
@@ -126,7 +103,6 @@ public class PartidoController {
             }
         }
 
->>>>>>> 366b1383d7b31cb5f110057f3c58c8ecc0102c7b
         Partido updated = repository.save(existing);
         return ResponseEntity.ok(ApiResponse.of(updated));
     }
