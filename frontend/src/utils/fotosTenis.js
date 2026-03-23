@@ -17,6 +17,12 @@ export function fotoTenisUrl(fileName) {
   return encodeURI(`/fotos-tenis/${fileName}`);
 }
 
+export function fotoTenisAlt(fileName, index) {
+  const base = fileName.replace(/\.(png|jpg|jpeg|webp)$/i, '');
+  if (typeof index === 'number') return `Foto del club ${index + 1}: ${base}`;
+  return `Foto del club: ${base}`;
+}
+
 export function fotosTenisAsGaleriaItems() {
   return FOTOS_TENIS_FILES.map((fileName, index) => ({
     id: `fotos-tenis-${index + 1}`,

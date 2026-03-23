@@ -109,8 +109,13 @@
       </div>
 
       <div class="club-galeria-grid">
-        <figure v-for="(file, idx) in fotos" :key="file" class="club-galeria-item">
-          <img :src="fotoUrl(file)" :alt="`Foto del club ${idx + 1}`" loading="lazy" />
+        <figure
+          v-for="(file, idx) in fotos"
+          :key="file"
+          class="club-galeria-item"
+          :style="{ '--bg-image': `url(${fotoUrl(file)})` }"
+        >
+          <img :src="fotoUrl(file)" :alt="fotoAlt(file, idx)" loading="lazy" />
         </figure>
       </div>
     </section>
@@ -189,10 +194,11 @@
 </template>
 
 <script setup>
-import { FOTOS_TENIS_FILES, fotoTenisUrl } from '../utils/fotosTenis';
+import { FOTOS_TENIS_FILES, fotoTenisAlt, fotoTenisUrl } from '../utils/fotosTenis';
 
 const fotos = FOTOS_TENIS_FILES;
 const fotoUrl = (fileName) => fotoTenisUrl(fileName);
+const fotoAlt = (fileName, index) => fotoTenisAlt(fileName, index);
 </script>
 
 <style scoped>
@@ -370,7 +376,13 @@ const fotoUrl = (fileName) => fotoTenisUrl(fileName);
   margin: 0;
   border-radius: 16px;
   overflow: hidden;
-  background: rgba(9, 13, 15, 0.6);
+  background-image:
+    linear-gradient(180deg, rgba(8, 12, 14, 0.18), rgba(8, 12, 14, 0.88)),
+    var(--bg-image);
+  background-size: cover, cover;
+  background-position: center, center;
+  background-repeat: no-repeat, no-repeat;
+  background-color: rgba(9, 13, 15, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
 }
