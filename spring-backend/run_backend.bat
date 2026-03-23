@@ -24,6 +24,17 @@ if not exist "%JAVA_HOME%\bin\java.exe" goto BAD_JAVA_HOME
 echo JAVA_HOME: %JAVA_HOME%
 echo.
 
+rem DB credentials for local XAMPP MySQL (read from env if present)
+if not defined DB_USER set "DB_USER=root"
+if not defined DB_PASSWORD (
+	echo.
+	echo DB_PASSWORD no esta definida.
+	set /p DB_PASSWORD=Introduce la contrasena de MySQL para %DB_USER%: 
+)
+
+echo DB_USER: %DB_USER%
+echo.
+
 set "PATH=%JAVA_HOME%\bin;%PATH%"
 call .\apache-maven-3.9.6\bin\mvn.cmd spring-boot:run
 exit /b %errorlevel%
