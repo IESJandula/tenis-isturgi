@@ -10,4 +10,6 @@ public interface DisponibilidadRepository extends JpaRepository<Disponibilidad, 
 	List<Disponibilidad> findByJugador_Id(Long jugadorId);
 	List<Disponibilidad> findByJornada_Id(Long jornadaId);
 	Optional<Disponibilidad> findByJugador_IdAndJornada_Id(Long jugadorId, Long jornadaId);
+	void deleteByJornadaIdIn(List<Long> jornadaIds);
+	void deleteByJornada_IdIn(List<Long> jornadaIds);
 }

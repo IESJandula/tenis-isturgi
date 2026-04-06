@@ -56,6 +56,11 @@
             <div class="card-info">
               <h3>{{ jornada.Nombre }}</h3>
               <p class="meta">Temporada: {{ jornada.division?.temporada?.Nombre || 'N/A' }}</p>
+              <p class="meta" style="margin-top: 6px;">
+                <span class="badge-estado" :class="jornada.cerrada ? 'cerrada' : 'abierta'">
+                  {{ jornada.cerrada ? 'Cerrada' : 'Abierta' }}
+                </span>
+              </p>
             </div>
             
             <div class="card-actions">
@@ -65,6 +70,13 @@
                 class="btn-algorithm"
               >
                 {{ procesando === jornada.id ? 'Procesando...' : 'Generar Horarios' }}
+              </button>
+              <button
+                @click="cerrarJornada(jornada)"
+                :disabled="procesando !== null || jornada.cerrada"
+                class="btn-close-jornada"
+              >
+                {{ jornada.cerrada ? 'Jornada Cerrada' : (procesando === 'close_' + jornada.id ? 'Cerrando...' : 'Cerrar Jornada') }}
               </button>
               <button 
                 @click="togglePartidos(jornada)" 
@@ -113,9 +125,36 @@
 
             <div v-if="resultados[jornada.id]" class="results-log">
               <h4>Log de Asignación:</h4>
-              <ul>
-                <li v-for="(log, idx) in resultados[jornada.id]" :key="idx">{{ log }}</li>
-              </ul>
+              <template v-if="Array.isArray(resultados[jornada.id])">
+                <ul>
+                  <li v-for="(log, idx) in resultados[jornada.id]" :key="idx">{{ log }}</li>
+                </ul>
+              </template>
+              <template v-else>
+                <p class="summary-message">{{ resultados[jornada.id].message || 'Proceso completado' }}</p>
+                <div class="summary-grid">
+                  <div class="summary-item">
+                    <span class="summary-label">Partidos</span>
+                    <strong>{{ resultados[jornada.id].partidos ?? 0 }}</strong>
+                  </div>
+                  <div class="summary-item">
+                    <span class="summary-label">Programados</span>
+                    <strong>{{ resultados[jornada.id].programados ?? 0 }}</strong>
+                  </div>
+                  <div class="summary-item">
+                    <span class="summary-label">Aplazados</span>
+                    <strong>{{ resultados[jornada.id].aplazados ?? 0 }}</strong>
+                  </div>
+                </div>
+                <div v-if="resultados[jornada.id].slotsUtilizados" class="slots-summary">
+                  <h5>Franjas usadas</h5>
+                  <ul>
+                    <li v-for="(pistas, slot) in resultados[jornada.id].slotsUtilizados" :key="slot">
+                      {{ slot }}: {{ pistas }} pista<span v-if="pistas !== 1">s</span>
+                    </li>
+                  </ul>
+                </div>
+              </template>
             </div>
           </div>
         </div>
@@ -146,7 +185,18 @@ const cargandoPartidos = reactive({});
 const cargarJornadas = async () => {
   try {
     const res = await axios.get(`${apiUrl}/api/jornadas?limit=300`, config);
-    jornadas.value = res.data.data;
+    const data = res.data.data || [];
+    jornadas.value = [...data].sort((a, b) => {
+      const divA = a?.division?.id ?? 0;
+      const divB = b?.division?.id ?? 0;
+      if (divA !== divB) return divA - divB;
+
+      const numA = Number.isFinite(a?.Numero) ? a.Numero : Number.MAX_SAFE_INTEGER;
+      const numB = Number.isFinite(b?.Numero) ? b.Numero : Number.MAX_SAFE_INTEGER;
+      if (numA !== numB) return numA - numB;
+
+      return (a?.id ?? 0) - (b?.id ?? 0);
+    });
     
     const resDiv = await axios.get(`${apiUrl}/api/divisions`, config);
     divisiones.value = resDiv.data.data;
@@ -286,6 +336,41 @@ const guardarResultado = async (partido) => {
   }
 };
 
+const cerrarJornada = async (jornada) => {
+  if (!confirm(`¿Confirmas cerrar ${jornada.Nombre}? Solo se cerrará si todos sus partidos están en estado Jugado o Aplazado.`)) return;
+
+  procesando.value = 'close_' + jornada.id;
+  try {
+    const res = await axios.post(`${apiUrl}/api/jornadas/${jornada.id}/close`, {}, config);
+    const data = res.data?.data || {};
+
+    await cargarJornadas();
+
+    if (data.nextJornada?.id) {
+      const nextId = data.nextJornada.id;
+      await cargarPartidosDeJornada(nextId);
+      mostrandoPartidos[nextId] = true;
+      resultados[nextId] = {
+        message: `Jornada cerrada. Siguiente jornada activa: ${data.nextJornada.nombre}`,
+        partidos: data.total ?? 0,
+        programados: data.jugados ?? 0,
+        aplazados: data.aplazados ?? 0,
+        slotsUtilizados: {}
+      };
+      alert(`Jornada cerrada y clasificación actualizada. Siguiente: ${data.nextJornada.nombre}`);
+      return;
+    }
+
+    alert('Jornada cerrada y clasificación actualizada. No hay más jornadas siguientes.');
+  } catch (e) {
+    console.error(e);
+    const msg = e.response?.data?.error || e.response?.data?.message || 'No se pudo cerrar la jornada.';
+    alert(msg);
+  } finally {
+    procesando.value = null;
+  }
+};
+
 onMounted(cargarJornadas);
 </script>
 
@@ -335,6 +420,27 @@ onMounted(cargarJornadas);
 .card-info h3 { color: var(--ball); margin-bottom: 5px; }
 .card-info .meta { color: #888; font-size: 0.9rem; }
 
+.badge-estado {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+
+.badge-estado.cerrada {
+  background: rgba(56, 166, 85, 0.2);
+  color: #9be9a8;
+  border-color: rgba(56, 166, 85, 0.5);
+}
+
+.badge-estado.abierta {
+  background: rgba(255, 193, 7, 0.15);
+  color: #ffd666;
+  border-color: rgba(255, 193, 7, 0.45);
+}
+
 .btn-algorithm {
   background: #fff;
   color: #000;
@@ -365,6 +471,46 @@ onMounted(cargarJornadas);
 .results-log h4 { color: #666; margin-bottom: 10px; }
 .results-log ul { list-style: none; color: #0f0; }
 
+.summary-message {
+  margin: 0 0 12px;
+  color: #ddd;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.summary-item {
+  background: #111;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.summary-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #888;
+}
+
+.slots-summary h5 {
+  margin: 0 0 8px;
+  color: var(--ball);
+}
+
+.slots-summary ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #ddd;
+}
+
 .btn-view-matches {
   background: rgba(255,255,255,0.1);
   color: white;
@@ -389,6 +535,21 @@ onMounted(cargarJornadas);
 
 .btn-reset:hover {
   background: #5b1515;
+}
+
+.btn-close-jornada {
+  background: #173f1a;
+  color: #dcffe0;
+  border: 1px solid #2d7b34;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-close-jornada:hover {
+  background: #1e5522;
 }
 
 .btn-view-matches:hover {

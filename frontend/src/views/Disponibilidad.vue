@@ -119,11 +119,13 @@ const cargarDatos = async () => {
       headers: { Authorization: `Bearer ${state.jwt}` }
     };
 
-    // 1. Obtener el perfil de jugador (Nuevo endpoint robusto en Strapi v5)
+    // 1. Obtener el perfil de jugador (incluye division para filtrar jornadas)
+    let divisionId = null;
     try {
       const resMe = await axios.get(`${apiUrl}/api/jugadors/me`, config);
       if (resMe.data.data) {
         jugadorId.value = resMe.data.data.id;
+        divisionId = resMe.data.data?.division?.id || null;
       }
     } catch (e) {
       console.error('Error fetching /jugadors/me:', e);
@@ -133,14 +135,34 @@ const cargarDatos = async () => {
       throw new Error('No se encontró un perfil de jugador vinculado a tu cuenta.');
     }
 
-    // 2. Obtener jornada activa
-    const resJornada = await axios.get(`${apiUrl}/api/jornadas?limit=1`, config);
-    let allJornadas = resJornada.data.data || resJornada.data || [];
-    if (allJornadas.length > 0) {
-      allJornadas.sort((a, b) => b.id - a.id);
-      jornadaActual.value = allJornadas[0];
-    } else {
+    // 2. Obtener jornadas de la division del jugador y escoger la primera abierta.
+    const jornadaParams = { limit: 300 };
+    if (divisionId) jornadaParams.divisionId = divisionId;
+
+    const resJornada = await axios.get(`${apiUrl}/api/jornadas`, {
+      ...config,
+      params: jornadaParams
+    });
+    const allJornadas = resJornada.data.data || resJornada.data || [];
+    if (!allJornadas.length) {
       throw new Error('No hay jornadas activas configuradas.');
+    }
+
+    const jornadasAbiertas = allJornadas
+      .filter(j => j?.cerrada === false)
+      .sort((a, b) => {
+        const numA = Number.isFinite(a?.Numero) ? a.Numero : Number.MAX_SAFE_INTEGER;
+        const numB = Number.isFinite(b?.Numero) ? b.Numero : Number.MAX_SAFE_INTEGER;
+        if (numA !== numB) return numA - numB;
+        return (a?.id ?? 0) - (b?.id ?? 0);
+      });
+
+    if (jornadasAbiertas.length > 0) {
+      jornadaActual.value = jornadasAbiertas[0];
+    } else {
+      // Fallback: si todas estan cerradas, mostrar la mas reciente.
+      const jornadasOrdenadas = [...allJornadas].sort((a, b) => (b?.id ?? 0) - (a?.id ?? 0));
+      jornadaActual.value = jornadasOrdenadas[0];
     }
 
     // 3. Intentar cargar disponibilidad existente usando filtros server-side

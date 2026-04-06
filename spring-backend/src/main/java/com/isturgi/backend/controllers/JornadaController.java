@@ -4,6 +4,8 @@ import com.isturgi.backend.models.Jornada;
 import com.isturgi.backend.models.Partido;
 import com.isturgi.backend.repositories.JornadaRepository;
 import com.isturgi.backend.repositories.PartidoRepository;
+import com.isturgi.backend.services.ClasificacionService;
+import com.isturgi.backend.services.LeagueService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +30,12 @@ public class JornadaController {
     @Autowired
     private PartidoRepository partidoRepository;
 
+    @Autowired
+    private LeagueService leagueService;
+
+    @Autowired
+    private ClasificacionService clasificacionService;
+
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAll(
             @RequestParam(required = false) Long divisionId,
@@ -44,11 +52,22 @@ public class JornadaController {
 
         // Resumen ligero para evitar bloquear frontend al listar jornadas.
         List<Map<String, Object>> list = jornadas.stream().map(j -> {
+            List<Partido> partidos = partidoRepository.findByJornadaIdOrderByIdAsc(j.getId());
+            long jugados = partidos.stream().filter(p -> "Jugado".equalsIgnoreCase(p.getEstado())).count();
+            long aplazados = partidos.stream().filter(p -> "Aplazado".equalsIgnoreCase(p.getEstado())).count();
+            long abiertos = partidos.size() - jugados - aplazados;
+            boolean cerrada = !partidos.isEmpty() && abiertos == 0;
+
             Map<String, Object> item = new LinkedHashMap<>();
             item.put("id", j.getId());
             item.put("Nombre", j.getNombre());
             item.put("Numero", j.getNumero());
             item.put("division", j.getDivision());
+            item.put("cerrada", cerrada);
+            item.put("totalPartidos", partidos.size());
+            item.put("jugados", jugados);
+            item.put("aplazados", aplazados);
+            item.put("abiertos", abiertos);
             return item;
         }).collect(Collectors.toList());
         return ResponseEntity.ok(ApiResponse.of(list));
@@ -79,7 +98,69 @@ public class JornadaController {
 
     @PostMapping("/{id}/schedule")
     public ResponseEntity<Map<String, Object>> schedule(@PathVariable Long id) {
-        return ResponseEntity.ok(ApiResponse.of(List.of("Algoritmo de horarios pronto disponible en Spring Boot...")));
+        Map<String, Object> result = leagueService.programarPartidosJornada(id);
+        if (result.containsKey("error")) {
+            return ResponseEntity.badRequest().body(result);
+        }
+        return ResponseEntity.ok(ApiResponse.of(result));
+    }
+
+    @PostMapping("/{id}/close")
+    public ResponseEntity<Map<String, Object>> close(@PathVariable Long id) {
+        Jornada jornada = repository.findById(id).orElse(null);
+        if (jornada == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<Partido> partidos = partidoRepository.findByJornadaIdOrderByIdAsc(id);
+        if (partidos.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "No hay partidos en esta jornada"));
+        }
+
+        long jugados = partidos.stream().filter(p -> "Jugado".equalsIgnoreCase(p.getEstado())).count();
+        long aplazados = partidos.stream().filter(p -> "Aplazado".equalsIgnoreCase(p.getEstado())).count();
+        long abiertos = partidos.size() - jugados - aplazados;
+
+        if (abiertos > 0) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "error", "No se puede cerrar la jornada: hay partidos pendientes o solo programados",
+                    "abiertos", abiertos,
+                    "jugados", jugados,
+                    "aplazados", aplazados,
+                    "total", partidos.size()
+            ));
+        }
+
+        Long divisionId = jornada.getDivision() != null ? jornada.getDivision().getId() : null;
+        if (divisionId != null) {
+            clasificacionService.recomputeDivision(divisionId);
+        }
+
+        Map<String, Object> nextJornada = null;
+        if (divisionId != null && jornada.getNumero() != null) {
+            List<Jornada> jornadasDivision = repository.findByDivisionIdOrderByNumeroAsc(divisionId);
+            Jornada siguiente = jornadasDivision.stream()
+                    .filter(j -> j.getNumero() != null && j.getNumero() > jornada.getNumero())
+                    .findFirst()
+                    .orElse(null);
+
+            if (siguiente != null) {
+                nextJornada = new LinkedHashMap<>();
+                nextJornada.put("id", siguiente.getId());
+                nextJornada.put("nombre", siguiente.getNombre());
+                nextJornada.put("numero", siguiente.getNumero());
+            }
+        }
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("message", "Jornada cerrada correctamente. Clasificacion actualizada.");
+        result.put("jornadaId", jornada.getId());
+        result.put("total", partidos.size());
+        result.put("jugados", jugados);
+        result.put("aplazados", aplazados);
+        result.put("nextJornada", nextJornada);
+
+        return ResponseEntity.ok(ApiResponse.of(result));
     }
 
     @GetMapping("/division/{divisionId}/jornadas")

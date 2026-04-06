@@ -37,6 +37,11 @@ const routes = [
     meta: { requiresAuth: true, requiresAdmin: true, title: 'Admin · Gestión' }
   },
   {
+    path: '/admin/calendario',
+    component: AdminGestion,
+    meta: { requiresAuth: true, requiresAdmin: true, title: 'Admin · Gestión' }
+  },
+  {
     path: '/admin-mantenimiento',
     component: AdminMantenimiento,
     meta: { requiresAuth: true, requiresAdmin: true, title: 'Admin · Mantenimiento' }
