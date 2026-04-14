@@ -6,10 +6,10 @@ services:
     command: --default-authentication-plugin=mysql_native_password
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: IsturgiRoot_2026_DB94
+      MYSQL_DATABASE: tenis_isturgi
+      MYSQL_USER: tenis_user
+      MYSQL_PASSWORD: IsturgiApp_2026_User57
     volumes:
       - mysql_data:/var/lib/mysql
 
@@ -23,10 +23,9 @@ services:
     environment:
       DB_HOST: db
       DB_PORT: "3306"
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      FIREBASE_SERVICE_ACCOUNT_JSON: ${FIREBASE_SERVICE_ACCOUNT_JSON}
+      DB_NAME: tenis_isturgi
+      DB_USER: tenis_user
+      DB_PASSWORD: IsturgiApp_2026_User57
 
   frontend:
     build:
