@@ -13,11 +13,11 @@ services:
     volumes:
       - mysql_data_v2:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u$$MYSQL_USER -p$$MYSQL_PASSWORD --silent"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-pIsturgiRoot_2026_DB94", "--silent"]
       interval: 10s
       timeout: 5s
       retries: 20
-      start_period: 30s
+      start_period: 60s
 
   backend:
     build:
