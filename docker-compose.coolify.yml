@@ -12,12 +12,6 @@ services:
       MYSQL_PASSWORD: IsturgiApp_2026_User57
     volumes:
       - mysql_data_v2:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-pIsturgiRoot_2026_DB94", "--silent"]
-      interval: 10s
-      timeout: 5s
-      retries: 20
-      start_period: 60s
 
   backend:
     build:
@@ -25,8 +19,7 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     depends_on:
-      db:
-        condition: service_healthy
+      - db
     environment:
       DB_HOST: db
       DB_PORT: "3306"
