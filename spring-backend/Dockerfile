@@ -13,4 +13,4 @@ WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+ENTRYPOINT ["bash", "-lc", "for i in {1..90}; do (echo > /dev/tcp/db/3306) >/dev/null 2>&1 && break; echo 'Waiting for db:3306...'; sleep 2; done; exec java -jar /app/app.jar"]
