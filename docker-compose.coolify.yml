@@ -11,7 +11,7 @@ services:
       MYSQL_USER: tenis_user
       MYSQL_PASSWORD: IsturgiApp_2026_User57
     volumes:
-      - mysql_data:/var/lib/mysql
+      - mysql_data_v2:/var/lib/mysql
 
   backend:
     build:
@@ -45,4 +45,4 @@ services:
       - backend
 
 volumes:
-  mysql_data:
+  mysql_data_v2:
