@@ -33,7 +33,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_API_BASE_URL: http://backend:8080
+        VITE_API_BASE_URL: http://ystmqi9daf5g8za4avnliezn.coolify.iesjandula.es.sslip.io
         VITE_FIREBASE_API_KEY: AIzaSyBxsLRoR_7obGhweEWhaW43XVNH9PMYJfA
         VITE_FIREBASE_AUTH_DOMAIN: tenis-isturgi.firebaseapp.com
         VITE_FIREBASE_PROJECT_ID: tenis-isturgi
