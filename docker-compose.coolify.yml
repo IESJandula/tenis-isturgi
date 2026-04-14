@@ -12,6 +12,12 @@ services:
       MYSQL_PASSWORD: IsturgiApp_2026_User57
     volumes:
       - mysql_data_v2:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u$$MYSQL_USER -p$$MYSQL_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
 
   backend:
     build:
@@ -19,7 +25,8 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       DB_HOST: db
       DB_PORT: "3306"
