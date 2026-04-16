@@ -2,7 +2,7 @@
   <div class="dashboard-container">
     <header class="dashboard-header">
       <div class="user-info">
-        <h1>Hola, {{ state.user?.username || state.user?.nombre || 'Socio' }}</h1>
+        <h1>Hola, {{ displayName }}</h1>
         <div class="user-meta" v-if="state.user?.NumeroSocio">
           <span class="meta-tag">Socio #{{ state.user.NumeroSocio }}</span>
           <span class="meta-tag ranking">{{ state.user.Nivel }}</span>
@@ -58,14 +58,20 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuth } from '../utils/auth';
 
 const { state, logout, isAdmin } = useAuth();
 const router = useRouter();
 
-const handleLogout = () => {
-  logout();
+const displayName = computed(() => {
+  const nombre = [state.user?.Nombre, state.user?.Apellidos].filter(Boolean).join(' ').trim();
+  return nombre || state.user?.displayName || state.user?.email || 'Socio';
+});
+
+const handleLogout = async () => {
+  await logout();
   router.push('/login');
 };
 </script>

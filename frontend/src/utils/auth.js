@@ -23,6 +23,7 @@ onAuthStateChanged(auth, async (firebaseUser) => {
         let userData = {
             email: firebaseUser.email,
             uid: firebaseUser.uid,
+            displayName: firebaseUser.displayName || null,
             isAdmin: VIRTUAL_ADMINS.includes(firebaseUser.email)
         };
 

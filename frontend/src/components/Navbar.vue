@@ -26,16 +26,35 @@
       <router-link to="/contacto">Contacto</router-link>
       
       <router-link v-if="isAuthenticated() && !isAdmin()" to="/disponibilidad">Mi Disponibilidad</router-link>
-      
+
       <router-link v-if="!isAuthenticated()" to="/login" class="btn-login">Soy Socio</router-link>
-      <router-link v-else to="/socio-dashboard" class="btn-login">Mi Panel</router-link>
+
+      <template v-else>
+        <span class="user-greeting">Hola, {{ displayName }}</span>
+        <router-link to="/socio-dashboard" class="btn-login">Mi Panel</router-link>
+        <button type="button" class="btn-logout" @click="handleLogout">Salir</button>
+      </template>
     </div>
   </nav>
 </template>
 
 <script setup>
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { useAuth } from '../utils/auth';
-const { isAuthenticated, isAdmin } = useAuth();
+
+const router = useRouter();
+const { state, isAuthenticated, isAdmin, logout } = useAuth();
+
+const displayName = computed(() => {
+  const nombre = [state.user?.Nombre, state.user?.Apellidos].filter(Boolean).join(' ').trim();
+  return nombre || state.user?.displayName || state.user?.email || 'Socio';
+});
+
+const handleLogout = async () => {
+  await logout();
+  router.push('/login');
+};
 </script>
 
 <style scoped>
@@ -144,6 +163,30 @@ const { isAuthenticated, isAdmin } = useAuth();
 
 .btn-login:hover {
   transform: translateY(-2px);
+}
+
+.user-greeting {
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: rgba(234, 242, 239, 0.9);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.btn-logout {
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(255, 82, 82, 0.08);
+  border: 1px solid rgba(255, 82, 82, 0.28);
+  color: #ff6b6b;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-logout:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 82, 82, 0.12);
 }
 
 @media (max-width: 768px) {

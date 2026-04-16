@@ -4,7 +4,7 @@
       <div class="login-header">
         <img src="/logo-isturgi.jpg" alt="Logo" class="login-logo" />
         <h2>Soy Socio</h2>
-        <p>Benvenido de nuevo a tu club</p>
+        <p>Bienvenido de nuevo a tu club</p>
       </div>
 
       <form @submit.prevent="handleLogin" class="login-form">
@@ -60,7 +60,7 @@ const identifier = ref('');
 const password = ref('');
 
 const handleLogin = async () => {
-  const result = await login(identifier.ref ? identifier.value : identifier.value, password.value);
+  const result = await login(identifier.value, password.value);
   if (result.success) {
     router.push('/socio-dashboard');
   }
