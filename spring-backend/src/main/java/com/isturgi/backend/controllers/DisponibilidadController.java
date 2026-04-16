@@ -9,7 +9,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/disponibilidades")
-@CrossOrigin(origins = "*")
 public class DisponibilidadController {
     @Autowired private DisponibilidadRepository repository;
 

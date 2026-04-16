@@ -10,7 +10,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/temporadas")
-@CrossOrigin(origins = "*") // Allow Vue frontend during development
 public class TemporadaController {
 
     @Autowired

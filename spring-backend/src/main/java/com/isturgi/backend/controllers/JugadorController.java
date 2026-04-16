@@ -20,7 +20,6 @@ import static org.springframework.http.HttpStatus.*;
 
 @RestController
 @RequestMapping("/api/jugadors")
-@CrossOrigin(origins = "*") // Allow Vue frontend during development
 public class JugadorController {
 
     @Autowired

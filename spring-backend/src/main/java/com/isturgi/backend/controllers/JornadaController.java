@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/jornadas")
-@CrossOrigin(origins = "*") // Allow Vue frontend during development
 public class JornadaController {
 
     @Autowired

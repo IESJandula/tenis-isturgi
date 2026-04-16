@@ -5,7 +5,7 @@
         <img src="/logo-isturgi.jpg" alt="Logo Club Tenis Isturgi" class="footer-logo" />
         <div>
           <p class="footer-name headline">Isturgi</p>
-          <p class="footer-sub">Club de Tenis · Andujar</p>
+          <p class="footer-sub">Club de Tenis · Andújar</p>
           <p class="footer-copy">
             Pistas de tierra batida, escuela para todas las edades y competiciones con
             ambiente de club.
@@ -18,7 +18,7 @@
           <h3>Horarios</h3>
           <ul>
             <li>Lunes - Viernes: 09:00 - 22:00</li>
-            <li>Sabado: 09:00 - 20:00</li>
+            <li>Sábado: 09:00 - 20:00</li>
             <li>Domingo: 10:00 - 14:00</li>
           </ul>
         </div>
@@ -45,10 +45,10 @@
           </ul>
         </div>
         <div class="footer-card">
-          <h3>Acceso rapido</h3>
+          <h3>Acceso rápido</h3>
           <ul>
             <li><router-link to="/contacto">Reserva pista</router-link></li>
-            <li><router-link to="/galeria">Galeria</router-link></li>
+            <li><router-link to="/galeria">Galería</router-link></li>
             <li><router-link to="/liga">Liga</router-link></li>
           </ul>
         </div>
@@ -57,7 +57,7 @@
       <div class="footer-cta">
         <div>
           <h3>¿Quieres jugar esta semana?</h3>
-          <p>Reserva pista o unete a la escuela para mejorar tu nivel.</p>
+          <p>Reserva pista o únete a la escuela para mejorar tu nivel.</p>
         </div>
         <router-link to="/contacto" class="btn btn-primary">Reservar ahora</router-link>
       </div>

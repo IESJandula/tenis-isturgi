@@ -10,7 +10,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/torneos")
-@CrossOrigin(origins = "*") // Allow Vue frontend during development
 public class TorneoController {
 
     @Autowired

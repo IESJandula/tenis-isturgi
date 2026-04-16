@@ -13,7 +13,6 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @RestController
 @RequestMapping("/api/contacto")
-@CrossOrigin(origins = "*")
 public class ContactoController {
 
     @Autowired

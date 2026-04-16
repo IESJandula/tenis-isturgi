@@ -333,10 +333,13 @@
 <script setup>
 import { ref, watch, onMounted, computed, reactive } from 'vue';
 import axios from 'axios';
+import { toast } from '../utils/toast';
+import { useAuth } from '../utils/auth';
+
+const { state } = useAuth();
 
 const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-const token = localStorage.getItem('jwt');
-const config = { headers: { Authorization: `Bearer ${token}` } };
+const config = () => ({ headers: { Authorization: `Bearer ${state.jwt}` } });
 
 const activeTab = ref('torneos');
 const tabs = [
@@ -361,7 +364,7 @@ const cargarDatos = async () => {
   if (!token) return;
   cargando.value = true;
   try {
-    const res = await axios.get(`${apiUrl}/api/${activeEndpoint.value}?sort=createdAt:desc`, config);
+    const res = await axios.get(`${apiUrl}/api/${activeEndpoint.value}?sort=createdAt:desc`, config());
     items.value = res.data.data;
   } catch (error) {
     console.error(error);
@@ -431,18 +434,18 @@ const guardarItem = async () => {
     reserved.forEach(k => delete payload[k]);
 
     if (editandoId.value) {
-      await axios.put(`${apiUrl}/api/${activeEndpoint.value}/${editandoId.value}`, payload, config);
+      await axios.put(`${apiUrl}/api/${activeEndpoint.value}/${editandoId.value}`, payload, config());
     } else {
       payload.publishedAt = new Date().toISOString();
-      await axios.post(`${apiUrl}/api/${activeEndpoint.value}`, payload, config);
+      await axios.post(`${apiUrl}/api/${activeEndpoint.value}`, payload, config());
     }
     
-    alert('Guardado correctamente.');
+    toast('Guardado correctamente.', 'success');
     cerrarModal();
     cargarDatos();
   } catch (error) {
     console.error(error);
-    alert('Error al guardar: ' + (error.response?.data?.error?.message || 'Error desconocido'));
+    toast('Error al guardar: ' + (error.response?.data?.error?.message || 'Error desconocido'), 'error');
   } finally {
     guardando.value = false;
   }
@@ -454,12 +457,12 @@ const eliminarItem = async (item) => {
   
   try {
     console.log('Eliminando item:', item);
-    await axios.delete(`${apiUrl}/api/${activeEndpoint.value}/${idToDelete}`, config);
-    alert('Eliminado con éxito.');
+    await axios.delete(`${apiUrl}/api/${activeEndpoint.value}/${idToDelete}`, config());
+    toast('Eliminado con éxito.', 'success');
     cargarDatos();
   } catch (error) {
     console.error('Error al eliminar:', error.response || error);
-    alert('Error al eliminar: ' + (error.response?.data?.error?.message || 'Error desconocido'));
+    toast('Error al eliminar: ' + (error.response?.data?.error?.message || 'Error desconocido'), 'error');
   }
 };
 

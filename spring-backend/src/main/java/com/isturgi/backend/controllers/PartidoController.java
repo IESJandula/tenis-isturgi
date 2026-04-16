@@ -19,7 +19,6 @@ import static org.springframework.http.HttpStatus.*;
 
 @RestController
 @RequestMapping("/api/partidos")
-@CrossOrigin(origins = "*")
 public class PartidoController {
     @Autowired private PartidoRepository repository;
     @Autowired private ClasificacionService clasificacionService;

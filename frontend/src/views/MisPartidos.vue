@@ -116,6 +116,7 @@ import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { useAuth } from '../utils/auth';
+import { toast } from '../utils/toast';
 
 const router = useRouter();
 const { state, isAuthenticated } = useAuth();
@@ -158,7 +159,7 @@ const cerrarFormulario = (docId) => {
 const guardarResultado = async (partido) => {
   const f = formResultados[partido.id];
   if (f.s1_1 === null || f.s1_2 === null || f.s1_1 === '' || f.s1_2 === '') {
-    alert('Introduce al menos el resultado del primer set completo.');
+    toast('Introduce al menos el resultado del primer set completo.', 'warning');
     return;
   }
 
@@ -173,13 +174,13 @@ const guardarResultado = async (partido) => {
     await axios.put(`${apiUrl}/api/partidos/${partido.id}/resultado`, {
       resultado: resStr
     }, config);
-    
-    alert('¡Resultado guardado correctamente! La clasificación se actualizará.');
+
+    toast('Resultado guardado correctamente. La clasificación se actualizará.', 'success');
     cerrarFormulario(partido.id);
     await cargarDatos(); // Recargar partidos
   } catch (e) {
     console.error(e);
-    alert('Error al guardar el resultado. ' + (e.response?.data?.error?.message || ''));
+    toast('Error al guardar el resultado. ' + (e.response?.data?.error?.message || ''), 'error');
   } finally {
     guardando.value = null;
   }

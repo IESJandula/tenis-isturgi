@@ -85,6 +85,7 @@
 import { ref, onMounted, reactive } from 'vue';
 import axios from 'axios';
 import { useAuth } from '../utils/auth';
+import { toast } from '../utils/toast';
 
 const { state } = useAuth();
 
@@ -220,7 +221,7 @@ const guardarDisponibilidad = async () => {
     setTimeout(() => mensajeExito.value = false, 3000);
   } catch (e) {
     console.error(e);
-    alert('Error al guardar la disponibilidad.');
+    toast('Error al guardar la disponibilidad.', 'error');
   } finally {
     guardando.value = false;
   }

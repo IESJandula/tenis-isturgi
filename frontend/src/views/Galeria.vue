@@ -3,10 +3,10 @@
     <header class="galeria-hero glass-card">
       <div>
         <span class="tag">Vista multimedia</span>
-        <h1 class="headline">Galeria del Club Isturgi</h1>
+        <h1 class="headline">Galería del Club Isturgi</h1>
         <p>
           Fotos seleccionadas de entrenos, torneos y vida social. Una mirada real a las
-          pistas de Andujar.
+          pistas de Andújar.
         </p>
       </div>
       <div class="hero-actions">

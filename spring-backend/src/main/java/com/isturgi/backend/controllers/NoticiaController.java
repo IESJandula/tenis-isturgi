@@ -10,7 +10,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/noticias")
-@CrossOrigin(origins = "*") // Allow Vue frontend during development
 public class NoticiaController {
 
     @Autowired

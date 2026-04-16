@@ -75,8 +75,15 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const { isAuthenticated, isAdmin } = useAuth();
 
+  // Si ya estás autenticado, no tiene sentido volver al login
+  if (to.path === '/login' && isAuthenticated()) {
+    const redirect = typeof to.query.redirect === 'string' ? to.query.redirect : '/socio-dashboard';
+    next(redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/socio-dashboard');
+    return;
+  }
+
   if (to.meta.requiresAuth && !isAuthenticated()) {
-    next('/login');
+    next({ path: '/login', query: { redirect: to.fullPath } });
   } else if (to.meta.requiresAdmin && !isAdmin()) {
     next('/socio-dashboard');
   } else {

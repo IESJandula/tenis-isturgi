@@ -10,7 +10,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/clasificacions")
-@CrossOrigin(origins = "*")
 public class ClasificacionController {
 
     @Autowired

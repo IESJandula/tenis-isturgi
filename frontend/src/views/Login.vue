@@ -49,20 +49,32 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useAuth } from '../utils/auth';
 
-const { state, login } = useAuth();
+const { state, login, isAuthenticated } = useAuth();
 const router = useRouter();
+const route = useRoute();
 
 const identifier = ref('');
 const password = ref('');
 
+const redirectTarget = computed(() => {
+  const redirect = route.query.redirect;
+  if (typeof redirect !== 'string') return '/socio-dashboard';
+  if (!redirect.startsWith('/') || redirect.startsWith('//') || redirect.startsWith('/login')) return '/socio-dashboard';
+  return redirect;
+});
+
+if (isAuthenticated()) {
+  router.replace('/socio-dashboard');
+}
+
 const handleLogin = async () => {
   const result = await login(identifier.value, password.value);
   if (result.success) {
-    router.push('/socio-dashboard');
+    router.push(redirectTarget.value);
   }
 };
 </script>

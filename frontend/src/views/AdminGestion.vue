@@ -166,10 +166,13 @@
 <script setup>
 import { ref, onMounted, reactive } from 'vue';
 import axios from 'axios';
+import { toast } from '../utils/toast';
+import { useAuth } from '../utils/auth';
+
+const { state } = useAuth();
 
 const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-const token = localStorage.getItem('jwt');
-const config = { headers: { Authorization: `Bearer ${token}` } };
+const config = () => ({ headers: { Authorization: `Bearer ${state.jwt}` } });
 
 const jornadas = ref([]);
 const divisiones = ref([]);
@@ -184,7 +187,7 @@ const cargandoPartidos = reactive({});
 
 const cargarJornadas = async () => {
   try {
-    const res = await axios.get(`${apiUrl}/api/jornadas?limit=300`, config);
+    const res = await axios.get(`${apiUrl}/api/jornadas?limit=300`, config());
     const data = res.data.data || [];
     jornadas.value = [...data].sort((a, b) => {
       const divA = a?.division?.id ?? 0;
@@ -198,7 +201,7 @@ const cargarJornadas = async () => {
       return (a?.id ?? 0) - (b?.id ?? 0);
     });
     
-    const resDiv = await axios.get(`${apiUrl}/api/divisions`, config);
+    const resDiv = await axios.get(`${apiUrl}/api/divisions`, config());
     divisiones.value = resDiv.data.data;
   } catch (e) {
     console.error(e);
@@ -213,8 +216,8 @@ const generarCalendarioDivision = async (division) => {
   
   procesando.value = 'div_' + division.id;
   try {
-    const res = await axios.post(`${apiUrl}/api/divisions/${division.id}/generar-calendario`, {}, config);
-    alert(`¡Éxito! ${res.data.message}. Se crearon ${res.data.jornadas} jornadas y ${res.data.partidos} partidos.`);
+    const res = await axios.post(`${apiUrl}/api/divisions/${division.id}/generar-calendario`, {}, config());
+    toast(`¡Éxito! ${res.data.message}. Se crearon ${res.data.jornadas} jornadas y ${res.data.partidos} partidos.`, 'success');
     await cargarJornadas();
   } catch (e) {
     console.error(e);
@@ -222,12 +225,12 @@ const generarCalendarioDivision = async (division) => {
     if (msg && msg.includes('ya tiene calendario generado')) {
       const confirmar = confirm(`${division.Nombre} ya tiene calendario. ¿Quieres regenerarlo desde cero? (borra jornadas y partidos de esa división)`);
       if (confirmar) {
-        const r2 = await axios.post(`${apiUrl}/api/divisions/${division.id}/regenerar-calendario`, {}, config);
-        alert(`Calendario regenerado. Jornadas: ${r2.data.jornadas}, partidos: ${r2.data.partidos}.`);
+        const r2 = await axios.post(`${apiUrl}/api/divisions/${division.id}/regenerar-calendario`, {}, config());
+        toast(`Calendario regenerado. Jornadas: ${r2.data.jornadas}, partidos: ${r2.data.partidos}.`, 'success');
         await cargarJornadas();
       }
     } else {
-      alert(msg || 'Error al generar calendario.');
+      toast(msg || 'Error al generar calendario.', 'error');
     }
   } finally {
     procesando.value = null;
@@ -243,13 +246,13 @@ const regenerarCalendarioDivision = async (division) => {
 
   procesando.value = 'reset_' + division.id;
   try {
-    const res = await axios.post(`${apiUrl}/api/divisions/${division.id}/regenerar-calendario`, {}, config);
-    alert(`Calendario regenerado. Jornadas: ${res.data.jornadas}, partidos: ${res.data.partidos}.`);
+    const res = await axios.post(`${apiUrl}/api/divisions/${division.id}/regenerar-calendario`, {}, config());
+    toast(`Calendario regenerado. Jornadas: ${res.data.jornadas}, partidos: ${res.data.partidos}.`, 'success');
     await cargarJornadas();
   } catch (e) {
     console.error(e);
     const msg = e.response?.data?.error || e.response?.data?.message || 'Error al regenerar calendario.';
-    alert(msg);
+    toast(msg, 'error');
   } finally {
     procesando.value = null;
   }
@@ -260,12 +263,12 @@ const lanzarAlgoritmo = async (jornada) => {
   
   procesando.value = jornada.id;
   try {
-    const res = await axios.post(`${apiUrl}/api/jornadas/${jornada.id}/schedule`, {}, config);
+    const res = await axios.post(`${apiUrl}/api/jornadas/${jornada.id}/schedule`, {}, config());
     resultados[jornada.id] = res.data.data;
-    alert('¡Proceso completado! Revisa los logs en la tarjeta.');
+    toast('Proceso completado. Revisa los logs en la tarjeta.', 'success');
   } catch (e) {
     console.error(e);
-    alert('Error al ejecutar el algoritmo.');
+    toast('Error al ejecutar el algoritmo.', 'error');
   } finally {
     procesando.value = null;
   }
@@ -275,7 +278,7 @@ const cargarPartidosDeJornada = async (jornadaId) => {
   if (cargandoPartidos[jornadaId]) return;
   cargandoPartidos[jornadaId] = true;
   try {
-    const res = await axios.get(`${apiUrl}/api/jornadas/${jornadaId}/partidos`, config);
+    const res = await axios.get(`${apiUrl}/api/jornadas/${jornadaId}/partidos`, config());
     partidosJornada[jornadaId] = res.data;
     
     // Inicializar formularios
@@ -290,7 +293,7 @@ const cargarPartidosDeJornada = async (jornadaId) => {
     });
   } catch (e) {
     console.error(e);
-    alert('Error al cargar los partidos.');
+    toast('Error al cargar los partidos.', 'error');
   } finally {
     cargandoPartidos[jornadaId] = false;
   }
@@ -310,7 +313,7 @@ const togglePartidos = async (jornada) => {
 const guardarResultado = async (partido) => {
   const f = formResultados[partido.id];
   if (f.s1_1 === null || f.s1_2 === null) {
-    alert('Introduce al menos el resultado del primer set.');
+    toast('Introduce al menos el resultado del primer set.', 'warning');
     return;
   }
 
@@ -321,9 +324,9 @@ const guardarResultado = async (partido) => {
   try {
     await axios.put(`${apiUrl}/api/partidos/${partido.id}/resultado`, {
       resultado: resStr
-    }, config);
-    
-    alert('Resultado guardado correctamente.');
+    }, config());
+
+    toast('Resultado guardado correctamente.', 'success');
     // Recargar partidos de la jornada
     const jornadaId = Object.keys(partidosJornada).find(jid => partidosJornada[jid].some(p => p.id === partido.id));
     if (jornadaId) {
@@ -332,7 +335,7 @@ const guardarResultado = async (partido) => {
     }
   } catch (e) {
     console.error(e);
-    alert('Error al guardar el resultado.');
+    toast('Error al guardar el resultado.', 'error');
   }
 };
 
@@ -341,7 +344,7 @@ const cerrarJornada = async (jornada) => {
 
   procesando.value = 'close_' + jornada.id;
   try {
-    const res = await axios.post(`${apiUrl}/api/jornadas/${jornada.id}/close`, {}, config);
+    const res = await axios.post(`${apiUrl}/api/jornadas/${jornada.id}/close`, {}, config());
     const data = res.data?.data || {};
 
     await cargarJornadas();
@@ -357,15 +360,15 @@ const cerrarJornada = async (jornada) => {
         aplazados: data.aplazados ?? 0,
         slotsUtilizados: {}
       };
-      alert(`Jornada cerrada y clasificación actualizada. Siguiente: ${data.nextJornada.nombre}`);
+      toast(`Jornada cerrada y clasificación actualizada. Siguiente: ${data.nextJornada.nombre}`, 'success');
       return;
     }
 
-    alert('Jornada cerrada y clasificación actualizada. No hay más jornadas siguientes.');
+    toast('Jornada cerrada y clasificación actualizada. No hay más jornadas siguientes.', 'success');
   } catch (e) {
     console.error(e);
     const msg = e.response?.data?.error || e.response?.data?.message || 'No se pudo cerrar la jornada.';
-    alert(msg);
+    toast(msg, 'error');
   } finally {
     procesando.value = null;
   }
