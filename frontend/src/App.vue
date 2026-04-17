@@ -21,4 +21,15 @@ import ToastHost from './components/ToastHost.vue';
 .app-layout {
   min-height: 100vh;
 }
+
+/* Padding inferior en móvil para no quedar oculto bajo el bottom nav */
+.page {
+  padding-bottom: calc(var(--bottom-nav-h) + 40px);
+}
+
+@media (min-width: 769px) {
+  .page {
+    padding-bottom: 80px;
+  }
+}
 </style>

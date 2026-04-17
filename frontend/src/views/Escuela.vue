@@ -6,9 +6,9 @@
       <div class="hero-content">
         <span class="mini-tag">Formación</span>
         <h1>Escuela Municipal de Tenis</h1>
-        <p class="hero-lead">Aprende tenis desde cero o perfecciona tu técnica con monitores titulados. Desde mini-tenis (4 años) hasta categoría juvenil.</p>
+        <p class="hero-lead">Aprende tenis desde cero o perfecciona tu técnica con monitores titulados. Desde mini-tenis (4 años) hasta categoría senior.</p>
         <div class="hero-badge">
-          <span class="badge-text">Inscripciones Abiertas 25/26</span>
+          <span class="badge-text">Inscripciones Abiertas</span>
         </div>
       </div>
     </section>
@@ -29,7 +29,7 @@
         <div class="info-card">
           <div class="info-icon">👥</div>
           <h3>Grupos Reducidos</h3>
-          <p>Máximo 8 alumnos por grupo para garantizar atención personalizada y progresión efectiva.</p>
+          <p>Máximo 6 alumnos por grupo para garantizar atención personalizada y progresión efectiva.</p>
         </div>
         <div class="info-card">
           <div class="info-icon">🏅</div>
@@ -126,14 +126,14 @@
       <div class="campus-hero">
         <div class="campus-badge">Verano 2025</div>
         <h2>Campus de Verano Tenis y Pádel</h2>
-        <p class="campus-lead">Por segundo año consecutivo, tenis y pádel comparten Campus de Verano. Una semana intensa de deporte, diversión y convivencia.</p>
+        <p class="campus-lead">Durante el verano, tenis y pádel comparten Campus de Verano. Una semana intensa de deporte, diversión y convivencia.</p>
       </div>
 
       <div class="campus-info-grid">
         <div class="campus-info-card">
           <div class="campus-icon">📅</div>
           <h4>Fechas</h4>
-          <p>Del 24 al 30 de junio de 2025</p>
+          <p>Entre junio y julio</p>
         </div>
         <div class="campus-info-card">
           <div class="campus-icon">⏰</div>
@@ -187,7 +187,6 @@
     <section class="inscripcion-section">
       <div class="section-header">
         <h2>Información de Inscripción</h2>
-        <p class="section-subtitle">Curso 2025/2026</p>
       </div>
 
       <div class="inscripcion-content">

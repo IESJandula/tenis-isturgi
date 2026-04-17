@@ -72,28 +72,6 @@
         </div>
       </div>
     </div>
-
-    <section class="media-highlight glass-card">
-      <div>
-        <h2 class="section-title">Highlights del club</h2>
-        <p class="section-subtitle">
-          Un resumen de torneos y entrenamientos con los mejores puntos de la semana.
-        </p>
-      </div>
-      <a
-        class="highlight-card"
-        href="https://www.youtube.com/results?search_query=tenis+club+highlights"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <div class="highlight-media"></div>
-        <div class="highlight-copy">
-          <span class="tag">Video</span>
-          <h3>Ver highlights en YouTube</h3>
-          <p>Abre la lista de reproduccion y comparte los mejores puntos.</p>
-        </div>
-      </a>
-    </section>
   </section>
 </template>
 

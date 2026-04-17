@@ -242,19 +242,22 @@ onMounted(async () => {
 }
 
 /* ============================================
-   HERO NOTICIAS
+   HERO NOTICIAS  (mobile-first)
    ============================================ */
 .hero-noticias {
   position: relative;
   width: 100%;
   overflow: hidden;
-  margin-bottom: 60px;
+  margin-bottom: 40px;
   background: #000;
+  border-radius: 0 0 20px 20px;
 }
 
 .hero-banner {
   width: 100%;
-  max-height: 500px;
+  aspect-ratio: 21 / 9;
+  min-height: 160px;
+  max-height: 520px;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -263,59 +266,69 @@ onMounted(async () => {
 }
 
 .banner-image {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  height: auto;
-  display: block;
+  height: 100%;
   object-fit: cover;
   object-position: center;
-  position: absolute;
+  display: block;
 }
 
 .banner-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(7,16,13,0.75) 0%,
+    rgba(0,0,0,0.4) 55%,
+    rgba(0,0,0,0.25) 100%
+  );
   z-index: 1;
 }
 
 .banner-title {
   position: relative;
   z-index: 2;
+  font-family: "Syne", sans-serif;
   color: #fff;
-  font-size: clamp(2.5rem, 6vw, 4rem);
-  font-weight: 900;
+  font-size: clamp(1.4rem, 5vw, 3.6rem);
+  font-weight: 800;
   text-align: center;
   margin: 0;
-  letter-spacing: 2px;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+  letter-spacing: 1px;
+  text-shadow: 0 2px 16px rgba(0,0,0,0.7);
+  padding: 0 16px;
 }
 
 /* ============================================
    SECCIÓN NOTICIAS
    ============================================ */
 .noticias-section {
-  padding: 0 20px 80px;
+  padding: 0 16px 48px;
 }
 
 .section-header-main {
-  text-align: center;
-  margin-bottom: 48px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
 }
 
 .section-title-main {
-  font-size: clamp(2rem, 4vw, 3rem);
-  font-weight: 900;
+  font-family: "Syne", sans-serif;
+  font-size: clamp(1.5rem, 4vw, 2.4rem);
+  font-weight: 800;
   color: #fff;
-  margin: 0 0 12px;
-  letter-spacing: -0.5px;
+  margin: 0 0 4px;
+  letter-spacing: -0.3px;
 }
 
 .section-subtitle-main {
-  font-size: 1.1rem;
-  color: rgba(234, 242, 239, 0.7);
+  font-size: 0.88rem;
+  color: var(--text-muted);
   margin: 0;
 }
 
@@ -375,11 +388,11 @@ onMounted(async () => {
   margin: 0;
 }
 
-/* Grid de Noticias */
+/* Grid de Noticias – mobile-first: 1 columna base */
 .noticias-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 32px;
+  grid-template-columns: 1fr;
+  gap: 20px;
   max-width: 1400px;
   margin: 0 auto;
 }
@@ -422,12 +435,9 @@ onMounted(async () => {
   opacity: 1;
 }
 
-/* Primera noticia destacada */
+/* Primera noticia destacada – solo en desktop */
 .noticia-card.featured {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: 1.3fr 1fr;
-  gap: 0;
+  /* sin layout especial en móvil */
 }
 
 .noticia-card.featured .card-image-wrapper {
@@ -448,7 +458,7 @@ onMounted(async () => {
 .card-image-wrapper {
   position: relative;
   width: 100%;
-  height: 260px;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   background: linear-gradient(135deg, rgba(199, 255, 52, 0.08), rgba(201, 106, 58, 0.08));
 }
@@ -492,10 +502,10 @@ onMounted(async () => {
 
 /* Contenido de la tarjeta */
 .card-content {
-  padding: 28px;
+  padding: 18px 20px 20px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
   flex: 1;
 }
 
@@ -527,12 +537,13 @@ onMounted(async () => {
 }
 
 .card-title {
-  font-size: 1.5rem;
+  font-family: "Syne", sans-serif;
+  font-size: clamp(1.05rem, 2.5vw, 1.35rem);
   font-weight: 800;
   color: #fff;
   margin: 0;
   line-height: 1.3;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.2px;
 }
 
 .card-description {
@@ -602,91 +613,65 @@ onMounted(async () => {
 .stagger > *:nth-child(n+7) { animation-delay: 0.35s; }
 
 /* ============================================
-   RESPONSIVE
+   RESPONSIVE  (mobile-first breakpoints)
    ============================================ */
-@media (max-width: 1024px) {
+@media (min-width: 480px) {
+  .hero-noticias {
+    border-radius: 0 0 24px 24px;
+    margin-bottom: 48px;
+  }
+}
+
+@media (min-width: 640px) {
+  .noticias-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .noticias-section {
+    padding: 0 24px 56px;
+  }
+}
+
+@media (min-width: 1024px) {
   .noticias-grid {
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  }
-  
-  .noticia-card.featured {
-    grid-template-columns: 1fr;
-  }
-  
-  .noticia-card.featured .card-image-wrapper {
-    min-height: 350px;
-  }
-}
-
-@media (max-width: 768px) {
-  .hero-noticias {
-    min-height: 300px;
-    border-radius: 0 0 16px 16px;
-  }
-  
-  .hero-content {
-    padding: 40px 20px;
-  }
-
-  .noticias-section {
-    padding: 0 20px 60px;
-  }
-  
-  .noticias-grid {
-    grid-template-columns: 1fr;
     gap: 24px;
   }
-  
-  .card-image-wrapper {
-    height: 220px;
-  }
-  
-  .noticia-card.featured .card-image-wrapper {
-    min-height: 280px;
-  }
-  
-  .card-title {
-    font-size: 1.3rem;
-  }
-  
-  .noticia-card.featured .card-title {
-    font-size: 1.8rem;
+
+  .noticias-section {
+    padding: 0 32px 72px;
   }
 
   .section-header-main {
-    margin-bottom: 40px;
+    margin-bottom: 36px;
+  }
+
+  .noticia-card.featured {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1.35fr 1fr;
+    gap: 0;
+  }
+
+  .noticia-card.featured .card-image-wrapper {
+    aspect-ratio: unset;
+    height: 100%;
+    min-height: 400px;
+  }
+
+  .noticia-card.featured .card-title {
+    font-size: 1.9rem;
+  }
+
+  .noticia-card.featured .card-content {
+    padding: 32px;
   }
 }
 
-@media (max-width: 480px) {
-  .hero-banner {
-    max-height: 180px;
-  }
-
-  .noticias-section {
-    padding: 0 16px 40px;
-  }
-  
-  .section-title-main {
-    font-size: 1.8rem;
-  }
-  
-  .section-subtitle-main {
-    font-size: 1rem;
-  }
-  
-  .card-content {
-    padding: 20px;
-  }
-  
-  .section-header-main {
-    margin-bottom: 32px;
-  }
-
-  .loading-state,
-  .error-state,
-  .empty-state {
-    padding: 60px 28px;
+@media (min-width: 1400px) {
+  .hero-noticias {
+    border-radius: 0 0 32px 32px;
   }
 }
 </style>
