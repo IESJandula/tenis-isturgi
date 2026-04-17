@@ -202,6 +202,7 @@ const fotoAlt = (fileName, index) => fotoTenisAlt(fileName, index);
 </script>
 
 <style scoped>
+/* ── Base ─────────────────────────────────── */
 .club-page {
   width: 100%;
 }
@@ -209,15 +210,15 @@ const fotoAlt = (fileName, index) => fotoTenisAlt(fileName, index);
 /* Hero del Club */
 .club-hero {
   position: relative;
-  min-height: 400px;
+  min-height: 240px;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-end;
+  justify-content: flex-start;
   background:
-    linear-gradient(135deg, rgba(8, 15, 18, 0.9), rgba(15, 45, 35, 0.85)),
+    linear-gradient(to top, rgba(8,15,18,0.92) 0%, rgba(8,15,18,0.45) 55%, transparent 100%),
     url("https://images.unsplash.com/photo-1622163642998-1ea32b0bbc67?q=80&w=2400&auto=format&fit=crop") center/cover no-repeat;
-  margin-bottom: 60px;
-  border-radius: 0 0 24px 24px;
+  margin-bottom: 48px;
+  border-radius: 0 0 20px 20px;
 }
 
 .hero-overlay {
