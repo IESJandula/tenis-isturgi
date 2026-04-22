@@ -20,13 +20,13 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_API_BASE_URL: ${SERVICE_URL_BACKEND}
-        VITE_FIREBASE_API_KEY: ${VITE_FIREBASE_API_KEY}
-        VITE_FIREBASE_AUTH_DOMAIN: ${VITE_FIREBASE_AUTH_DOMAIN}
-        VITE_FIREBASE_PROJECT_ID: ${VITE_FIREBASE_PROJECT_ID}
-        VITE_FIREBASE_STORAGE_BUCKET: ${VITE_FIREBASE_STORAGE_BUCKET}
-        VITE_FIREBASE_MESSAGING_SENDER_ID: ${VITE_FIREBASE_MESSAGING_SENDER_ID}
-        VITE_FIREBASE_APP_ID: ${VITE_FIREBASE_APP_ID}
-        VITE_ADMIN_EMAILS: ${VITE_ADMIN_EMAILS}
+        VITE_FIREBASE_API_KEY: AIzaSyBxsLRoR_7obGhweEWhaW43XVNH9PMYJfA
+        VITE_FIREBASE_AUTH_DOMAIN: tenis-isturgi.firebaseapp.com
+        VITE_FIREBASE_PROJECT_ID: tenis-isturgi
+        VITE_FIREBASE_STORAGE_BUCKET: tenis-isturgi.firebasestorage.app
+        VITE_FIREBASE_MESSAGING_SENDER_ID: "707348941864"
+        VITE_FIREBASE_APP_ID: 1:707348941864:web:d54fcecfb0677a6851791d
+        VITE_ADMIN_EMAILS: admin@isturgi.com,socio@isturgi.com,profe@isturgi.com
     restart: unless-stopped
     depends_on:
       - backend
