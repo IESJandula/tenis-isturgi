@@ -3,7 +3,6 @@ version: "3.9"
 services:
   db:
     image: mysql:8.4
-    command: --default-authentication-plugin=mysql_native_password
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: IsturgiRoot_2026_DB94
@@ -12,6 +11,12 @@ services:
       MYSQL_PASSWORD: IsturgiApp_2026_User57
     volumes:
       - mysql_data_v2:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pIsturgiRoot_2026_DB94"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   backend:
     build:
@@ -19,13 +24,15 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       DB_HOST: db
       DB_PORT: "3306"
       DB_NAME: tenis_isturgi
       DB_USER: tenis_user
       DB_PASSWORD: IsturgiApp_2026_User57
+      CORS_ALLOWED_ORIGINS: https://isfen1z2d9wj89ja8xqqe9ac.51.210.104.106.sslip.io,http://isfen1z2d9wj89ja8xqqe9ac.51.210.104.106.sslip.io
 
   frontend:
     build:
