@@ -72,11 +72,11 @@
                 {{ procesando === jornada.id ? 'Procesando...' : 'Generar Horarios' }}
               </button>
               <button
-                @click="cerrarJornada(jornada)"
-                :disabled="procesando !== null || jornada.cerrada"
+                @click="toggleCierreJornada(jornada)"
+                :disabled="procesando !== null"
                 class="btn-close-jornada"
               >
-                {{ jornada.cerrada ? 'Jornada Cerrada' : (procesando === 'close_' + jornada.id ? 'Cerrando...' : 'Cerrar Jornada') }}
+                {{ jornada.cerrada ? (procesando === 'reopen_' + jornada.id ? 'Reabriendo...' : 'Reabrir Jornada') : (procesando === 'close_' + jornada.id ? 'Cerrando...' : 'Cerrar Jornada') }}
               </button>
               <button 
                 @click="togglePartidos(jornada)" 
@@ -299,6 +299,11 @@ const cargarPartidosDeJornada = async (jornadaId) => {
   }
 };
 
+const cargarJornadaCompleta = async (jornadaId) => {
+  const res = await axios.get(`${apiUrl}/api/jornadas/${jornadaId}`, config());
+  return res.data.data;
+};
+
 const togglePartidos = async (jornada) => {
   const docId = jornada.id;
   if (mostrandoPartidos[docId]) {
@@ -339,7 +344,27 @@ const guardarResultado = async (partido) => {
   }
 };
 
-const cerrarJornada = async (jornada) => {
+const toggleCierreJornada = async (jornada) => {
+  if (jornada.cerrada) {
+    if (!confirm(`¿Reabrir ${jornada.Nombre}? Volverá a aceptar disponibilidades.`)) return;
+
+    procesando.value = 'reopen_' + jornada.id;
+    try {
+      const completa = await cargarJornadaCompleta(jornada.id);
+      completa.disponibilidadCerrada = false;
+      const res = await axios.put(`${apiUrl}/api/jornadas/${jornada.id}`, completa, config());
+      toast(`Jornada reabierta: ${res.data?.data?.Nombre || jornada.Nombre}.`, 'success');
+      await cargarJornadas();
+    } catch (e) {
+      console.error(e);
+      const msg = e.response?.data?.error || e.response?.data?.message || 'No se pudo reabrir la jornada.';
+      toast(msg, 'error');
+    } finally {
+      procesando.value = null;
+    }
+    return;
+  }
+
   if (!confirm(`¿Confirmas cerrar ${jornada.Nombre}? Solo se cerrará si todos sus partidos están en estado Jugado o Aplazado.`)) return;
 
   procesando.value = 'close_' + jornada.id;

@@ -30,6 +30,12 @@ public class Jornada {
     @JsonProperty("partidos")
     private List<Partido> partidos;
 
+    @JsonProperty("fechaLimiteDisponibilidad")
+    private LocalDateTime fechaLimiteDisponibilidad;
+
+    @JsonProperty("disponibilidadCerrada")
+    private Boolean disponibilidadCerrada = false;
+
     private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt = LocalDateTime.now();
 }

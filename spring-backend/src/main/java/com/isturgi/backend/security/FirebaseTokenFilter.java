@@ -8,13 +8,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -22,6 +24,27 @@ public class FirebaseTokenFilter extends OncePerRequestFilter {
 
     private static final boolean ALLOW_UNVERIFIED_JWT =
             "true".equalsIgnoreCase(System.getenv("ALLOW_UNVERIFIED_JWT"));
+    private static final List<String> ADMIN_EMAILS = parseAdminEmails();
+
+    private static List<String> parseAdminEmails() {
+        String configured = System.getenv("ADMIN_EMAILS");
+        if (configured == null || configured.isBlank()) {
+            return List.of("admin@isturgi.com", "socio@isturgi.com", "profe@isturgi.com", "admin@admin.com");
+        }
+
+        return Arrays.stream(configured.split(","))
+                .map(String::trim)
+                .filter(email -> !email.isBlank())
+                .toList();
+    }
+
+    private UsernamePasswordAuthenticationToken buildAuthentication(String email) {
+        List<SimpleGrantedAuthority> authorities = ADMIN_EMAILS.contains(email)
+                ? List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))
+                : List.of(new SimpleGrantedAuthority("ROLE_USER"));
+
+        return new UsernamePasswordAuthenticationToken(email, null, authorities);
+    }
 
     private String tryExtractEmailFromJwt(String token) {
         try {
@@ -52,30 +75,23 @@ public class FirebaseTokenFilter extends OncePerRequestFilter {
                 try {
                     FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(token);
                     String email = decodedToken.getEmail();
-                    
-                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            email, null, Collections.emptyList()
-                    );
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                    if (email != null && !email.isBlank()) {
+                        SecurityContextHolder.getContext().setAuthentication(buildAuthentication(email));
+                    }
                 } catch (Exception e) {
                     System.err.println("Error verificando token de Firebase: " + e.getMessage());
 
                     if (ALLOW_UNVERIFIED_JWT) {
                         String email = tryExtractEmailFromJwt(token);
                         if (email != null && !email.isBlank()) {
-                            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                                    email, null, Collections.emptyList()
-                            );
-                            SecurityContextHolder.getContext().setAuthentication(authentication);
+                            SecurityContextHolder.getContext().setAuthentication(buildAuthentication(email));
                         }
                     }
                 }
             } else {
                  // For testing backwards compatibility in local if JWT is simple fake token
-                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        "admin@admin.com", null, Collections.emptyList()
-                );
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                 SecurityContextHolder.getContext().setAuthentication(buildAuthentication("admin@admin.com"));
             }
         }
         

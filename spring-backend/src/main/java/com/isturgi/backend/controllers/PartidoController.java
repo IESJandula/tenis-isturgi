@@ -50,6 +50,8 @@ public class PartidoController {
         ResultadoParsed parsed = ResultadoParsed.from(resultado);
 
         partido.setResultado(resultado);
+        partido.setResultadoEstado("Jugado");
+        partido.setResultadoConfirmadoAt(LocalDateTime.now());
         partido.setEstado("Jugado");
         partido.setSetsFavor(parsed.j1Sets);
         partido.setSetsContra(parsed.j2Sets);
@@ -64,6 +66,72 @@ public class PartidoController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.getName() != null && !auth.getName().isBlank() && !"anonymousUser".equals(auth.getName())) {
             partido.setJugadorQueGuardo(auth.getName());
+        }
+
+        partido.setUpdatedAt(LocalDateTime.now());
+
+        Partido saved = repository.save(partido);
+
+        if (saved.getJornada() != null && saved.getJornada().getDivision() != null && saved.getJornada().getDivision().getId() != null) {
+            clasificacionService.recomputeDivision(saved.getJornada().getDivision().getId());
+        }
+
+        return ResponseEntity.ok(ApiResponse.of(saved));
+    }
+
+    @PutMapping("/{id}/resultado-provisional")
+    public ResponseEntity<Map<String, Object>> guardarResultadoProvisional(@PathVariable Long id, @RequestBody PartidoResultadoRequest body) {
+        Partido partido = repository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND));
+
+        if (body == null || body.getResultado() == null || body.getResultado().isBlank()) {
+            throw new ResponseStatusException(BAD_REQUEST, "Falta 'resultado'");
+        }
+
+        String resultado = body.getResultado().trim();
+        ResultadoParsed parsed = ResultadoParsed.from(resultado);
+
+        partido.setResultado(resultado);
+        partido.setResultadoEstado("Provisional");
+        partido.setResultadoProvisionalAt(LocalDateTime.now());
+        partido.setResultadoConfirmadoAt(null);
+        partido.setEstado("Provisional");
+        partido.setGanador(null);
+        partido.setSetsFavor(parsed.j1Sets);
+        partido.setSetsContra(parsed.j2Sets);
+        partido.setJuegosFavor(parsed.j1Games);
+        partido.setJuegosContra(parsed.j2Games);
+        partido.setUpdatedAt(LocalDateTime.now());
+
+        Partido saved = repository.save(partido);
+        return ResponseEntity.ok(ApiResponse.of(saved));
+    }
+
+    @PutMapping("/{id}/resultado-confirmar")
+    public ResponseEntity<Map<String, Object>> confirmarResultado(@PathVariable Long id) {
+        Partido partido = repository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND));
+
+        if (!"Provisional".equalsIgnoreCase(partido.getResultadoEstado())) {
+            throw new ResponseStatusException(BAD_REQUEST, "El resultado no está en estado provisional");
+        }
+
+        String resultado = partido.getResultado();
+        if (resultado == null || resultado.isBlank()) {
+            throw new ResponseStatusException(BAD_REQUEST, "No hay resultado para confirmar");
+        }
+
+        ResultadoParsed parsed = ResultadoParsed.from(resultado);
+
+        partido.setResultadoEstado("Jugado");
+        partido.setResultadoConfirmadoAt(LocalDateTime.now());
+        partido.setEstado("Jugado");
+        partido.setSetsFavor(parsed.j1Sets);
+        partido.setSetsContra(parsed.j2Sets);
+        partido.setJuegosFavor(parsed.j1Games);
+        partido.setJuegosContra(parsed.j2Games);
+
+        if (partido.getJugador1() != null && partido.getJugador2() != null) {
+            if (parsed.j1Sets > parsed.j2Sets) partido.setGanador(partido.getJugador1());
+            else if (parsed.j2Sets > parsed.j1Sets) partido.setGanador(partido.getJugador2());
         }
 
         partido.setUpdatedAt(LocalDateTime.now());
@@ -99,6 +167,9 @@ public class PartidoController {
         if (patch.getPista() != null) existing.setPista(patch.getPista());
         if (patch.getEstado() != null) existing.setEstado(patch.getEstado());
         if (patch.getResultado() != null) existing.setResultado(patch.getResultado());
+        if (patch.getResultadoEstado() != null) existing.setResultadoEstado(patch.getResultadoEstado());
+        if (patch.getResultadoProvisionalAt() != null) existing.setResultadoProvisionalAt(patch.getResultadoProvisionalAt());
+        if (patch.getResultadoConfirmadoAt() != null) existing.setResultadoConfirmadoAt(patch.getResultadoConfirmadoAt());
         if (patch.getSetsFavor() != null) existing.setSetsFavor(patch.getSetsFavor());
         if (patch.getSetsContra() != null) existing.setSetsContra(patch.getSetsContra());
         if (patch.getJuegosFavor() != null) existing.setJuegosFavor(patch.getJuegosFavor());

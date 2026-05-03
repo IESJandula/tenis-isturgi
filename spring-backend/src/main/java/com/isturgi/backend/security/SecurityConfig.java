@@ -34,8 +34,16 @@ public class SecurityConfig {
                 // Preflight CORS
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                .requestMatchers("/api/partidos/**").authenticated()
-                .requestMatchers("/api/jornadas/**").permitAll()
+                // Lectura pública para calendario y ligas; la escritura queda protegida por rol.
+                .requestMatchers(HttpMethod.GET, "/api/jornadas/**", "/api/partidos/**", "/api/clasificacions/**", "/api/divisions/**", "/api/temporadas/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/jugadors/me").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/jornadas/*/schedule", "/api/jornadas/*/close", "/api/divisions/*/generar-calendario", "/api/divisions/*/regenerar-calendario", "/api/partidos/*/resultado", "/api/partidos/*/resultado-provisional", "/api/partidos/*/resultado-confirmar").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/jornadas", "/api/jornadas/**", "/api/partidos/**", "/api/clasificacions/**", "/api/divisions/**", "/api/temporadas/**", "/api/jugadors/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/jornadas/**", "/api/partidos/**", "/api/clasificacions/**", "/api/divisions/**", "/api/temporadas/**", "/api/jugadors/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/jornadas/**", "/api/partidos/**", "/api/clasificacions/**", "/api/divisions/**", "/api/temporadas/**", "/api/jugadors/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/disponibilidades/**").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/disponibilidades/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/disponibilidades/**").authenticated()
                 .anyRequest().permitAll()
             )
             .addFilterBefore(firebaseTokenFilter, UsernamePasswordAuthenticationFilter.class);

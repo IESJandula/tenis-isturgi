@@ -11,6 +11,7 @@ import com.isturgi.backend.repositories.PartidoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,55 @@ public class ClasificacionService {
         int j2Games;
     }
 
+    private ParsedResultado parseResultado(Partido partido) {
+        ParsedResultado parsed = new ParsedResultado();
+        if (partido == null) {
+            return parsed;
+        }
+
+        if (partido.getSetsFavor() != null || partido.getSetsContra() != null || partido.getJuegosFavor() != null || partido.getJuegosContra() != null) {
+            parsed.j1Sets = partido.getSetsFavor() != null ? partido.getSetsFavor() : 0;
+            parsed.j2Sets = partido.getSetsContra() != null ? partido.getSetsContra() : 0;
+            parsed.j1Games = partido.getJuegosFavor() != null ? partido.getJuegosFavor() : 0;
+            parsed.j2Games = partido.getJuegosContra() != null ? partido.getJuegosContra() : 0;
+            return parsed;
+        }
+
+        return parseResultado(partido.getResultado());
+    }
+
+    private void finalizarResultadoProvisionalSiExpirado(Partido partido) {
+        if (partido == null) {
+            return;
+        }
+
+        if (!"Provisional".equalsIgnoreCase(partido.getResultadoEstado())) {
+            return;
+        }
+
+        LocalDateTime provisionalAt = partido.getResultadoProvisionalAt();
+        if (provisionalAt == null || provisionalAt.isAfter(LocalDateTime.now().minusHours(24))) {
+            return;
+        }
+
+        ParsedResultado parsed = parseResultado(partido);
+        partido.setResultadoEstado("Jugado");
+        partido.setResultadoConfirmadoAt(LocalDateTime.now());
+        partido.setEstado("Jugado");
+        partido.setSetsFavor(parsed.j1Sets);
+        partido.setSetsContra(parsed.j2Sets);
+        partido.setJuegosFavor(parsed.j1Games);
+        partido.setJuegosContra(parsed.j2Games);
+
+        if (partido.getJugador1() != null && partido.getJugador2() != null) {
+            if (parsed.j1Sets > parsed.j2Sets) partido.setGanador(partido.getJugador1());
+            else if (parsed.j2Sets > parsed.j1Sets) partido.setGanador(partido.getJugador2());
+        }
+
+        partido.setUpdatedAt(LocalDateTime.now());
+        partidoRepository.save(partido);
+    }
+
     private ParsedResultado parseResultado(String resultado) {
         ParsedResultado parsed = new ParsedResultado();
         if (resultado == null || resultado.isBlank()) return parsed;
@@ -85,6 +135,11 @@ public class ClasificacionService {
         if (divisionOpt.isEmpty()) return;
         Division division = divisionOpt.get();
 
+        List<Partido> partidosDivision = partidoRepository.findByJornada_Division_Id(divisionId);
+        for (Partido partido : partidosDivision) {
+            finalizarResultadoProvisionalSiExpirado(partido);
+        }
+
         List<Partido> partidosJugados = partidoRepository.findByJornada_Division_IdAndEstadoIgnoreCase(divisionId, "Jugado");
 
         Map<Long, Stats> statsByJugadorId = new HashMap<>();
@@ -96,16 +151,7 @@ public class ClasificacionService {
             Long j2Id = partido.getJugador2().getId();
             if (j1Id == null || j2Id == null) continue;
 
-            ParsedResultado parsed;
-            if (partido.getSetsFavor() != null || partido.getSetsContra() != null || partido.getJuegosFavor() != null || partido.getJuegosContra() != null) {
-                parsed = new ParsedResultado();
-                parsed.j1Sets = partido.getSetsFavor() != null ? partido.getSetsFavor() : 0;
-                parsed.j2Sets = partido.getSetsContra() != null ? partido.getSetsContra() : 0;
-                parsed.j1Games = partido.getJuegosFavor() != null ? partido.getJuegosFavor() : 0;
-                parsed.j2Games = partido.getJuegosContra() != null ? partido.getJuegosContra() : 0;
-            } else {
-                parsed = parseResultado(partido.getResultado());
-            }
+            ParsedResultado parsed = parseResultado(partido);
 
             Stats s1 = statsByJugadorId.computeIfAbsent(j1Id, _k -> new Stats());
             Stats s2 = statsByJugadorId.computeIfAbsent(j2Id, _k -> new Stats());

@@ -40,6 +40,16 @@ public class LeagueService {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private LocalDateTime calcularFechaLimiteDisponibilidad() {
+        LocalDate today = LocalDate.now();
+        int daysUntilWednesday = DayOfWeek.WEDNESDAY.getValue() - today.getDayOfWeek().getValue();
+        if (daysUntilWednesday < 0) {
+            daysUntilWednesday += 7;
+        }
+
+        return today.plusDays(daysUntilWednesday).atTime(23, 59, 0);
+    }
+
     @Transactional
     public Map<String, Object> regenerarCalendarioBerger(Long divisionId) {
         Division division = divisionRepository.findById(divisionId).orElse(null);
@@ -92,6 +102,8 @@ public class LeagueService {
             jornada.setNombre("Jornada " + (j + 1));
             jornada.setNumero(j + 1);
             jornada.setDivision(division);
+            jornada.setFechaLimiteDisponibilidad(calcularFechaLimiteDisponibilidad().plusWeeks(j));
+            jornada.setDisponibilidadCerrada(false);
             jornada = jornadaRepository.save(jornada);
 
             List<Partido> partidosDeJornada = new ArrayList<>();

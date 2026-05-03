@@ -25,6 +25,8 @@ CREATE TABLE IF NOT EXISTS jornadas (
   nombre VARCHAR(255) NOT NULL,
   numero INT,
   division_id BIGINT,
+  fecha_limite_disponibilidad DATETIME,
+  disponibilidad_cerrada BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (division_id) REFERENCES divisiones(id) ON DELETE SET NULL

@@ -24,6 +24,7 @@
           <div class="info-card">
             <h3>{{ jornadaActual?.Nombre || 'Jornada Sin Nombre' }}</h3>
             <p class="deadline">Límite para marcar: <strong>Miércoles 23:59h</strong></p>
+            <p v-if="jornadaCerrada" class="warning">El plazo ya ha terminado para esta jornada.</p>
           </div>
         </div>
 
@@ -70,7 +71,7 @@
         </div>
 
         <div class="actions">
-          <button @click="guardarDisponibilidad" :disabled="guardando" class="btn-save">
+          <button @click="guardarDisponibilidad" :disabled="guardando || jornadaCerrada" class="btn-save">
             {{ guardando ? 'Guardando...' : 'Guardar Disponibilidad' }}
           </button>
           <p v-if="mensajeExito" class="success-message">¡Guardado correctamente! 🎾</p>
@@ -95,6 +96,7 @@ const guardando = ref(false);
 const error = ref(null);
 const mensajeExito = ref(false);
 const jornadaActual = ref(null);
+const jornadaCerrada = ref(false);
 
 // Definición de slots según requisitos
 const slotsDef = [
@@ -166,6 +168,8 @@ const cargarDatos = async () => {
       jornadaActual.value = jornadasOrdenadas[0];
     }
 
+    jornadaCerrada.value = Boolean(jornadaActual.value?.disponibilidadCerrada);
+
     // 3. Intentar cargar disponibilidad existente usando filtros server-side
     const resDisp = await axios.get(`${apiUrl}/api/disponibilidades`, {
       ...config,
@@ -209,6 +213,10 @@ const guardarDisponibilidad = async () => {
       jornada: { id: jornadaActual.value.id },
       slots: JSON.stringify({ ...form })
     };
+
+    if (jornadaCerrada.value) {
+      throw new Error('El plazo para marcar disponibilidad ha finalizado.');
+    }
 
     if (resExistente.length > 0) {
       const docId = resExistente[0].id || resExistente[0].documentId;

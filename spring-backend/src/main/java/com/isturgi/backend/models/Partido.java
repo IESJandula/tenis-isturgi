@@ -49,6 +49,15 @@ public class Partido {
     @JsonProperty("resultado")
     private String resultado;
 
+    @JsonProperty("resultadoEstado")
+    private String resultadoEstado;
+
+    @JsonProperty("resultadoProvisionalAt")
+    private LocalDateTime resultadoProvisionalAt;
+
+    @JsonProperty("resultadoConfirmadoAt")
+    private LocalDateTime resultadoConfirmadoAt;
+
     @JsonProperty("setsFavor")
     private Integer setsFavor;
 

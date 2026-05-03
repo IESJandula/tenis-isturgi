@@ -63,6 +63,8 @@ public class JornadaController {
             item.put("Numero", j.getNumero());
             item.put("division", j.getDivision());
             item.put("cerrada", cerrada);
+            item.put("fechaLimiteDisponibilidad", j.getFechaLimiteDisponibilidad());
+            item.put("disponibilidadCerrada", Boolean.TRUE.equals(j.getDisponibilidadCerrada()) || (j.getFechaLimiteDisponibilidad() != null && java.time.LocalDateTime.now().isAfter(j.getFechaLimiteDisponibilidad())));
             item.put("totalPartidos", partidos.size());
             item.put("jugados", jugados);
             item.put("aplazados", aplazados);
