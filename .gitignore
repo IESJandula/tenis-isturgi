@@ -17,6 +17,14 @@ build/
 # Java / Maven
 **/target/
 
+# H2 local database files
+testdb.mv.db
+testdb.lock.db
+testdb.trace.db
+**/testdb.mv.db
+**/testdb.lock.db
+**/testdb.trace.db
+
 # Local secrets
 **/.env
 **/.env.*
