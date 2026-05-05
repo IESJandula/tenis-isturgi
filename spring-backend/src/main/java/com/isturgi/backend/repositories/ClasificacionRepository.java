@@ -9,4 +9,8 @@ public interface ClasificacionRepository extends JpaRepository<Clasificacion, Lo
     List<Clasificacion> findByDivisionId(Long divisionId);
 
     Optional<Clasificacion> findByDivisionIdAndJugadorId(Long divisionId, Long jugadorId);
+
+    boolean existsByJugador_Id(Long jugadorId);
+
+    void deleteByJugador_Id(Long jugadorId);
 }

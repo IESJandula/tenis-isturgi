@@ -8,5 +8,7 @@ import java.util.Optional;
 @Repository
 public interface JugadorRepository extends JpaRepository<Jugador, Long> {
     Optional<Jugador> findByEmail(String email);
+    Optional<Jugador> findByEmailIgnoreCase(String email);
+    Optional<Jugador> findByFirebaseUid(String firebaseUid);
     java.util.List<Jugador> findByDivisionId(Long divisionId);
 }

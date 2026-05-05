@@ -8,6 +8,7 @@ import java.util.Optional;
 @Repository
 public interface DisponibilidadRepository extends JpaRepository<Disponibilidad, Long> {
 	List<Disponibilidad> findByJugador_Id(Long jugadorId);
+	void deleteByJugador_Id(Long jugadorId);
 	List<Disponibilidad> findByJornada_Id(Long jornadaId);
 	Optional<Disponibilidad> findByJugador_IdAndJornada_Id(Long jugadorId, Long jornadaId);
 	void deleteByJornadaIdIn(List<Long> jornadaIds);

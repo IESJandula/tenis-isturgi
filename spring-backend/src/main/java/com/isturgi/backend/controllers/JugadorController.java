@@ -1,6 +1,9 @@
 package com.isturgi.backend.controllers;
 
 import com.isturgi.backend.models.Jugador;
+import com.isturgi.backend.repositories.ClasificacionRepository;
+import com.isturgi.backend.repositories.DisponibilidadRepository;
+import com.isturgi.backend.repositories.PartidoRepository;
 import com.isturgi.backend.repositories.JugadorRepository;
 import com.isturgi.backend.security.FirebaseService;
 import com.isturgi.backend.controllers.ApiResponse;
@@ -11,10 +14,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import jakarta.servlet.http.HttpServletRequest;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -26,6 +33,15 @@ public class JugadorController {
     private JugadorRepository repository;
 
     @Autowired
+    private PartidoRepository partidoRepository;
+
+    @Autowired
+    private DisponibilidadRepository disponibilidadRepository;
+
+    @Autowired
+    private ClasificacionRepository clasificacionRepository;
+
+    @Autowired
     private FirebaseService firebaseService;
 
     @GetMapping
@@ -35,33 +51,60 @@ public class JugadorController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<Map<String, Object>> getMe() {
+    public ResponseEntity<Map<String, Object>> getMe(HttpServletRequest request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || auth.getName() == null || auth.getName().isBlank() || "anonymousUser".equals(auth.getName())) {
-            return ResponseEntity.status(401).body(Map.of(
+        String authName = (auth != null) ? auth.getName() : null;
+
+        // Si no hay auth en el SecurityContext, intentamos extraer identidad desde la cabecera Authorization
+        AuthIdentity identity = extractIdentity(request, authName);
+        System.out.println("[DEBUG] /api/jugadors/me - SecurityContext authName=" + authName + " extractedEmail=" + identity.email() + " firebaseUid=" + identity.firebaseUid());
+
+        if ((identity.email() == null || identity.email().isBlank())
+                && (identity.firebaseUid() == null || identity.firebaseUid().isBlank())) {
+            return ResponseEntity.status(UNAUTHORIZED).body(Map.of(
                     "ok", false,
                     "error", "No autenticado"
             ));
         }
 
-        String email = auth.getName();
-        Optional<Jugador> jugador = repository.findByEmail(email);
+        Optional<Jugador> jugador = Optional.empty();
+        if (identity.email() != null && !identity.email().isBlank()) {
+            jugador = repository.findByEmailIgnoreCase(identity.email());
+            if (jugador.isEmpty()) {
+                jugador = repository.findByEmail(identity.email());
+            }
+        }
+        if (jugador.isEmpty() && identity.firebaseUid() != null && !identity.firebaseUid().isBlank()) {
+            jugador = repository.findByFirebaseUid(identity.firebaseUid());
+        }
+
         if (jugador.isPresent()) {
-            return ResponseEntity.ok(ApiResponse.of(jugador.get()));
+            Jugador found = jugador.get();
+            if ((found.getFirebaseUid() == null || found.getFirebaseUid().isBlank())
+                    && identity.firebaseUid() != null && !identity.firebaseUid().isBlank()) {
+                found.setFirebaseUid(identity.firebaseUid());
+                found.setUpdatedAt(LocalDateTime.now());
+                found = repository.save(found);
+            }
+            return ResponseEntity.ok(ApiResponse.of(found));
         } else {
+            // No se encontró por email/uid
+            System.out.println("[DEBUG] /api/jugadors/me - jugador no encontrado para email=" + identity.email() + " uid=" + identity.firebaseUid());
             return ResponseEntity.notFound().build();
         }
     }
 
     @PutMapping("/me")
-    public ResponseEntity<Map<String, Object>> updateMe(@RequestBody Jugador patch) {
+    public ResponseEntity<Map<String, Object>> updateMe(HttpServletRequest request, @RequestBody Jugador patch) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || auth.getName() == null || auth.getName().isBlank() || "anonymousUser".equals(auth.getName())) {
+        String authName = (auth != null) ? auth.getName() : null;
+
+        AuthIdentity identity = extractIdentity(request, authName);
+        if ((identity.email() == null || identity.email().isBlank())
+                && (identity.firebaseUid() == null || identity.firebaseUid().isBlank())) {
             throw new ResponseStatusException(UNAUTHORIZED, "No autenticado");
         }
-
-        String email = auth.getName();
-        Jugador existing = repository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(NOT_FOUND));
+        Jugador existing = resolveCurrentJugador(identity);
 
         if (patch.getNombre() != null) existing.setNombre(patch.getNombre());
         if (patch.getApellidos() != null) existing.setApellidos(patch.getApellidos());
@@ -75,6 +118,55 @@ public class JugadorController {
         Jugador updated = repository.save(existing);
         return ResponseEntity.ok(ApiResponse.of(updated));
     }
+
+    private Jugador resolveCurrentJugador(AuthIdentity identity) {
+        if (identity.email() != null && !identity.email().isBlank()) {
+            Optional<Jugador> byEmail = repository.findByEmailIgnoreCase(identity.email());
+            if (byEmail.isPresent()) return byEmail.get();
+            byEmail = repository.findByEmail(identity.email());
+            if (byEmail.isPresent()) return byEmail.get();
+        }
+
+        if (identity.firebaseUid() != null && !identity.firebaseUid().isBlank()) {
+            Optional<Jugador> byUid = repository.findByFirebaseUid(identity.firebaseUid());
+            if (byUid.isPresent()) return byUid.get();
+        }
+
+        throw new ResponseStatusException(NOT_FOUND, "No se encontró un perfil de jugador vinculado a tu cuenta");
+    }
+
+    private AuthIdentity extractIdentity(HttpServletRequest request, String fallbackEmail) {
+        String email = (fallbackEmail != null && fallbackEmail.contains("@")) ? fallbackEmail : null;
+        String firebaseUid = (fallbackEmail != null && fallbackEmail.contains("@")) ? null : fallbackEmail;
+
+        String header = request.getHeader("Authorization");
+        if (header != null && header.startsWith("Bearer ")) {
+            String token = header.substring(7);
+            try {
+                String[] parts = token.split("\\.");
+                if (parts.length >= 2) {
+                    byte[] decoded = Base64.getUrlDecoder().decode(parts[1]);
+                    String json = new String(decoded, StandardCharsets.UTF_8);
+                    Map<?, ?> payload = new com.fasterxml.jackson.databind.ObjectMapper().readValue(json, Map.class);
+                    Object tokenEmail = payload.get("email");
+                    Object tokenUid = payload.get("user_id");
+                    if (tokenUid == null) tokenUid = payload.get("uid");
+                    if (tokenUid == null) tokenUid = payload.get("sub");
+                    if (tokenEmail != null && !tokenEmail.toString().isBlank()) {
+                        email = tokenEmail.toString();
+                    }
+                    if (tokenUid != null && !tokenUid.toString().isBlank()) {
+                        firebaseUid = tokenUid.toString();
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
+        return new AuthIdentity(email, firebaseUid);
+    }
+
+    private record AuthIdentity(String email, String firebaseUid) {}
 
     @GetMapping("/{id}")
     public ResponseEntity<Map<String, Object>> getById(@PathVariable Long id) {
@@ -134,9 +226,14 @@ public class JugadorController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    @Transactional
+    public ResponseEntity<Map<String, Object>> delete(@PathVariable Long id) {
         if (!repository.existsById(id)) return ResponseEntity.notFound().build();
+
+        partidoRepository.deleteByJugador1_IdOrJugador2_IdOrGanador_Id(id, id, id);
+        disponibilidadRepository.deleteByJugador_Id(id);
+        clasificacionRepository.deleteByJugador_Id(id);
         repository.deleteById(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(Map.of("ok", true));
     }
 }

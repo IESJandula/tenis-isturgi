@@ -7,6 +7,8 @@ import java.util.List;
 @Repository
 public interface PartidoRepository extends JpaRepository<Partido, Long> {
 	List<Partido> findByJugador1_IdOrJugador2_Id(Long jugador1Id, Long jugador2Id);
+	List<Partido> findByJugador1_IdOrJugador2_IdOrGanador_Id(Long jugador1Id, Long jugador2Id, Long ganadorId);
+	void deleteByJugador1_IdOrJugador2_IdOrGanador_Id(Long jugador1Id, Long jugador2Id, Long ganadorId);
 
 	List<Partido> findByJornada_Id(Long jornadaId);
 	List<Partido> findByJornada_Division_Id(Long divisionId);

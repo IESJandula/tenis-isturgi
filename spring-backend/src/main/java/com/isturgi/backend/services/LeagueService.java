@@ -304,7 +304,17 @@ public class LeagueService {
         try {
             return objectMapper.readValue(slotsJson, new TypeReference<Map<String, Map<String, Boolean>>>() {});
         } catch (Exception e) {
-            return Map.of();
+            try {
+                // Compatibilidad con datos legacy donde el JSON se almacenó como string JSON
+                // Ejemplo: "{\"sabado\":{\"16:00\":true}}"
+                String decoded = objectMapper.readValue(slotsJson, String.class);
+                if (decoded == null || decoded.isBlank()) {
+                    return Map.of();
+                }
+                return objectMapper.readValue(decoded, new TypeReference<Map<String, Map<String, Boolean>>>() {});
+            } catch (Exception ignored) {
+                return Map.of();
+            }
         }
     }
 

@@ -65,6 +65,15 @@
                   <th>Email</th>
                   <th>Acciones</th>
                 </tr>
+                <tr v-if="activeTab === 'temporadas'">
+                  <th>Nombre</th>
+                  <th>Acciones</th>
+                </tr>
+                <tr v-if="activeTab === 'divisiones'">
+                  <th>Nombre</th>
+                  <th>Temporada</th>
+                  <th>Acciones</th>
+                </tr>
                 <tr v-if="activeTab === 'galeria'">
                   <th>Miniatura</th>
                   <th>Título</th>
@@ -93,6 +102,17 @@
                     <td><strong>{{ item.Nombre }} {{ item.Apellidos }}</strong></td>
                     <td><span class="tag-nivel">{{ item.Nivel || 'Sin nivel' }}</span></td>
                     <td>{{ item.Email }}</td>
+                  </template>
+
+                  <!-- COLUMNAS TEMPORADAS -->
+                  <template v-if="activeTab === 'temporadas'">
+                    <td><strong>{{ item.Nombre }}</strong></td>
+                  </template>
+
+                  <!-- COLUMNAS DIVISIONES -->
+                  <template v-if="activeTab === 'divisiones'">
+                    <td><strong>{{ item.Nombre }}</strong></td>
+                    <td>{{ item.temporada?.Nombre || item.temporada?.nombre || 'Sin temporada' }}</td>
                   </template>
 
                   <!-- COLUMNAS GALERIA -->
@@ -289,6 +309,40 @@
                 </div>
               </div>
             </div>
+            <div class="form-group">
+              <label>División</label>
+              <select v-model="form.divisionId" required>
+                <option value="" disabled>Selecciona una división</option>
+                <option v-for="div in divisiones" :key="div.id" :value="div.id">
+                  {{ div.Nombre || `División ${div.id}` }}
+                </option>
+              </select>
+            </div>
+          </template>
+
+          <!-- CAMPOS TEMPORADA -->
+          <template v-if="activeTab === 'temporadas'">
+            <div class="form-group">
+              <label>Nombre de la Temporada</label>
+              <input v-model="form.Nombre" required placeholder="Ej: Temporada 2026">
+            </div>
+          </template>
+
+          <!-- CAMPOS DIVISION -->
+          <template v-if="activeTab === 'divisiones'">
+            <div class="form-group">
+              <label>Nombre de la División</label>
+              <input v-model="form.Nombre" required placeholder="Ej: División A">
+            </div>
+            <div class="form-group">
+              <label>Temporada</label>
+              <select v-model="form.temporadaId" required>
+                <option value="" disabled>Selecciona una temporada</option>
+                <option v-for="temporada in temporadas" :key="temporada.id" :value="temporada.id">
+                  {{ temporada.Nombre || temporada.nombre || `Temporada ${temporada.id}` }}
+                </option>
+              </select>
+            </div>
           </template>
 
           <!-- CAMPOS GALERIA -->
@@ -346,10 +400,14 @@ const tabs = [
   { id: 'torneos', label: 'Torneos', singular: 'Torneo', endpoint: 'torneos' },
   { id: 'noticias', label: 'Noticias', singular: 'Noticia', endpoint: 'noticias' },
   { id: 'jugadores', label: 'Jugadores', singular: 'Jugador', endpoint: 'jugadors' },
+  { id: 'temporadas', label: 'Temporadas', singular: 'Temporada', endpoint: 'temporadas' },
+  { id: 'divisiones', label: 'Divisiones', singular: 'División', endpoint: 'divisions' },
   { id: 'galeria', label: 'Galería', singular: 'Foto', endpoint: 'galeria' }
 ];
 
 const items = ref([]);
+const temporadas = ref([]);
+const divisiones = ref([]);
 const cargando = ref(false);
 const guardando = ref(false);
 const showModal = ref(false);
@@ -361,13 +419,45 @@ const activeTabSingular = computed(() => tabs.find(t => t.id === activeTab.value
 const activeEndpoint = computed(() => tabs.find(t => t.id === activeTab.value)?.endpoint);
 
 const cargarDatos = async () => {
-  if (!token) return;
+  // Esperar a que el estado de auth esté inicializado y haya un token válido
+  if (!state.initialized) return;
+  if (!state.jwt) return;
   cargando.value = true;
   try {
     const res = await axios.get(`${apiUrl}/api/${activeEndpoint.value}?sort=createdAt:desc`, config());
-    items.value = res.data.data;
+    items.value = res.data.data || [];
+
+    if (activeTab.value === 'divisiones') {
+      try {
+        const resTemporadas = await axios.get(`${apiUrl}/api/temporadas?sort=createdAt:desc`, config());
+        temporadas.value = resTemporadas.data.data || [];
+      } catch (e) {
+        console.warn('No se pudieron cargar las temporadas:', e);
+        temporadas.value = [];
+      }
+    }
+
+    if (activeTab.value === 'jugadores') {
+      try {
+        const resDivisiones = await axios.get(`${apiUrl}/api/divisions?sort=createdAt:desc`, config());
+        divisiones.value = resDivisiones.data.data || [];
+      } catch (e) {
+        console.warn('No se pudieron cargar las divisiones:', e);
+        divisiones.value = [];
+      }
+    }
   } catch (error) {
-    console.error(error);
+    console.error('Error cargando datos de administración:', error);
+    let serverMsg = error.response?.data?.error?.message || error.response?.data?.message || error.response?.data || error.message || 'Error desconocido';
+    if (typeof serverMsg === 'object') {
+      try { serverMsg = JSON.stringify(serverMsg); } catch (e) { serverMsg = String(serverMsg); }
+    }
+    // Si es 401/403, dar indicación útil
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      toast('No autorizado: ' + serverMsg + '. Comprueba que tu usuario es administrador.', 'error');
+    } else {
+      toast('Error cargando datos: ' + serverMsg, 'error');
+    }
   } finally {
     cargando.value = false;
   }
@@ -397,6 +487,12 @@ const abrirNuevo = () => {
     form.Nivel = 'Medio';
     form.Puntos = 0;
     form.Foto = '';
+    form.divisionId = divisiones.value.length ? divisiones.value[0].id : '';
+  } else if (activeTab.value === 'temporadas') {
+    form.Nombre = '';
+  } else if (activeTab.value === 'divisiones') {
+    form.Nombre = '';
+    form.temporadaId = temporadas.value.length ? temporadas.value[0].id : '';
   } else if (activeTab.value === 'galeria') {
     form.titulo = '';
     form.categoria = 'Club';
@@ -416,6 +512,7 @@ const editarItem = (item) => {
   if (form.FechaInicio) form.FechaInicio = new Date(form.FechaInicio).toISOString().substring(0, 10);
   if (form.FechaFin) form.FechaFin = new Date(form.FechaFin).toISOString().substring(0, 10);
   if (form.FechaNacimiento) form.FechaNacimiento = new Date(form.FechaNacimiento).toISOString().substring(0, 10);
+  if (form.temporada?.id && !form.temporadaId) form.temporadaId = form.temporada.id;
   
   showModal.value = true;
 };
@@ -433,6 +530,16 @@ const guardarItem = async () => {
     const reserved = ['id', 'documentId', 'createdAt', 'updatedAt', 'publishedAt', 'locale', 'localizations', 'division', 'user'];
     reserved.forEach(k => delete payload[k]);
 
+    if (activeTab.value === 'divisiones') {
+      payload.temporada = { id: Number(payload.temporadaId) };
+      delete payload.temporadaId;
+    }
+
+    if (activeTab.value === 'jugadores' && payload.divisionId) {
+      payload.division = { id: Number(payload.divisionId) };
+      delete payload.divisionId;
+    }
+
     if (editandoId.value) {
       await axios.put(`${apiUrl}/api/${activeEndpoint.value}/${editandoId.value}`, payload, config());
     } else {
@@ -445,7 +552,11 @@ const guardarItem = async () => {
     cargarDatos();
   } catch (error) {
     console.error(error);
-    toast('Error al guardar: ' + (error.response?.data?.error?.message || 'Error desconocido'), 'error');
+    let serverMsg = error.response?.data?.error?.message || error.response?.data?.message || error.response?.data || error.message || 'Error desconocido';
+    if (typeof serverMsg === 'object') {
+      try { serverMsg = JSON.stringify(serverMsg); } catch(e) { serverMsg = String(serverMsg); }
+    }
+    toast('Error al guardar: ' + serverMsg, 'error');
   } finally {
     guardando.value = false;
   }
@@ -462,12 +573,32 @@ const eliminarItem = async (item) => {
     cargarDatos();
   } catch (error) {
     console.error('Error al eliminar:', error.response || error);
-    toast('Error al eliminar: ' + (error.response?.data?.error?.message || 'Error desconocido'), 'error');
+    let serverMsg = error.response?.data?.error?.message || error.response?.data?.message || error.response?.data || error.message || 'Error desconocido';
+    if (typeof serverMsg === 'object') {
+      try { serverMsg = JSON.stringify(serverMsg); } catch(e) { serverMsg = String(serverMsg); }
+    }
+    toast('Error al eliminar: ' + serverMsg, 'error');
   }
 };
 
 watch(activeTab, cargarDatos);
-onMounted(cargarDatos);
+watch(() => state.jwt, (val) => {
+  if (val) cargarDatos();
+});
+
+onMounted(() => {
+  if (state.initialized && state.jwt) {
+    cargarDatos();
+  } else {
+    // esperar a la inicialización de auth
+    const stop = watch(() => state.initialized, (v) => {
+      if (v) {
+        if (state.jwt) cargarDatos();
+        stop();
+      }
+    });
+  }
+});
 </script>
 
 <style scoped>

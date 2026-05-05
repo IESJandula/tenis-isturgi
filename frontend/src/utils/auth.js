@@ -57,16 +57,27 @@ const login = async (identifier, password) => {
     state.error = null;
     try {
         await signInWithEmailAndPassword(auth, identifier, password);
-        // onAuthStateChanged actualizará el estado
-        return { success: true };
+        
+        // Esperar a que onAuthStateChanged actualice el estado (jwt y user)
+        return new Promise((resolve) => {
+            const checkState = () => {
+                if (state.jwt && state.user) {
+                    state.loading = false;
+                    resolve({ success: true });
+                } else {
+                    // Reintentar después de 50ms
+                    setTimeout(checkState, 50);
+                }
+            };
+            checkState();
+        });
     } catch (err) {
         state.error = err.message || 'Error al iniciar sesión';
         if (state.error.includes('auth/invalid-credential')) {
             state.error = 'Correo o contraseña incorrectos';
         }
-        return { success: false, error: state.error };
-    } finally {
         state.loading = false;
+        return { success: false, error: state.error };
     }
 };
 
