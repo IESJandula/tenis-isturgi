@@ -12,15 +12,18 @@ import AdminGestion from '../views/AdminGestion.vue'
 import AdminMantenimiento from '../views/AdminMantenimiento.vue'
 import Login from '../views/Login.vue'
 import SocioDashboard from '../views/SocioDashboard.vue'
+import AdminDashboard from '../views/AdminDashboard.vue'
 import MisPartidos from '../views/MisPartidos.vue'
 import PerfilSocio from '../views/PerfilSocio.vue'
 import NoticiaDetalle from '../pages/noticiaDetalle.vue'
 import TorneoDetalle from '../pages/torneoDetalle.vue'
+import JugadorPerfil from '../views/JugadorPerfil.vue'
 import { useAuth } from '../utils/auth'
 
 const routes = [
   { path: '/', component: Home, meta: { title: 'Inicio' } },
   { path: '/liga', component: Liga, meta: { title: 'Liga' } },
+  { path: '/jugador/:id', component: JugadorPerfil, meta: { title: 'Perfil de Jugador' } },
   { path: '/galeria', component: Galeria, meta: { title: 'Galería' } },
   { path: '/club', component: Club, meta: { title: 'El Club' } },
   { path: '/escuela', component: Escuela, meta: { title: 'Escuela' } },
@@ -32,9 +35,9 @@ const routes = [
     meta: { requiresAuth: true, title: 'Disponibilidad' }
   },
   {
-    path: '/admin-gestion',
-    component: AdminGestion,
-    meta: { requiresAuth: true, requiresAdmin: true, title: 'Admin · Gestión' }
+    path: '/admin/dashboard',
+    component: AdminDashboard,
+    meta: { requiresAuth: true, requiresAdmin: true, title: 'Admin · Dashboard' }
   },
   {
     path: '/admin/calendario',

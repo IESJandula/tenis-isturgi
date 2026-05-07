@@ -1,11 +1,40 @@
 <template>
   <div class="home fade-in">
-    <!-- Hero con banner original -->
-    <section class="hero-noticias">
-      <div class="hero-banner">
-        <img src="/cancha.jpg" alt="Club de Tenis Isturgi" class="banner-image" />
-        <div class="banner-overlay"></div>
-        <h1 class="banner-title">CLUB DE TENIS ISTURGI</h1>
+    <!-- Hero Premium (Sin vídeo, pero con diseño de impacto) -->
+    <section class="hero-premium">
+      <div class="hero-bg">
+        <img src="/cancha.jpg" alt="Club de Tenis Isturgi" class="hero-img" />
+        <div class="hero-overlay"></div>
+      </div>
+      
+      <div class="hero-content-wrapper">
+        <div class="hero-glass-card fade-in-up">
+          <span class="hero-tag">Temporada 2026</span>
+          <h1 class="hero-title">Club de Tenis <br/> <span class="highlight">Isturgi</span></h1>
+          <p class="hero-text">
+            Vive la pasión del tenis en las mejores instalaciones de Andújar. 
+            Únete a nuestra liga social y compite al más alto nivel.
+          </p>
+          <div class="hero-actions">
+            <router-link to="/liga" class="btn btn-primary btn-hero">Explorar Liga</router-link>
+            <router-link to="/club" class="btn btn-outline btn-hero">Conocer el Club</router-link>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-stats">
+        <div class="hero-stat-item">
+          <span class="val">120+</span>
+          <span class="lbl">Socios</span>
+        </div>
+        <div class="hero-stat-item">
+          <span class="val">6</span>
+          <span class="lbl">Pistas</span>
+        </div>
+        <div class="hero-stat-item">
+          <span class="val">15</span>
+          <span class="lbl">Torneos/año</span>
+        </div>
       </div>
     </section>
 
@@ -242,63 +271,155 @@ onMounted(async () => {
 }
 
 /* ============================================
-   HERO NOTICIAS  (mobile-first)
+   HERO PREMIUM
    ============================================ */
-.hero-noticias {
+.hero-premium {
   position: relative;
-  width: 100%;
-  overflow: hidden;
-  margin-bottom: 40px;
-  background: #000;
-  border-radius: 0 0 20px 20px;
-}
-
-.hero-banner {
-  width: 100%;
-  aspect-ratio: 21 / 9;
-  min-height: 160px;
-  max-height: 520px;
-  overflow: hidden;
+  height: 90vh;
+  min-height: 600px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  position: relative;
+  padding: 0 5%;
+  overflow: hidden;
+  margin-bottom: 64px;
 }
 
-.banner-image {
+.hero-bg {
   position: absolute;
   inset: 0;
+  z-index: 0;
+}
+
+.hero-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  filter: brightness(0.6) scale(1.1);
+  animation: slowZoom 20s infinite alternate linear;
+}
+
+@keyframes slowZoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.15); }
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+}
+
+.hero-content-wrapper {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+}
+
+.hero-glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  padding: 64px;
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
+}
+
+.hero-tag {
+  color: var(--ball);
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 2px;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
   display: block;
 }
 
-.banner-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to top,
-    rgba(7,16,13,0.75) 0%,
-    rgba(0,0,0,0.4) 55%,
-    rgba(0,0,0,0.25) 100%
-  );
-  z-index: 1;
+.hero-title {
+  font-family: "Syne", sans-serif;
+  font-size: 5rem;
+  font-weight: 800;
+  line-height: 1;
+  margin: 0 0 24px;
+  color: #fff;
 }
 
-.banner-title {
-  position: relative;
-  z-index: 2;
-  font-family: "Syne", sans-serif;
+.hero-title .highlight {
+  color: var(--ball);
+  text-shadow: var(--glow);
+}
+
+.hero-text {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 40px;
+  max-width: 500px;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 20px;
+}
+
+.btn-hero {
+  padding: 18px 40px;
+  font-size: 1rem;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.2);
   color: #fff;
-  font-size: clamp(1.4rem, 5vw, 3.6rem);
+}
+
+.btn-outline:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: #fff;
+}
+
+.hero-stats {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: var(--ball);
+  color: var(--ink);
+  display: flex;
+  padding: 32px 64px;
+  gap: 64px;
+  border-radius: 40px 0 0 0;
+  z-index: 3;
+}
+
+.hero-stat-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-stat-item .val {
+  font-family: "Syne", sans-serif;
+  font-size: 2.5rem;
   font-weight: 800;
-  text-align: center;
-  margin: 0;
-  letter-spacing: 1px;
-  text-shadow: 0 2px 16px rgba(0,0,0,0.7);
-  padding: 0 16px;
+  line-height: 1;
+}
+
+.hero-stat-item .lbl {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+@media (max-width: 1024px) {
+  .hero-glass-card { padding: 40px; }
+  .hero-title { font-size: 3.5rem; }
+  .hero-stats { padding: 24px 40px; gap: 32px; }
+}
+
+@media (max-width: 768px) {
+  .hero-premium { height: auto; padding: 120px 20px 60px; }
+  .hero-glass-card { background: transparent; backdrop-filter: none; padding: 0; border: none; box-shadow: none; }
+  .hero-overlay { background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.6) 100%); }
+  .hero-stats { position: relative; border-radius: 20px; margin-top: 40px; width: 100%; right: auto; justify-content: space-around; }
 }
 
 /* ============================================
@@ -399,40 +520,22 @@ onMounted(async () => {
 
 /* Tarjeta de Noticia */
 .noticia-card {
-  background: rgba(9, 13, 15, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-stroke);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1);
   position: relative;
 }
 
-.noticia-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 20px;
-  padding: 2px;
-  background: linear-gradient(135deg, var(--ball), rgba(201, 106, 58, 0.5));
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  opacity: 0;
-  transition: opacity 0.4s ease;
-  pointer-events: none;
-}
-
 .noticia-card:hover {
-  transform: translateY(-12px);
-  box-shadow: 
-    0 30px 60px rgba(0, 0, 0, 0.4),
-    0 0 60px rgba(199, 255, 52, 0.2);
-}
-
-.noticia-card:hover::after {
-  opacity: 1;
+  transform: translateY(-8px);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--ball);
+  box-shadow: var(--shadow-lg), var(--glow);
 }
 
 /* Primera noticia destacada – solo en desktop */

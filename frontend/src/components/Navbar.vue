@@ -55,7 +55,8 @@
           <router-link to="/socio-dashboard" class="dropdown-item" role="menuitem" @click="closeAllMenus">Mi panel</router-link>
           <router-link v-if="!isAdmin()" to="/mi-perfil" class="dropdown-item" role="menuitem" @click="closeAllMenus">Mi perfil</router-link>
           <router-link v-if="!isAdmin()" to="/mis-partidos" class="dropdown-item" role="menuitem" @click="closeAllMenus">Mis partidos</router-link>
-          <router-link v-if="isAdmin()" to="/admin-gestion" class="dropdown-item" role="menuitem" @click="closeAllMenus">Admin · Gestión</router-link>
+          <router-link v-if="isAdmin()" to="/admin/dashboard" class="dropdown-item" role="menuitem" @click="closeAllMenus">Admin · Dashboard</router-link>
+          <router-link v-if="isAdmin()" to="/admin/calendario" class="dropdown-item" role="menuitem" @click="closeAllMenus">Admin · Calendario</router-link>
           <router-link v-if="isAdmin()" to="/admin-mantenimiento" class="dropdown-item" role="menuitem" @click="closeAllMenus">Admin · Mantenimiento</router-link>
           <button type="button" class="dropdown-item danger" role="menuitem" @click="handleLogout">Cerrar sesión</button>
         </div>

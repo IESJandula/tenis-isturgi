@@ -40,30 +40,61 @@
 
     <template v-else>
       <!-- VISTA CALENDARIO -->
-      <section v-if="vista === 'calendario'" class="jornadas-grid">
-        <article v-for="(jornada, index) in jornadas" :key="jornada.id" class="jornada-card">
+      <section v-if="vista === 'calendario'" class="jornadas-grid stagger">
+        <article v-for="(jornada, index) in jornadas" :key="jornada.id" class="jornada-card glass-card">
           <div class="jornada-header">
-            <h2>Jornada {{ jornada.numero ?? index + 1 }}</h2>
+            <h2 class="headline">Jornada {{ jornada.numero ?? index + 1 }}</h2>
             <span class="jornada-nombre">{{ jornada.Nombre || 'Sin nombre' }}</span>
           </div>
 
           <ul v-if="jornada.partidos && jornada.partidos.length" class="partidos-list">
             <li v-for="partido in jornada.partidos" :key="partido.id" class="partido-item">
-              <div class="jugadores">
-                <span class="jugador" :class="{ ganador: elGanadorEs(partido, 1) }">
-                  {{ nombreJugador(partido.jugador1) }}
-                </span>
-                <span class="vs">vs</span>
-                <span class="jugador" :class="{ ganador: elGanadorEs(partido, 2) }">
-                  {{ nombreJugador(partido.jugador2) }}
-                </span>
+              <div class="match-info">
+                <div class="jugadores">
+                  <router-link 
+                    v-if="partido.jugador1" 
+                    :to="'/jugador/' + partido.jugador1.id" 
+                    class="jugador-link"
+                    :class="{ ganador: elGanadorEs(partido, 1) }"
+                  >
+                    {{ nombreJugador(partido.jugador1) }}
+                  </router-link>
+                  <span v-else class="jugador">Por confirmar</span>
+                  
+                  <span class="vs">vs</span>
+                  
+                  <router-link 
+                    v-if="partido.jugador2" 
+                    :to="'/jugador/' + partido.jugador2.id" 
+                    class="jugador-link"
+                    :class="{ ganador: elGanadorEs(partido, 2) }"
+                  >
+                    {{ nombreJugador(partido.jugador2) }}
+                  </router-link>
+                  <span v-else class="jugador">Por confirmar</span>
+                </div>
+                
+                <div v-if="partido.estado === 'Jugado'" class="resultado-badge">
+                  {{ partido.resultado }}
+                </div>
               </div>
-              <div class="resultado-inline" v-if="partido.estado === 'Jugado'">
-                {{ partido.resultado }}
-              </div>
+
               <div class="meta">
-                <span class="estado-pill">{{ partido.estado || 'Pendiente' }}</span>
-                <span v-if="formatoMeta(partido)" class="detalle">{{ formatoMeta(partido) }}</span>
+                <div class="details">
+                  <span class="estado-pill" :class="partido.estado?.toLowerCase()">{{ partido.estado || 'Pendiente' }}</span>
+                  <span v-if="formatoMeta(partido)" class="detalle">{{ formatoMeta(partido) }}</span>
+                </div>
+                
+                <button 
+                  v-if="isAdmin()" 
+                  class="btn-edit-result"
+                  title="Editar resultado"
+                  @click="abrirModal(partido)"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </button>
               </div>
             </li>
           </ul>
@@ -96,7 +127,9 @@
               <tr v-for="(fila, idx) in clasificacion" :key="fila.id" :class="getFilaClass(idx)">
                 <td class="pos">{{ idx + 1 }}</td>
                 <td class="nombre-jugador">
-                  {{ nombreJugador(fila.jugador) }}
+                  <router-link :to="'/jugador/' + fila.jugador.id" class="table-jugador-link">
+                    {{ nombreJugador(fila.jugador) }}
+                  </router-link>
                 </td>
                 <td class="num">{{ fila.jugados }}</td>
                 <td class="num">{{ fila.ganados }}</td>
@@ -117,14 +150,24 @@
         </div>
       </section>
     </template>
+
+    <ModalResultados 
+      :is-open="modalAbierto" 
+      :partido="partidoSeleccionado"
+      @close="modalAbierto = false"
+      @saved="onResultadoGuardado"
+    />
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref, watch } from 'vue';
 import axios from 'axios';
+import { useAuth } from '../utils/auth';
+import ModalResultados from '../components/ModalResultados.vue';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+const { isAdmin } = useAuth();
 
 const vista = ref('calendario'); // 'calendario' | 'clasificacion'
 const divisiones = ref([]);
@@ -133,6 +176,20 @@ const jornadas = ref([]);
 const clasificacion = ref([]);
 const cargando = ref(false);
 const error = ref(null);
+
+// Modal Logic
+const modalAbierto = ref(false);
+const partidoSeleccionado = ref({});
+
+const abrirModal = (partido) => {
+  partidoSeleccionado.value = partido;
+  modalAbierto.value = true;
+};
+
+const onResultadoGuardado = () => {
+  if (vista.value === 'calendario') cargarCalendario();
+  else cargarClasificacion();
+};
 
 const getFilaClass = (index) => {
   if (index < 4) return 'zona-ascenso';
@@ -198,7 +255,8 @@ const cargarClasificacion = async () => {
       if (dsB !== dsA) return dsB - dsA;
       const djA = (a.juegosFavor || 0) - (a.juegosContra || 0);
       const djB = (b.juegosFavor || 0) - (b.juegosContra || 0);
-      return djB - djA;
+      if (djB !== djA) return djB - djA;
+      return 0;
     });
 
     clasificacion.value = data;
@@ -251,209 +309,283 @@ onMounted(() => {
 .liga-container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  color: #eaf2ef;
+  gap: 32px;
 }
 
 .header {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding: 24px;
-  border-radius: var(--radius-lg);
-  background: rgba(8, 15, 18, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 24px;
+  padding: 40px;
+  border-radius: var(--radius-xl);
+  background: var(--glass);
+  border: 1px solid var(--glass-stroke);
+  backdrop-filter: blur(20px);
 }
 
 .header h1 {
-  margin: 0 0 6px;
-  color: var(--ball);
-  font-size: 2.1rem;
-  font-family: "Bebas Neue", sans-serif;
-  letter-spacing: 1px;
+  margin: 0 0 8px;
+  color: #fff;
+  font-size: 2.5rem;
+  font-family: "Syne", sans-serif;
+  font-weight: 800;
+  letter-spacing: -1px;
 }
 
 .header p {
   margin: 0;
-  color: rgba(234, 242, 239, 0.7);
+  color: var(--text-muted);
+  font-size: 1.1rem;
 }
 
 .header-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 20px;
+  gap: 24px;
   flex-wrap: wrap;
 }
 
 /* TABS */
 .view-toggle {
   display: flex;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 4px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 6px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
 }
 
 .toggle-btn {
-  padding: 8px 20px;
+  padding: 10px 24px;
   border: none;
   background: transparent;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-muted);
   cursor: pointer;
-  border-radius: 10px;
+  border-radius: 12px;
   font-weight: 700;
-  font-size: 0.85rem;
-  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
 }
 
 .toggle-btn.activo {
-  background: rgba(199, 255, 52, 0.15);
-  color: var(--ball);
+  background: var(--ball);
+  color: var(--ink);
+  box-shadow: 0 4px 12px rgba(199, 255, 52, 0.25);
 }
 
 .division-select {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
 .chip {
-  background: rgba(9, 13, 15, 0.7);
-  color: #f4f4f4;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  padding: 10px 16px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 10px 20px;
   cursor: pointer;
   border-radius: 999px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.8px;
   font-size: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.chip:hover {
+  background: var(--surface-hover);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .chip.activo {
-  background: var(--ball);
-  color: var(--ink);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--ball);
   border-color: var(--ball);
 }
 
 .estado {
-  padding: 16px;
-  background: rgba(9, 13, 15, 0.7);
-  border-radius: var(--radius-md);
+  padding: 40px;
   text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.estado.error {
-  color: #ffb3b3;
-  border: 1px solid rgba(255, 110, 110, 0.3);
+  color: var(--text-muted);
 }
 
 /* CALENDARIO */
 .jornadas-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 24px;
 }
 
 .jornada-card {
-  background: rgba(9, 13, 15, 0.74);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-lg);
-  padding: 18px;
-  box-shadow: var(--shadow);
+  padding: 24px;
 }
 
 .jornada-header {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
-  gap: 10px;
-  margin-bottom: 14px;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
 }
 
 .jornada-header h2 {
   margin: 0;
-  font-size: 1.1rem;
-  color: var(--ball);
+  font-size: 1.3rem;
+  color: #fff;
 }
 
 .jornada-nombre {
-  font-size: 0.8rem;
-  color: rgba(234, 242, 239, 0.6);
+  font-size: 0.85rem;
+  color: var(--text-faint);
+  font-weight: 600;
 }
 
 .partidos-list {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 12px;
 }
 
 .partido-item {
-  background: rgba(13, 18, 20, 0.76);
-  border-radius: 12px;
-  padding: 12px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.partido-item:hover {
+  transform: translateX(4px);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.match-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .jugadores {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  font-weight: 600;
+  gap: 12px;
 }
 
-.jugador {
+.jugador-link {
   flex: 1;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  transition: color 0.2s ease;
 }
 
-.jugador.ganador {
+.jugador-link:hover {
   color: var(--ball);
+}
+
+.jugador-link.ganador {
+  color: #fff;
+  font-weight: 700;
+}
+
+.table-jugador-link {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.table-jugador-link:hover {
+  color: var(--ball) !important;
 }
 
 .vs {
-  color: rgba(255, 255, 255, 0.3);
-  font-weight: 400;
+  font-size: 0.75rem;
+  color: var(--text-faint);
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
 }
 
-.resultado-inline {
-  display: block;
-  font-size: 1.1rem;
-  font-weight: 800;
-  margin: 6px 0;
-  text-align: center;
+.resultado-badge {
+  background: var(--ball-dim);
   color: var(--ball);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 1.1rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  border: 1px solid var(--border-accent);
 }
 
 .meta {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 8px;
-  color: rgba(234, 242, 239, 0.6);
-  font-size: 0.8rem;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.details {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .estado-pill {
-  background: rgba(255, 255, 255, 0.05);
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-weight: 700;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
+  font-weight: 800;
   text-transform: uppercase;
-  color: rgba(234, 242, 239, 0.8);
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-faint);
+}
+
+.estado-pill.jugado {
+  background: rgba(74, 222, 128, 0.1);
+  color: #4ade80;
+}
+
+.detalle {
+  font-size: 0.8rem;
+  color: var(--text-faint);
+}
+
+.btn-edit-result {
+  background: transparent;
+  border: none;
+  color: var(--text-faint);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-edit-result:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ball);
+}
+
+.btn-edit-result svg {
+  width: 18px;
+  height: 18px;
 }
 
 /* CLASIFICACION */
 .clasificacion-section {
-  background: rgba(9, 13, 15, 0.74);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-lg);
-  padding: 0;
+  background: var(--glass);
+  border: 1px solid var(--glass-stroke);
+  border-radius: var(--radius-xl);
   overflow: hidden;
+  backdrop-filter: blur(20px);
 }
 
 .table-wrapper {
@@ -463,90 +595,72 @@ onMounted(() => {
 .tabla-clasif {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.82rem;
 }
 
-.gesliga-header th {
-  background: #e9e2d0; /* Beige Gesliga */
-  color: #2c3e50;
-  padding: 10px 6px;
+.tabla-clasif th {
+  padding: 20px 16px;
   text-align: right;
-  font-family: inherit;
   font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
-  border-bottom: 2px solid #d4cbb3;
+  letter-spacing: 1px;
+  color: var(--text-faint);
+  border-bottom: 1px solid var(--border);
 }
 
-.gesliga-header th.al-left {
+.tabla-clasif th.al-left {
   text-align: left;
 }
 
 .tabla-clasif td {
-  padding: 8px 6px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 16px;
   text-align: right;
-  color: rgba(255, 255, 255, 0.8);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
 }
 
-.tabla-clasif td.al-left,
-.tabla-clasif td.pos,
-.tabla-clasif td.nombre-jugador {
+.tabla-clasif td.al-left {
   text-align: left;
 }
 
 .pos {
   font-weight: 800;
-  color: rgba(255, 255, 255, 0.4);
-  width: 30px;
+  color: var(--text-faint);
+  width: 60px;
 }
 
 .nombre-jugador {
-  font-weight: 600;
+  font-weight: 700;
   color: #fff;
-  min-width: 140px;
+  font-size: 1rem;
 }
 
-.zona-ascenso .nombre-jugador {
-  color: #4ade80 !important; /* Green */
-}
-
-.zona-descenso .nombre-jugador {
-  color: #f87171 !important; /* Red */
-}
+.zona-ascenso .pos { color: #4ade80; }
+.zona-descenso .pos { color: #f87171; }
 
 .num {
   font-variant-numeric: tabular-nums;
-}
-
-.bold {
-  font-weight: 800;
-  color: #fff;
+  font-weight: 500;
 }
 
 .puntos {
-  font-weight: 900;
-  color: var(--ball) !important;
-  background: rgba(199, 255, 52, 0.05);
+  font-weight: 800;
+  color: var(--ball);
+  font-size: 1.1rem;
 }
 
-.vacio-tabla {
-  text-align: center;
-  padding: 40px !important;
-  color: rgba(255, 255, 255, 0.4);
-  font-style: italic;
-}
-
-@media (max-width: 720px) {
+@media (max-width: 768px) {
+  .header {
+    padding: 24px;
+  }
+  .header h1 {
+    font-size: 1.8rem;
+  }
   .header-actions {
     flex-direction: column;
     align-items: stretch;
   }
-  .view-toggle {
-    width: 100%;
-  }
-  .toggle-btn {
-    flex: 1;
+  .jornadas-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>
