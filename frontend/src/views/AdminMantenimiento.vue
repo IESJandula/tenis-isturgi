@@ -273,6 +273,16 @@
             </div>
             <div class="form-group grid-2">
               <div>
+                <label>Contraseña de acceso</label>
+                <input v-model="form.Contrasena" :required="!editandoId" type="password" placeholder="Necesaria para iniciar sesión en Firebase">
+              </div>
+              <div>
+                <label>Confirmación</label>
+                <input :value="form.Contrasena" type="password" placeholder="Se usa la misma contraseña" readonly>
+              </div>
+            </div>
+            <div class="form-group grid-2">
+              <div>
                 <label>Número de Socio</label>
                 <input v-model="form.NumeroSocio" placeholder="Ej: 001">
               </div>
@@ -483,6 +493,7 @@ const abrirNuevo = () => {
     form.Apellidos = '';
     form.Email = '';
     form.Telefono = '';
+    form.Contrasena = '';
     form.NumeroSocio = '';
     form.Nivel = 'Medio';
     form.Puntos = 0;
@@ -513,6 +524,7 @@ const editarItem = (item) => {
   if (form.FechaFin) form.FechaFin = new Date(form.FechaFin).toISOString().substring(0, 10);
   if (form.FechaNacimiento) form.FechaNacimiento = new Date(form.FechaNacimiento).toISOString().substring(0, 10);
   if (form.temporada?.id && !form.temporadaId) form.temporadaId = form.temporada.id;
+  if (activeTab.value === 'jugadores') form.Contrasena = '';
   
   showModal.value = true;
 };
@@ -538,6 +550,10 @@ const guardarItem = async () => {
     if (activeTab.value === 'jugadores' && payload.divisionId) {
       payload.division = { id: Number(payload.divisionId) };
       delete payload.divisionId;
+    }
+
+    if (activeTab.value === 'jugadores' && !payload.Contrasena) {
+      delete payload.Contrasena;
     }
 
     if (editandoId.value) {

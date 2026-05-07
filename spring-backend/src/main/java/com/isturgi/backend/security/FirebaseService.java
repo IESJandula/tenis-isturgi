@@ -16,6 +16,9 @@ public class FirebaseService {
             // Intentar ver si ya existe para evitar errores
             try {
                 UserRecord existingUser = FirebaseAuth.getInstance().getUserByEmail(email);
+                if (password != null && !password.isBlank()) {
+                    FirebaseAuth.getInstance().updateUser(new UserRecord.UpdateRequest(existingUser.getUid()).setPassword(password));
+                }
                 return existingUser.getUid();
             } catch (Exception e) {
                 // No existe, procedemos a crear
@@ -32,8 +35,35 @@ public class FirebaseService {
             System.out.println("Usuario de Firebase creado exitosamente: " + userRecord.getUid());
             return userRecord.getUid();
         } catch (Exception e) {
-            System.err.println("Error creando usuario en Firebase: " + e.getMessage());
-            return null;
+            String message = "Error creando usuario en Firebase: " + e.getMessage();
+            System.err.println(message);
+            throw new IllegalStateException(message, e);
+        }
+    }
+
+    public boolean deleteFirebaseUserByEmail(String email) {
+        try {
+            UserRecord userRecord = FirebaseAuth.getInstance().getUserByEmail(email);
+            FirebaseAuth.getInstance().deleteUser(userRecord.getUid());
+            return true;
+        } catch (Exception e) {
+            String message = "Error eliminando usuario de Firebase: " + e.getMessage();
+            System.err.println(message);
+            throw new IllegalStateException(message, e);
+        }
+    }
+
+    public boolean updateFirebaseUserPasswordByEmail(String email, String password) {
+        try {
+            UserRecord userRecord = FirebaseAuth.getInstance().getUserByEmail(email);
+            UserRecord.UpdateRequest request = new UserRecord.UpdateRequest(userRecord.getUid())
+                    .setPassword(password);
+            FirebaseAuth.getInstance().updateUser(request);
+            return true;
+        } catch (Exception e) {
+            String message = "Error actualizando contraseña en Firebase: " + e.getMessage();
+            System.err.println(message);
+            throw new IllegalStateException(message, e);
         }
     }
 }

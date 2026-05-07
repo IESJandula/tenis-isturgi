@@ -181,17 +181,17 @@ public class JugadorController {
         
         // 1. Crear usuario en Firebase si tiene email
         if (item.getEmail() != null && !item.getEmail().isEmpty()) {
+            if (item.getContrasena() == null || item.getContrasena().isBlank()) {
+                throw new ResponseStatusException(BAD_REQUEST, "Debes indicar una contraseña para poder crear el usuario en Firebase");
+            }
+
             System.out.println("Intentando crear usuario en Firebase para: " + item.getEmail());
             String displayName = (item.getNombre() != null ? item.getNombre() : "") + 
                                 (item.getApellidos() != null ? " " + item.getApellidos() : "");
             
-            String uid = firebaseService.createFirebaseUser(item.getEmail(), "123456", displayName);
-            if (uid != null) {
-                System.out.println("Vinvulando Firebase UID: " + uid);
-                item.setFirebaseUid(uid);
-            } else {
-                System.err.println("FRACASO: No se pudo obtener el UID de Firebase para " + item.getEmail());
-            }
+            String uid = firebaseService.createFirebaseUser(item.getEmail(), item.getContrasena(), displayName);
+            System.out.println("Vinvulando Firebase UID: " + uid);
+            item.setFirebaseUid(uid);
         } else {
             System.out.println("Omitiendo creación en Firebase: Email no proporcionado.");
         }
@@ -205,6 +205,15 @@ public class JugadorController {
     public ResponseEntity<Map<String, Object>> update(@PathVariable Long id, @RequestBody Jugador item) {
         Jugador existing = repository.findById(id).orElse(null);
         if (existing == null) return ResponseEntity.notFound().build();
+
+        if (item.getContrasena() != null && !item.getContrasena().isBlank()) {
+            String emailForFirebase = item.getEmail() != null && !item.getEmail().isBlank()
+                    ? item.getEmail()
+                    : existing.getEmail();
+            if (emailForFirebase != null && !emailForFirebase.isBlank()) {
+                firebaseService.updateFirebaseUserPasswordByEmail(emailForFirebase, item.getContrasena());
+            }
+        }
 
         if (item.getNombre() != null) existing.setNombre(item.getNombre());
         if (item.getApellidos() != null) existing.setApellidos(item.getApellidos());
@@ -228,7 +237,12 @@ public class JugadorController {
     @DeleteMapping("/{id}")
     @Transactional
     public ResponseEntity<Map<String, Object>> delete(@PathVariable Long id) {
-        if (!repository.existsById(id)) return ResponseEntity.notFound().build();
+        Jugador existing = repository.findById(id).orElse(null);
+        if (existing == null) return ResponseEntity.notFound().build();
+
+        if (existing.getEmail() != null && !existing.getEmail().isBlank()) {
+            firebaseService.deleteFirebaseUserByEmail(existing.getEmail());
+        }
 
         partidoRepository.deleteByJugador1_IdOrJugador2_IdOrGanador_Id(id, id, id);
         disponibilidadRepository.deleteByJugador_Id(id);

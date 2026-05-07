@@ -55,6 +55,7 @@
           <div v-for="jornada in jornadas" :key="jornada.id" class="jornada-admin-card">
             <div class="card-info">
               <h3>{{ jornada.Nombre }}</h3>
+              <p class="meta">División: {{ jornada.division?.Nombre || 'N/A' }}</p>
               <p class="meta">Temporada: {{ jornada.division?.temporada?.Nombre || 'N/A' }}</p>
               <p class="meta" style="margin-top: 6px;">
                 <span class="badge-estado" :class="jornada.cerrada ? 'cerrada' : 'abierta'">

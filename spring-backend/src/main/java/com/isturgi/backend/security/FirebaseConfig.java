@@ -26,7 +26,9 @@ public class FirebaseConfig {
                 if (envPath != null && !envPath.isBlank()) {
                     serviceAccountPath = Paths.get(envPath);
                 } else {
-                    serviceAccountPath = Paths.get("firebase-service-account.json");
+                    Path rootPath = Paths.get("firebase-service-account.json");
+                    Path modulePath = Paths.get("spring-backend", "firebase-service-account.json");
+                    serviceAccountPath = Files.exists(rootPath) ? rootPath : modulePath;
                 }
 
                 if (!Files.exists(serviceAccountPath)) {
