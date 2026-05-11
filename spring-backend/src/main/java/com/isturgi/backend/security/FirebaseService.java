@@ -1,6 +1,7 @@
 package com.isturgi.backend.security;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.AuthErrorCode;
 import com.google.firebase.auth.UserRecord;
 import org.springframework.stereotype.Service;
 
@@ -45,6 +46,15 @@ public class FirebaseService {
         try {
             UserRecord userRecord = FirebaseAuth.getInstance().getUserByEmail(email);
             FirebaseAuth.getInstance().deleteUser(userRecord.getUid());
+            System.out.println("Usuario de Firebase eliminado: " + email);
+            return true;
+        } catch (com.google.firebase.auth.FirebaseAuthException e) {
+            if (e.getAuthErrorCode() == AuthErrorCode.USER_NOT_FOUND) {
+                System.out.println("Usuario no existe en Firebase, continuando: " + email);
+                // No es error fatal - simplemente no existe en Firebase pero existe en BD local
+            } else {
+                throw new IllegalStateException("Error eliminando usuario de Firebase: " + e.getMessage(), e);
+            }
             return true;
         } catch (Exception e) {
             String message = "Error eliminando usuario de Firebase: " + e.getMessage();

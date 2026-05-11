@@ -79,6 +79,13 @@
               >
                 {{ jornada.cerrada ? (procesando === 'reopen_' + jornada.id ? 'Reabriendo...' : 'Reabrir Jornada') : (procesando === 'close_' + jornada.id ? 'Cerrando...' : 'Cerrar Jornada') }}
               </button>
+              <button
+                @click="eliminarJornada(jornada)"
+                :disabled="procesando !== null"
+                class="btn-delete-jornada"
+              >
+                {{ procesando === 'delete_' + jornada.id ? 'Eliminando...' : 'Eliminar Jornada' }}
+              </button>
               <button 
                 @click="togglePartidos(jornada)" 
                 class="btn-view-matches"
@@ -400,6 +407,34 @@ const toggleCierreJornada = async (jornada) => {
   }
 };
 
+const eliminarJornada = async (jornada) => {
+  if (procesando.value !== null) return;
+
+  const confirmar = confirm(
+    `Vas a eliminar ${jornada.Nombre}. Esto borrará también sus partidos y disponibilidades asociadas. ¿Continuar?`
+  );
+  if (!confirmar) return;
+
+  procesando.value = 'delete_' + jornada.id;
+  try {
+    await axios.delete(`${apiUrl}/api/jornadas/${jornada.id}`, config());
+
+    delete mostrandoPartidos[jornada.id];
+    delete partidosJornada[jornada.id];
+    delete resultados[jornada.id];
+    delete formResultados[jornada.id];
+
+    toast(`Jornada eliminada: ${jornada.Nombre}.`, 'success');
+    await cargarJornadas();
+  } catch (e) {
+    console.error(e);
+    const msg = e.response?.data?.error || e.response?.data?.message || 'No se pudo eliminar la jornada.';
+    toast(msg, 'error');
+  } finally {
+    procesando.value = null;
+  }
+};
+
 onMounted(cargarJornadas);
 </script>
 
@@ -579,6 +614,21 @@ onMounted(cargarJornadas);
 
 .btn-close-jornada:hover {
   background: #1e5522;
+}
+
+.btn-delete-jornada {
+  background: #5b1717;
+  color: #ffd9d9;
+  border: 1px solid #a83a3a;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-delete-jornada:hover {
+  background: #7a1e1e;
 }
 
 .btn-view-matches:hover {

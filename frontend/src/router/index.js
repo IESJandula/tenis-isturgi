@@ -41,6 +41,7 @@ const routes = [
   },
   {
     path: '/admin/calendario',
+    alias: '/admin-gestion',
     component: AdminGestion,
     meta: { requiresAuth: true, requiresAdmin: true, title: 'Admin · Gestión' }
   },

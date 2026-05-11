@@ -154,6 +154,30 @@ img {
   letter-spacing: -0.3px;
 }
 
+/* ─────────────────────────────────────────
+   TITULOS GLOBALES: asegurar misma tipografía
+───────────────────────────────────────── */
+.admin-gestion-page h1,
+.admin-gestion-page h2,
+.admin-gestion-page h3,
+.admin-gestion-page h4,
+.admin-gestion-page h5,
+.admin-gestion-page h6,
+.admin-gestion-page .title,
+.admin-gestion-page .headline,
+.admin-gestion-page .section-title,
+.admin-gestion-page .card-title,
+.admin-gestion-page .banner-title,
+.admin-gestion-page .hero-content h1,
+.admin-gestion-page .header h1,
+.admin-gestion-page .form-card h3,
+.admin-gestion-page .item-content h4 {
+  font-family: "Syne", sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  margin: 0;
+}
+
 .mini-tag {
   display: inline-block;
   padding: 4px 12px;

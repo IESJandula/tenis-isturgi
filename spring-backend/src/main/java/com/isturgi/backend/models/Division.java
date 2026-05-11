@@ -18,6 +18,12 @@ public class Division {
     @JsonProperty("Nombre")
     private String nombre;
 
+    @JsonProperty("Categoria")
+    private String categoria = "Absoluto"; // Absoluto, Juvenil, Infantil, Veterano, Senior
+
+    @JsonProperty("Nivel")
+    private String nivel = "Medio"; // Iniciado, Medio, Avanzado, Pro
+
     @ManyToOne
     @JoinColumn(name = "temporada_id")
     @JsonProperty("temporada")

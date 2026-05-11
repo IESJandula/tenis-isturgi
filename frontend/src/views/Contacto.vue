@@ -4,26 +4,26 @@
     <section class="contacto-hero">
       <div class="hero-overlay"></div>
       <div class="hero-content">
-        <span class="mini-tag">Estamos aquÃ­</span>
+        <span class="mini-tag">Estamos aquí</span>
         <h1>Contacto</h1>
-        <p class="hero-lead">Â¿Tienes alguna duda? Â¿Quieres apuntarte a la escuela o formar parte del club? ContÃ¡ctanos y te ayudaremos encantados.</p>
+        <p class="hero-lead">¿Tienes alguna duda? ¿Quieres apuntarte a la escuela o formar parte del club? Contáctanos y te ayudaremos encantados.</p>
       </div>
     </section>
 
     <!-- Contacto Principal -->
     <section class="contacto-principal">
       <div class="contacto-grid">
-        <!-- InformaciÃ³n de Contacto -->
+        <!-- Información de Contacto -->
         <div class="contacto-info">
-          <h2>InformaciÃ³n de Contacto</h2>
-          <p class="contacto-descripcion">Puedes contactarnos a travÃ©s de cualquiera de estos medios. Te responderemos lo antes posible.</p>
+          <h2>Información de Contacto</h2>
+          <p class="contacto-descripcion">Puedes contactarnos a través de cualquiera de estos medios. Te responderemos lo antes posible.</p>
 
           <div class="contacto-items">
             <div class="contacto-item">
               <div class="item-icon">ðŸ“</div>
               <div class="item-content">
-                <h4>UbicaciÃ³n</h4>
-                <p>C. Egido del Puente, s/n<br/>23740 AndÃºjar, JaÃ©n<br/>EspaÃ±a</p>
+                <h4>Ubicación</h4>
+                <p>C. Egido del Puente, s/n<br/>23740 Andújar, Jaén<br/>España</p>
               </div>
             </div>
 
@@ -39,9 +39,9 @@
             <div class="contacto-item">
               <div class="item-icon">ðŸ“ž</div>
               <div class="item-content">
-                <h4>TelÃ©fono</h4>
+                <h4>Teléfono</h4>
                 <a href="tel:+34697827244">+34 697 827 244</a>
-                <p class="item-note">Carlos MartÃ­nez</p>
+                <p class="item-note">Carlos Martínez</p>
               </div>
             </div>
           </div>
@@ -49,8 +49,8 @@
 
         <!-- Formulario de Contacto -->
         <div class="contacto-form-container">
-          <div class="form-card">
-            <h3>EnvÃ­anos un mensaje</h3>
+            <div class="form-card">
+            <h3>Envíanos un mensaje</h3>
             <p class="form-subtitle">Completa el formulario y nos pondremos en contacto contigo</p>
 
             <form class="contacto-form" @submit.prevent="handleSubmit">
@@ -77,12 +77,12 @@
               </div>
 
               <div class="form-group">
-                <label for="telefono">TelÃ©fono</label>
+                <label for="telefono">Teléfono</label>
                 <input 
                   type="tel" 
                   id="telefono" 
                   v-model="formData.telefono" 
-                  placeholder="Tu telÃ©fono (opcional)"
+                  placeholder="Tu teléfono (opcional)"
                 />
               </div>
 
@@ -92,7 +92,7 @@
                   <option value="">Selecciona un asunto</option>
                   <option value="escuela">Escuela Municipal de Tenis</option>
                   <option value="socio">Hacerse socio del club</option>
-                  <option value="torneos">InformaciÃ³n sobre torneos</option>
+                  <option value="torneos">Información sobre torneos</option>
                   <option value="alquiler">Alquiler de pistas</option>
                   <option value="otro">Otro</option>
                 </select>
@@ -105,7 +105,7 @@
                   v-model="formData.mensaje" 
                   rows="6" 
                   required 
-                  placeholder="Escribe tu mensaje aquÃ­..."
+                  placeholder="Escribe tu mensaje aquí..."
                 ></textarea>
               </div>
 
@@ -153,9 +153,9 @@
 
           <div class="horario-card">
             <div class="horario-icon">ðŸŽ¾</div>
-            <div class="horario-card-body">
+              <div class="horario-card-body">
               <h4>Escuela Municipal</h4>
-              <p class="horario-periodo">Todo el aÃ±o</p>
+              <p class="horario-periodo">Todo el año</p>
               <div class="horario-detalles">
                 <div class="horario-detalle"><strong>Lunes a Viernes:</strong> 16:00 - 22:00h</div>
               </div>
@@ -163,14 +163,14 @@
           </div>
         </div>
 
-        <p class="horarios-nota">* Los horarios pueden variar en dÃ­as festivos o durante torneos. Consulta disponibilidad.</p>
+        <p class="horarios-nota">* Los horarios pueden variar en días festivos o durante torneos. Consulta disponibilidad.</p>
       </div>
     </section>
 
-    <!-- CÃ³mo llegar -->
+    <!-- Cómo llegar -->
     <section class="como-llegar-section">
       <div class="como-llegar-content">
-        <h2>CÃ³mo Llegar</h2>
+        <h2>Cómo Llegar</h2>
 
         <div class="llegar-grid">
           <div class="llegar-info">
@@ -178,19 +178,19 @@
             <div class="llegar-item">
               <div class="llegar-icon">ðŸ“</div>
               <div>
-                <h4>DirecciÃ³n</h4>
+                <h4>Dirección</h4>
                 <p><strong>C. Egido del Puente, s/n</strong><br/>
-                23740 AndÃºjar, JaÃ©n<br/>
-                AndalucÃ­a, EspaÃ±a</p>
+                23740 Andújar, Jaén<br/>
+                Andalucía, España</p>
               </div>
             </div>
           </div>
 
           <div class="mapa-placeholder">
-            <div class="mapa-overlay">
+              <div class="mapa-overlay">
               <div class="mapa-icon">ðŸ—ºï¸</div>
               <p>Pistas Municipales de Tenis</p>
-              <p class="mapa-ubicacion">C. Egido del Puente, s/n, 23740 AndÃºjar, JaÃ©n</p>
+              <p class="mapa-ubicacion">C. Egido del Puente, s/n, 23740 Andújar, Jaén</p>
               <a href="https://www.google.com/maps/search/C.+Egido+del+Puente,+s%2Fn,+23740+And%C3%BAjar,+Ja%C3%A9n" target="_blank" rel="noopener" class="btn btn-secondary">
                 Ver en Google Maps
               </a>
@@ -207,33 +207,33 @@
         
         <div class="faq-grid">
           <div class="faq-item">
-            <h4>Â¿CÃ³mo me hago socio del club?</h4>
-            <p>Para hacerte socio, ponte en contacto con nosotros a travÃ©s del email o presencialmente en las pistas. Te informaremos sobre las cuotas y el proceso de inscripciÃ³n.</p>
+            <h4>¿Cómo me hago socio del club?</h4>
+            <p>Para hacerte socio, ponte en contacto con nosotros a través del email o presencialmente en las pistas. Te informaremos sobre las cuotas y el proceso de inscripción.</p>
           </div>
 
           <div class="faq-item">
-            <h4>Â¿Puedo alquilar pistas si no soy socio?</h4>
-            <p>SÃ­, las pistas estÃ¡n abiertas al pÃºblico en general.</p>
+            <h4>¿Puedo alquilar pistas si no soy socio?</h4>
+            <p>Sí, las pistas están abiertas al público en general.</p>
           </div>
 
           <div class="faq-item">
-            <h4>Â¿CuÃ¡ndo empiezan las inscripciones para la escuela?</h4>
-            <p>Las inscripciones para la escuela municipal suelen abrirse en septiembre. Consulta la secciÃ³n de Escuela para mÃ¡s informaciÃ³n.</p>
+            <h4>¿Cuándo empiezan las inscripciones para la escuela?</h4>
+            <p>Las inscripciones para la escuela municipal suelen abrirse en septiembre. Consulta la sección de Escuela para más información.</p>
           </div>
 
           <div class="faq-item">
-            <h4>Â¿QuÃ© necesito para participar en los torneos?</h4>
-            <p>Para la mayorÃ­a de torneos del club solo necesitas ser socio. Algunos torneos federados requieren licencia FAT/RFET.</p>
+            <h4>¿Qué necesito para participar en los torneos?</h4>
+            <p>Para la mayoría de torneos del club solo necesitas ser socio. Algunos torneos federados requieren licencia FAT/RFET.</p>
           </div>
 
           <div class="faq-item">
-            <h4>Â¿Hay material disponible para alquilar?</h4>
-            <p>SÃ­, disponemos de raquetas para prÃ©stamo y pelotas para la venta. Consulta disponibilidad en las pistas.</p>
+            <h4>¿Hay material disponible para alquilar?</h4>
+            <p>Sí, disponemos de raquetas para préstamo y pelotas para la venta. Consulta disponibilidad en las pistas.</p>
           </div>
 
           <div class="faq-item">
-            <h4>Â¿OrganizÃ¡is eventos privados?</h4>
-            <p>SÃ­, podemos organizar eventos, clinics y torneos privados. Contacta con nosotros para mÃ¡s informaciÃ³n sobre disponibilidad y tarifas.</p>
+            <h4>¿Organizáis eventos privados?</h4>
+            <p>Sí, podemos organizar eventos, clinics y torneos privados. Contacta con nosotros para más información sobre disponibilidad y tarifas.</p>
           </div>
         </div>
       </div>
@@ -242,9 +242,9 @@
     <!-- CTA Final -->
     <section class="cta-section">
       <div class="cta-content">
-        <h2>Â¿Hablamos?</h2>
-        <p>Estamos aquÃ­ para ayudarte. Cualquier duda o consulta, no dudes en contactarnos.</p>
-        <a href="mailto:info@clubtenisisturgi.com" class="btn btn-primary btn-large">EscrÃ­benos un email</a>
+        <h2>¿Hablamos?</h2>
+        <p>Estamos aquí para ayudarte. Cualquier duda o consulta, no dudes en contactarnos.</p>
+        <a href="mailto:info@clubtenisisturgi.com" class="btn btn-primary btn-large">Escríbenos un email</a>
       </div>
     </section>
   </div>
@@ -284,7 +284,7 @@ const handleSubmit = async () => {
     });
 
     submitSuccess.value = true;
-    submitMessage.value = 'Â¡Mensaje enviado correctamente! Te responderemos pronto.';
+    submitMessage.value = '¡Mensaje enviado correctamente! Te responderemos pronto.';
 
     Object.keys(formData).forEach(key => formData[key] = '');
   } catch (e) {

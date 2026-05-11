@@ -71,6 +71,7 @@
                 </tr>
                 <tr v-if="activeTab === 'divisiones'">
                   <th>Nombre</th>
+                  <th>Categoría / Nivel</th>
                   <th>Temporada</th>
                   <th>Acciones</th>
                 </tr>
@@ -112,6 +113,7 @@
                   <!-- COLUMNAS DIVISIONES -->
                   <template v-if="activeTab === 'divisiones'">
                     <td><strong>{{ item.Nombre }}</strong></td>
+                    <td>{{ item.Categoria || 'Absoluto' }} - {{ item.Nivel || 'Medio' }}</td>
                     <td>{{ item.temporada?.Nombre || item.temporada?.nombre || 'Sin temporada' }}</td>
                   </template>
 
@@ -142,21 +144,23 @@
       <div class="modal-content glass-card slide-up">
         <h3>{{ editandoId ? 'Editar' : 'Nuevo' }} {{ activeTabSingular }}</h3>
         
-        <form @submit.prevent="guardarItem" class="admin-form">
+        <form @submit.prevent="guardarItem" class="admin-form" novalidate>
           <!-- CAMPOS TORNEO -->
           <template v-if="activeTab === 'torneos'">
             <div class="form-group">
-              <label>Nombre del Torneo</label>
+              <label>Nombre del Torneo *</label>
               <input v-model="form.Nombre" required placeholder="Ej: Open Verano 2024">
+              <p v-if="formErrors.Nombre" class="field-error">{{ formErrors.Nombre }}</p>
             </div>
             <div class="form-group">
-              <label>Categoría</label>
+              <label>Categoría *</label>
               <select v-model="form.Categoria" required>
                 <option value="Torneo">Torneo</option>
                 <option value="Liga">Liga</option>
                 <option value="Evento especial">Evento especial</option>
                 <option value="Escuela">Escuela</option>
               </select>
+              <p v-if="formErrors.Categoria" class="field-error">{{ formErrors.Categoria }}</p>
             </div>
             <div class="form-group">
               <label>Edición</label>
@@ -222,16 +226,18 @@
           <!-- CAMPOS NOTICIA -->
           <template v-if="activeTab === 'noticias'">
             <div class="form-group">
-              <label>Título</label>
+              <label>Título *</label>
               <input v-model="form.Titulo" required>
+              <p v-if="formErrors.Titulo" class="field-error">{{ formErrors.Titulo }}</p>
             </div>
             <div class="form-group">
               <label>Resumen</label>
               <textarea v-model="form.Resumen" rows="2"></textarea>
             </div>
             <div class="form-group">
-              <label>Cuerpo / Descripción</label>
+              <label>Cuerpo / Descripción *</label>
               <textarea v-model="form.Descripcion" rows="6" required></textarea>
+              <p v-if="formErrors.Descripcion" class="field-error">{{ formErrors.Descripcion }}</p>
             </div>
             <!-- IMAGEN NOTICIA -->
             <div class="form-group">
@@ -253,57 +259,74 @@
           <template v-if="activeTab === 'jugadores'">
             <div class="form-group grid-2">
               <div>
-                <label>Nombre</label>
+                <label>Nombre *</label>
                 <input v-model="form.Nombre" required>
+                <p v-if="playerErrors.Nombre" class="field-error">{{ playerErrors.Nombre }}</p>
               </div>
               <div>
-                <label>Apellidos</label>
-                <input v-model="form.Apellidos">
+                <label>Apellidos *</label>
+                <input v-model="form.Apellidos" required>
+                <p v-if="playerErrors.Apellidos" class="field-error">{{ playerErrors.Apellidos }}</p>
               </div>
             </div>
             <div class="form-group grid-2">
               <div>
-                <label>Email</label>
+                <label>Email *</label>
                 <input v-model="form.Email" required type="email">
+                <p v-if="playerErrors.Email" class="field-error">{{ playerErrors.Email }}</p>
               </div>
               <div>
-                <label>Teléfono</label>
-                <input v-model="form.Telefono">
-              </div>
-            </div>
-            <div class="form-group grid-2">
-              <div>
-                <label>Contraseña de acceso</label>
-                <input v-model="form.Contrasena" :required="!editandoId" type="password" placeholder="Necesaria para iniciar sesión en Firebase">
-              </div>
-              <div>
-                <label>Confirmación</label>
-                <input :value="form.Contrasena" type="password" placeholder="Se usa la misma contraseña" readonly>
+                <label>Teléfono *</label>
+                <input v-model="form.Telefono" required maxlength="9" placeholder="Ej: 123456789">
+                <p v-if="playerErrors.Telefono" class="field-error">{{ playerErrors.Telefono }}</p>
               </div>
             </div>
             <div class="form-group grid-2">
               <div>
-                <label>Número de Socio</label>
-                <input v-model="form.NumeroSocio" placeholder="Ej: 001">
+                <label>Contraseña de acceso <span v-if="!editandoId">*</span></label>
+                <input v-model="form.Contrasena" :required="!editandoId" minlength="6" type="password" placeholder="Necesaria para iniciar sesión en Firebase" autocomplete="new-password">
+                <p v-if="playerErrors.Contrasena" class="field-error">{{ playerErrors.Contrasena }}</p>
               </div>
               <div>
-                <label>Fecha Nacimiento</label>
-                <input type="date" v-model="form.FechaNacimiento">
+                <label>Confirmación <span v-if="!editandoId || form.Contrasena">*</span></label>
+                <input v-model="form.ConfirmarContrasena" :required="!editandoId || !!form.Contrasena" type="password" placeholder="Repite la contraseña" autocomplete="new-password">
+                <p v-if="playerErrors.ConfirmarContrasena" class="field-error">{{ playerErrors.ConfirmarContrasena }}</p>
               </div>
             </div>
             <div class="form-group grid-2">
               <div>
-                <label>Nivel</label>
-                <select v-model="form.Nivel">
+                <label>Número de Socio *</label>
+                <input v-model="form.NumeroSocio" required placeholder="Ej: 001">
+                <p v-if="playerErrors.NumeroSocio" class="field-error">{{ playerErrors.NumeroSocio }}</p>
+              </div>
+              <div>
+                <label>Fecha Nacimiento *</label>
+                <input type="date" v-model="form.FechaNacimiento" required>
+                <p v-if="playerErrors.FechaNacimiento" class="field-error">{{ playerErrors.FechaNacimiento }}</p>
+              </div>
+            </div>
+            <div class="form-group grid-2">
+              <div>
+                <label>Nivel *</label>
+                <select v-model="form.Nivel" required>
                   <option value="Iniciado">Iniciado</option>
                   <option value="Medio">Medio</option>
                   <option value="Avanzado">Avanzado</option>
                   <option value="Pro">Pro</option>
                 </select>
+                <p v-if="playerErrors.Nivel" class="field-error">{{ playerErrors.Nivel }}</p>
               </div>
               <div>
-                <label>Categoría</label>
-                <input v-model="form.Categoria" placeholder="Ej: Absoluto">
+                <label>Categoría *</label>
+                <select v-model="form.Categoria" required>
+                  <option value="">Selecciona una categoría</option>
+                  <option value="Absoluto">Absoluto</option>
+                  <option value="Juvenil">Juvenil</option>
+                  <option value="Infantil">Infantil</option>
+                  <option value="Veterano">Veterano</option>
+                  <option value="Senior">Senior</option>
+                </select>
+                <p v-if="playerErrors.Categoria" class="field-error">{{ playerErrors.Categoria }}</p>
               </div>
             </div>
             <div class="form-group">
@@ -320,65 +343,98 @@
               </div>
             </div>
             <div class="form-group">
-              <label>División</label>
+              <label>División *</label>
               <select v-model="form.divisionId" required>
                 <option value="" disabled>Selecciona una división</option>
-                <option v-for="div in divisiones" :key="div.id" :value="div.id">
-                  {{ div.Nombre || `División ${div.id}` }}
+                <option v-for="div in divisionesCompatibles" :key="div.id" :value="div.id">
+                  {{ div.Nombre }} ({{ div.Categoria }} - {{ div.Nivel }})
                 </option>
               </select>
+              <p v-if="!divisionesCompatibles.length && form.Categoria && form.Nivel" class="field-error">
+                ⚠️ No hay divisiones para {{ form.Categoria }} - {{ form.Nivel }}
+              </p>
+              <p v-if="playerErrors.divisionId" class="field-error">{{ playerErrors.divisionId }}</p>
             </div>
           </template>
 
           <!-- CAMPOS TEMPORADA -->
           <template v-if="activeTab === 'temporadas'">
             <div class="form-group">
-              <label>Nombre de la Temporada</label>
+              <label>Nombre de la Temporada *</label>
               <input v-model="form.Nombre" required placeholder="Ej: Temporada 2026">
+              <p v-if="formErrors.Nombre" class="field-error">{{ formErrors.Nombre }}</p>
             </div>
           </template>
 
           <!-- CAMPOS DIVISION -->
           <template v-if="activeTab === 'divisiones'">
             <div class="form-group">
-              <label>Nombre de la División</label>
+              <label>Nombre de la División *</label>
               <input v-model="form.Nombre" required placeholder="Ej: División A">
+              <p v-if="formErrors.Nombre" class="field-error">{{ formErrors.Nombre }}</p>
             </div>
             <div class="form-group">
-              <label>Temporada</label>
+              <label>Temporada *</label>
               <select v-model="form.temporadaId" required>
                 <option value="" disabled>Selecciona una temporada</option>
                 <option v-for="temporada in temporadas" :key="temporada.id" :value="temporada.id">
                   {{ temporada.Nombre || temporada.nombre || `Temporada ${temporada.id}` }}
                 </option>
               </select>
+              <p v-if="formErrors.temporadaId" class="field-error">{{ formErrors.temporadaId }}</p>
+            </div>
+            <div class="form-group">
+              <label>Categoría *</label>
+              <select v-model="form.Categoria" required>
+                <option value="">Selecciona una categoría</option>
+                <option value="Absoluto">Absoluto</option>
+                <option value="Juvenil">Juvenil</option>
+                <option value="Infantil">Infantil</option>
+                <option value="Veterano">Veterano</option>
+                <option value="Senior">Senior</option>
+              </select>
+              <p v-if="formErrors.Categoria" class="field-error">{{ formErrors.Categoria }}</p>
+            </div>
+            <div class="form-group">
+              <label>Nivel *</label>
+              <select v-model="form.Nivel" required>
+                <option value="">Selecciona un nivel</option>
+                <option value="Iniciado">Iniciado</option>
+                <option value="Medio">Medio</option>
+                <option value="Avanzado">Avanzado</option>
+                <option value="Pro">Pro</option>
+              </select>
+              <p v-if="formErrors.Nivel" class="field-error">{{ formErrors.Nivel }}</p>
             </div>
           </template>
 
           <!-- CAMPOS GALERIA -->
           <template v-if="activeTab === 'galeria'">
             <div class="form-group">
-              <label>Título de la foto</label>
+              <label>Título de la foto *</label>
               <input v-model="form.titulo" required>
+              <p v-if="formErrors.titulo" class="field-error">{{ formErrors.titulo }}</p>
             </div>
             <div class="form-group">
-              <label>Categoría</label>
+              <label>Categoría *</label>
               <select v-model="form.categoria" required>
                 <option v-for="c in ['Pistas', 'Escuela', 'Liga', 'Torneos', 'Club', 'Eventos']" :key="c" :value="c">{{ c }}</option>
               </select>
+              <p v-if="formErrors.categoria" class="field-error">{{ formErrors.categoria }}</p>
             </div>
             <div class="form-group">
               <label>Descripción / Texto</label>
               <input v-model="form.texto">
             </div>
             <div class="form-group">
-              <label>URL de la imagen</label>
+              <label>URL de la imagen *</label>
               <div class="input-with-preview">
                 <input v-model="form.src" required placeholder="https://...">
                 <div v-if="form.src" class="image-preview-box">
                   <img :src="form.src" @error="(e) => e.target.style.display = 'none'" @load="(e) => e.target.style.display = 'block'">
                 </div>
               </div>
+              <p v-if="formErrors.src" class="field-error">{{ formErrors.src }}</p>
             </div>
           </template>
 
@@ -420,6 +476,8 @@ const temporadas = ref([]);
 const divisiones = ref([]);
 const cargando = ref(false);
 const guardando = ref(false);
+const formErrors = reactive({});
+const playerErrors = reactive({});
 const showModal = ref(false);
 const editandoId = ref(null);
 const form = reactive({});
@@ -427,6 +485,13 @@ const form = reactive({});
 const activeTabLabel = computed(() => tabs.find(t => t.id === activeTab.value)?.label);
 const activeTabSingular = computed(() => tabs.find(t => t.id === activeTab.value)?.singular);
 const activeEndpoint = computed(() => tabs.find(t => t.id === activeTab.value)?.endpoint);
+
+const divisionesCompatibles = computed(() => {
+  if (!form.Categoria || !form.Nivel) return divisiones.value;
+  return divisiones.value.filter(d => 
+    d.Categoria === form.Categoria && d.Nivel === form.Nivel
+  );
+});
 
 const cargarDatos = async () => {
   // Esperar a que el estado de auth esté inicializado y haya un token válido
@@ -476,6 +541,8 @@ const cargarDatos = async () => {
 const abrirNuevo = () => {
   editandoId.value = null;
   Object.keys(form).forEach(k => delete form[k]);
+  Object.keys(formErrors).forEach(k => delete formErrors[k]);
+  Object.keys(playerErrors).forEach(k => delete playerErrors[k]);
   
   if (activeTab.value === 'noticias') {
     form.Fecha = new Date().toISOString();
@@ -494,7 +561,9 @@ const abrirNuevo = () => {
     form.Email = '';
     form.Telefono = '';
     form.Contrasena = '';
+    form.ConfirmarContrasena = '';
     form.NumeroSocio = '';
+    form.Categoria = 'Absoluto';
     form.Nivel = 'Medio';
     form.Puntos = 0;
     form.Foto = '';
@@ -504,6 +573,8 @@ const abrirNuevo = () => {
   } else if (activeTab.value === 'divisiones') {
     form.Nombre = '';
     form.temporadaId = temporadas.value.length ? temporadas.value[0].id : '';
+    form.Categoria = 'Absoluto';
+    form.Nivel = 'Medio';
   } else if (activeTab.value === 'galeria') {
     form.titulo = '';
     form.categoria = 'Club';
@@ -516,6 +587,8 @@ const abrirNuevo = () => {
 const editarItem = (item) => {
   editandoId.value = item.id || item.documentId;
   Object.keys(form).forEach(k => delete form[k]);
+  Object.keys(formErrors).forEach(k => delete formErrors[k]);
+  Object.keys(playerErrors).forEach(k => delete playerErrors[k]);
   Object.assign(form, item);
   
   // Ajustar fechas para inputs date
@@ -524,13 +597,88 @@ const editarItem = (item) => {
   if (form.FechaFin) form.FechaFin = new Date(form.FechaFin).toISOString().substring(0, 10);
   if (form.FechaNacimiento) form.FechaNacimiento = new Date(form.FechaNacimiento).toISOString().substring(0, 10);
   if (form.temporada?.id && !form.temporadaId) form.temporadaId = form.temporada.id;
-  if (activeTab.value === 'jugadores') form.Contrasena = '';
+  if (form.division?.id && !form.divisionId) form.divisionId = form.division.id;
+  if (activeTab.value === 'jugadores') form.ConfirmarContrasena = '';
   
   showModal.value = true;
 };
 
 const cerrarModal = () => {
   showModal.value = false;
+  Object.keys(formErrors).forEach(k => delete formErrors[k]);
+  Object.keys(playerErrors).forEach(k => delete playerErrors[k]);
+};
+
+const setFormError = (field, message) => {
+  formErrors[field] = message;
+};
+
+const clearFormErrors = () => {
+  Object.keys(formErrors).forEach(k => delete formErrors[k]);
+};
+
+const setPlayerError = (field, message) => {
+  playerErrors[field] = message;
+};
+
+const clearPlayerErrors = () => {
+  Object.keys(playerErrors).forEach(k => delete playerErrors[k]);
+};
+
+const validatePlayerForm = (payload) => {
+  clearPlayerErrors();
+
+  if (!payload.Nombre?.trim()) setPlayerError('Nombre', 'El nombre es obligatorio');
+  if (!payload.Apellidos?.trim()) setPlayerError('Apellidos', 'Los apellidos son obligatorios');
+  if (!payload.Email?.trim()) setPlayerError('Email', 'El email es obligatorio');
+  if (!payload.Telefono?.trim()) setPlayerError('Telefono', 'El teléfono es obligatorio');
+  else if (payload.Telefono.replace(/\D/g, '').length !== 9) setPlayerError('Telefono', 'El teléfono debe tener exactamente 9 dígitos');
+  if (!payload.NumeroSocio?.trim()) setPlayerError('NumeroSocio', 'El número de socio es obligatorio');
+  if (!payload.FechaNacimiento?.trim()) setPlayerError('FechaNacimiento', 'La fecha de nacimiento es obligatoria');
+  if (!payload.Nivel?.trim()) setPlayerError('Nivel', 'El nivel es obligatorio');
+  if (!payload.Categoria?.trim()) setPlayerError('Categoria', 'La categoría es obligatoria');
+  if (!payload.division?.id) setPlayerError('divisionId', 'Debes seleccionar una división');
+
+  if (!editandoId.value && !payload.Contrasena) {
+    setPlayerError('Contrasena', 'La contraseña es obligatoria para crear el jugador');
+  } else if (payload.Contrasena && payload.Contrasena.length < 6) {
+    setPlayerError('Contrasena', 'La contraseña debe tener al menos 6 caracteres');
+  }
+
+  if (payload.Contrasena || payload.ConfirmarContrasena) {
+    if (!payload.ConfirmarContrasena) {
+      setPlayerError('ConfirmarContrasena', 'Debes confirmar la contraseña');
+    } else if (payload.Contrasena !== payload.ConfirmarContrasena) {
+      setPlayerError('ConfirmarContrasena', 'La contraseña y su confirmación no coinciden');
+    }
+  }
+
+  return Object.keys(playerErrors).length === 0;
+};
+
+const validateNonPlayerForm = (payload) => {
+  clearFormErrors();
+
+  if (activeTab.value === 'torneos') {
+    if (!payload.Nombre?.trim()) setFormError('Nombre', 'El nombre del torneo es obligatorio');
+    if (!payload.Categoria?.trim()) setFormError('Categoria', 'La categoría es obligatoria');
+  } else if (activeTab.value === 'noticias') {
+    if (!payload.Titulo?.trim()) setFormError('Titulo', 'El título es obligatorio');
+    if (!payload.Descripcion?.trim()) setFormError('Descripcion', 'La descripción es obligatoria');
+  } else if (activeTab.value === 'temporadas') {
+    if (!payload.Nombre?.trim()) setFormError('Nombre', 'El nombre de la temporada es obligatorio');
+  } else if (activeTab.value === 'divisiones') {
+    if (!payload.Nombre?.trim()) setFormError('Nombre', 'El nombre de la división es obligatorio');
+    if (!payload.temporada?.id) setFormError('temporadaId', 'Debes seleccionar una temporada');
+    if (!payload.Categoria?.trim()) setFormError('Categoria', 'Debes seleccionar una categoría');
+    if (!payload.Nivel?.trim()) setFormError('Nivel', 'Debes seleccionar un nivel');
+  } else if (activeTab.value === 'galeria') {
+    if (!payload.titulo?.trim()) setFormError('titulo', 'El título es obligatorio');
+    if (!payload.categoria?.trim()) setFormError('categoria', 'La categoría es obligatoria');
+    if (!payload.src?.trim()) setFormError('src', 'La URL de la imagen es obligatoria');
+  }
+
+  return Object.keys(formErrors).length === 0;
 };
 
 const guardarItem = async () => {
@@ -550,6 +698,17 @@ const guardarItem = async () => {
     if (activeTab.value === 'jugadores' && payload.divisionId) {
       payload.division = { id: Number(payload.divisionId) };
       delete payload.divisionId;
+    }
+
+    if (activeTab.value === 'jugadores') {
+      if (!validatePlayerForm(payload)) {
+        throw new Error('Revisa los campos obligatorios del jugador');
+      }
+      delete payload.ConfirmarContrasena;
+    } else {
+      if (!validateNonPlayerForm(payload)) {
+        throw new Error('Revisa los campos obligatorios del formulario');
+      }
     }
 
     if (activeTab.value === 'jugadores' && !payload.Contrasena) {
@@ -572,7 +731,9 @@ const guardarItem = async () => {
     if (typeof serverMsg === 'object') {
       try { serverMsg = JSON.stringify(serverMsg); } catch(e) { serverMsg = String(serverMsg); }
     }
-    toast('Error al guardar: ' + serverMsg, 'error');
+    if ((activeTab.value === 'jugadores' && Object.keys(playerErrors).length === 0) || (activeTab.value !== 'jugadores' && Object.keys(formErrors).length === 0)) {
+      toast('Error al guardar: ' + serverMsg, 'error');
+    }
   } finally {
     guardando.value = false;
   }
@@ -772,6 +933,13 @@ onMounted(() => {
   justify-content: flex-end;
   gap: 15px;
   margin-top: 30px;
+}
+
+.field-error {
+  margin: 6px 0 0;
+  color: #ff8f8f;
+  font-size: 0.82rem;
+  font-weight: 600;
 }
 
 .btn-secondary {

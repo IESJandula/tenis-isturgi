@@ -3,6 +3,7 @@ package com.isturgi.backend.controllers;
 import com.isturgi.backend.models.Jornada;
 import com.isturgi.backend.models.Partido;
 import com.isturgi.backend.repositories.JornadaRepository;
+import com.isturgi.backend.repositories.DisponibilidadRepository;
 import com.isturgi.backend.repositories.PartidoRepository;
 import com.isturgi.backend.services.ClasificacionService;
 import com.isturgi.backend.services.LeagueService;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -28,6 +30,9 @@ public class JornadaController {
 
     @Autowired
     private PartidoRepository partidoRepository;
+
+    @Autowired
+    private DisponibilidadRepository disponibilidadRepository;
 
     @Autowired
     private LeagueService leagueService;
@@ -192,8 +197,11 @@ public class JornadaController {
     }
 
     @DeleteMapping("/{id}")
+    @Transactional
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         if (!repository.existsById(id)) return ResponseEntity.notFound().build();
+        disponibilidadRepository.deleteByJornada_IdIn(List.of(id));
+        partidoRepository.deleteByJornada_IdIn(List.of(id));
         repository.deleteById(id);
         return ResponseEntity.ok().build();
     }
