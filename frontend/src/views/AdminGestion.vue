@@ -20,151 +20,207 @@
       </div>
 
       <div v-else class="admin-container">
-        
         <!-- SECCIÓN DIVISIONES -->
         <div v-if="divisiones.length" class="divisiones-section" style="margin-bottom: 50px;">
-          <h2 style="color: white; margin-bottom: 20px; font-size: 1.5rem; border-bottom: 1px solid #333; padding-bottom: 10px;">Sorteo de Calendario (Por División)</h2>
-          <div class="admin-grid">
-            <div v-for="div in divisiones" :key="div.id" class="jornada-admin-card" style="border-left: 4px solid var(--ball);">
-              <div class="card-info">
-                <h3>{{ div.Nombre }}</h3>
-                <p class="meta">Generación automática mediante Algoritmo Berger</p>
-              </div>
-              <div class="card-actions">
-                <button 
-                  @click="generarCalendarioDivision(div)" 
-                  :disabled="procesando !== null"
-                  class="btn-algorithm"
-                >
-                  {{ procesando === 'div_' + div.id ? 'Procesando...' : 'Realizar Sorteo Automático' }}
-                </button>
-                <button 
-                  @click="regenerarCalendarioDivision(div)" 
-                  :disabled="procesando !== null"
-                  class="btn-reset"
-                >
-                  {{ procesando === 'reset_' + div.id ? 'Regenerando...' : 'Limpiar y Regenerar' }}
-                </button>
-              </div>
+          <div class="section-head">
+            <div>
+              <h2 style="color: white; margin-bottom: 8px; font-size: 1.5rem; border-bottom: 1px solid #333; padding-bottom: 10px;">Sorteo de Calendario (Por Temporada)</h2>
+              <p class="section-lead">Busca una división por nombre, categoría o nivel y ejecútala en su temporada correspondiente.</p>
             </div>
+            <div class="section-counter">{{ divisionesFiltradas.length }} división{{ divisionesFiltradas.length === 1 ? '' : 'es' }}</div>
+          </div>
+
+          <div class="division-toolbar">
+            <input
+              v-model="busquedaDivision"
+              type="search"
+              class="division-search"
+              placeholder="Buscar por nombre, categoría o nivel"
+            >
+          </div>
+
+          <div v-if="!divisionesAgrupadas.length" class="empty-search-state">
+            No hay divisiones que coincidan con la búsqueda.
+          </div>
+
+          <div v-else class="division-group-list">
+            <section v-for="grupo in divisionesAgrupadas" :key="grupo.key" class="division-group-card">
+              <div class="division-group-header">
+                <div>
+                  <h3>{{ grupo.temporadaNombre }}</h3>
+                  <p>{{ grupo.items.length }} división{{ grupo.items.length === 1 ? '' : 'es' }}</p>
+                </div>
+              </div>
+
+              <div class="table-wrap">
+                <table class="divisions-table">
+                  <thead>
+                    <tr>
+                      <th>División</th>
+                      <th>Categoría</th>
+                      <th>Nivel</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="div in grupo.items" :key="div.id">
+                      <td>
+                        <div class="table-primary">{{ div.Nombre }}</div>
+                        <div class="table-secondary">Generación automática mediante Algoritmo Berger</div>
+                      </td>
+                      <td><span class="division-tag">{{ getDivisionCategoria(div) }}</span></td>
+                      <td><span class="division-tag division-tag-alt">{{ getDivisionNivel(div) }}</span></td>
+                      <td>
+                        <div class="table-actions">
+                          <button 
+                            @click="generarCalendarioDivision(div)" 
+                            :disabled="procesando !== null"
+                            class="btn-algorithm btn-table"
+                          >
+                            {{ procesando === 'div_' + div.id ? 'Procesando...' : 'Realizar Sorteo' }}
+                          </button>
+                          <button 
+                            @click="regenerarCalendarioDivision(div)" 
+                            :disabled="procesando !== null"
+                            class="btn-reset btn-table"
+                          >
+                            {{ procesando === 'reset_' + div.id ? 'Regenerando...' : 'Regenerar' }}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
           </div>
         </div>
 
         <h2 v-if="jornadas.length" style="color: white; margin-bottom: 20px; font-size: 1.5rem; border-bottom: 1px solid #333; padding-bottom: 10px;">Gestión de Pistas y Resultados (Por Jornada)</h2>
-        <div class="admin-grid" v-if="jornadas.length">
-          <div v-for="jornada in jornadas" :key="jornada.id" class="jornada-admin-card">
-            <div class="card-info">
-              <h3>{{ jornada.Nombre }}</h3>
-              <p class="meta">División: {{ jornada.division?.Nombre || 'N/A' }}</p>
-              <p class="meta">Temporada: {{ jornada.division?.temporada?.Nombre || 'N/A' }}</p>
-              <p class="meta" style="margin-top: 6px;">
-                <span class="badge-estado" :class="jornada.cerrada ? 'cerrada' : 'abierta'">
-                  {{ jornada.cerrada ? 'Cerrada' : 'Abierta' }}
-                </span>
-              </p>
-            </div>
-            
-            <div class="card-actions">
-              <button 
-                @click="lanzarAlgoritmo(jornada)" 
-                :disabled="procesando !== null"
-                class="btn-algorithm"
-              >
-                {{ procesando === jornada.id ? 'Procesando...' : 'Generar Horarios' }}
-              </button>
-              <button
-                @click="toggleCierreJornada(jornada)"
-                :disabled="procesando !== null"
-                class="btn-close-jornada"
-              >
-                {{ jornada.cerrada ? (procesando === 'reopen_' + jornada.id ? 'Reabriendo...' : 'Reabrir Jornada') : (procesando === 'close_' + jornada.id ? 'Cerrando...' : 'Cerrar Jornada') }}
-              </button>
-              <button
-                @click="eliminarJornada(jornada)"
-                :disabled="procesando !== null"
-                class="btn-delete-jornada"
-              >
-                {{ procesando === 'delete_' + jornada.id ? 'Eliminando...' : 'Eliminar Jornada' }}
-              </button>
-              <button 
-                @click="togglePartidos(jornada)" 
-                class="btn-view-matches"
-              >
-                {{ mostrandoPartidos[jornada.id] ? 'Ocultar Partidos' : 'Ver Partidos' }}
-              </button>
-            </div>
 
-            <div v-if="mostrandoPartidos[jornada.id]" class="matches-section">
-              <h4>Gestión de Resultados:</h4>
-              <div v-if="!partidosJornada[jornada.id]?.length" class="no-matches">
-                No hay partidos programados en esta jornada.
-              </div>
-              <div v-else class="matches-list">
-                <div v-for="partido in partidosJornada[jornada.id]" :key="partido.id" class="match-item-admin">
-                  <div class="match-main">
-                    <span class="m-players">{{ partido.jugador1?.Nombre }} {{ partido.jugador1?.Apellidos || '' }} vs {{ partido.jugador2?.Nombre }} {{ partido.jugador2?.Apellidos || '' }}</span>
-                    <span class="m-meta">{{ new Date(partido.fecha).toLocaleDateString('es-ES') }} • {{ partido.hora ? partido.hora.substring(0, 5) : 'Por definir' }} • Pista {{ partido.pista || '?' }}</span>
-                  </div>
-                  
-                  <div v-if="partido.estado !== 'Jugado' && formResultados[partido.id]" class="result-inputs">
-                    <div class="set-row">
-                      <span>S1</span>
-                      <input type="number" v-model="formResultados[partido.id].s1_1" placeholder="0">
-                      <input type="number" v-model="formResultados[partido.id].s1_2" placeholder="0">
-                    </div>
-                    <div class="set-row">
-                      <span>S2</span>
-                      <input type="number" v-model="formResultados[partido.id].s2_1" placeholder="0">
-                      <input type="number" v-model="formResultados[partido.id].s2_2" placeholder="0">
-                    </div>
-                    <div class="set-row">
-                      <span>S3</span>
-                      <input type="number" v-model="formResultados[partido.id].s3_1" placeholder="0">
-                      <input type="number" v-model="formResultados[partido.id].s3_2" placeholder="0">
-                    </div>
-                    <button @click="guardarResultado(partido)" class="btn-save-mini">Guardar</button>
-                  </div>
-                  <div v-else class="result-final">
-                    Resultado: <span class="res-tag">{{ partido.resultado }}</span>
-                  </div>
-                </div>
+        <div v-if="jornadas.length" class="jornadas-group-list">
+          <section v-for="grupo in jornadasAgrupadas" :key="grupo.key" class="division-group-card">
+            <div class="division-group-header">
+              <div>
+                <h3>{{ grupo.temporadaNombre || 'Sin temporada' }} · {{ grupo.divisionNombre }}</h3>
+                <p>{{ grupo.items.length }} jornada{{ grupo.items.length === 1 ? '' : 's' }}</p>
               </div>
             </div>
 
-            <div v-if="resultados[jornada.id]" class="results-log">
-              <h4>Log de Asignación:</h4>
-              <template v-if="Array.isArray(resultados[jornada.id])">
-                <ul>
-                  <li v-for="(log, idx) in resultados[jornada.id]" :key="idx">{{ log }}</li>
-                </ul>
-              </template>
-              <template v-else>
-                <p class="summary-message">{{ resultados[jornada.id].message || 'Proceso completado' }}</p>
-                <div class="summary-grid">
-                  <div class="summary-item">
-                    <span class="summary-label">Partidos</span>
-                    <strong>{{ resultados[jornada.id].partidos ?? 0 }}</strong>
+            <div class="cards-grid">
+              <div v-for="jornada in grupo.items" :key="jornada.id" class="jornada-admin-card compact">
+                <div class="card-info">
+                  <h3>{{ jornada.Nombre }}</h3>
+                  <p class="meta" style="margin-top: 6px;">
+                    <span class="badge-estado" :class="jornada.cerrada ? 'cerrada' : 'abierta'">
+                      {{ jornada.cerrada ? 'Cerrada' : 'Abierta' }}
+                    </span>
+                  </p>
+                </div>
+
+                <div class="card-actions">
+                  <button 
+                    @click="lanzarAlgoritmo(jornada)" 
+                    :disabled="procesando !== null"
+                    class="btn-algorithm"
+                  >
+                    {{ procesando === jornada.id ? 'Procesando...' : 'Generar Horarios' }}
+                  </button>
+                  <button
+                    @click="toggleCierreJornada(jornada)"
+                    :disabled="procesando !== null"
+                    class="btn-close-jornada"
+                  >
+                    {{ jornada.cerrada ? (procesando === 'reopen_' + jornada.id ? 'Reabriendo...' : 'Reabrir Jornada') : (procesando === 'close_' + jornada.id ? 'Cerrando...' : 'Cerrar Jornada') }}
+                  </button>
+                  <button
+                    @click="eliminarJornada(jornada)"
+                    :disabled="procesando !== null"
+                    class="btn-delete-jornada"
+                  >
+                    {{ procesando === 'delete_' + jornada.id ? 'Eliminando...' : 'Eliminar Jornada' }}
+                  </button>
+                  <button 
+                    @click="togglePartidos(jornada)" 
+                    class="btn-view-matches"
+                  >
+                    {{ mostrandoPartidos[jornada.id] ? 'Ocultar Partidos' : 'Ver Partidos' }}
+                  </button>
+                </div>
+
+                <div v-if="mostrandoPartidos[jornada.id]" class="matches-section">
+                  <h4>Gestión de Resultados:</h4>
+                  <div v-if="!partidosJornada[jornada.id]?.length" class="no-matches">
+                    No hay partidos programados en esta jornada.
                   </div>
-                  <div class="summary-item">
-                    <span class="summary-label">Programados</span>
-                    <strong>{{ resultados[jornada.id].programados ?? 0 }}</strong>
-                  </div>
-                  <div class="summary-item">
-                    <span class="summary-label">Aplazados</span>
-                    <strong>{{ resultados[jornada.id].aplazados ?? 0 }}</strong>
+                  <div v-else class="matches-list">
+                    <div v-for="partido in partidosJornada[jornada.id]" :key="partido.id" class="match-item-admin">
+                      <div class="match-main">
+                        <span class="m-players">{{ partido.jugador1?.Nombre }} {{ partido.jugador1?.Apellidos || '' }} vs {{ partido.jugador2?.Nombre }} {{ partido.jugador2?.Apellidos || '' }}</span>
+                        <span class="m-meta">{{ new Date(partido.fecha).toLocaleDateString('es-ES') }} • {{ partido.hora ? partido.hora.substring(0, 5) : 'Por definir' }} • Pista {{ partido.pista || '?' }}</span>
+                      </div>
+                      
+                      <div v-if="partido.estado !== 'Jugado' && formResultados[partido.id]" class="result-inputs">
+                        <div class="set-row">
+                          <span>S1</span>
+                          <input type="number" v-model="formResultados[partido.id].s1_1" placeholder="0">
+                          <input type="number" v-model="formResultados[partido.id].s1_2" placeholder="0">
+                        </div>
+                        <div class="set-row">
+                          <span>S2</span>
+                          <input type="number" v-model="formResultados[partido.id].s2_1" placeholder="0">
+                          <input type="number" v-model="formResultados[partido.id].s2_2" placeholder="0">
+                        </div>
+                        <div class="set-row">
+                          <span>S3</span>
+                          <input type="number" v-model="formResultados[partido.id].s3_1" placeholder="0">
+                          <input type="number" v-model="formResultados[partido.id].s3_2" placeholder="0">
+                        </div>
+                        <button @click="guardarResultado(partido)" class="btn-save-mini">Guardar</button>
+                      </div>
+                      <div v-else class="result-final">
+                        Resultado: <span class="res-tag">{{ partido.resultado }}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div v-if="resultados[jornada.id].slotsUtilizados" class="slots-summary">
-                  <h5>Franjas usadas</h5>
-                  <ul>
-                    <li v-for="(pistas, slot) in resultados[jornada.id].slotsUtilizados" :key="slot">
-                      {{ slot }}: {{ pistas }} pista<span v-if="pistas !== 1">s</span>
-                    </li>
-                  </ul>
+
+                <div v-if="resultados[jornada.id]" class="results-log">
+                  <h4>Log de Asignación:</h4>
+                  <template v-if="Array.isArray(resultados[jornada.id])">
+                    <ul>
+                      <li v-for="(log, idx) in resultados[jornada.id]" :key="idx">{{ log }}</li>
+                    </ul>
+                  </template>
+                  <template v-else>
+                    <p class="summary-message">{{ resultados[jornada.id].message || 'Proceso completado' }}</p>
+                    <div class="summary-grid">
+                      <div class="summary-item">
+                        <span class="summary-label">Partidos</span>
+                        <strong>{{ resultados[jornada.id].partidos ?? 0 }}</strong>
+                      </div>
+                      <div class="summary-item">
+                        <span class="summary-label">Programados</span>
+                        <strong>{{ resultados[jornada.id].programados ?? 0 }}</strong>
+                      </div>
+                      <div class="summary-item">
+                        <span class="summary-label">Aplazados</span>
+                        <strong>{{ resultados[jornada.id].aplazados ?? 0 }}</strong>
+                      </div>
+                    </div>
+                    <div v-if="resultados[jornada.id].slotsUtilizados" class="slots-summary">
+                      <h5>Franjas usadas</h5>
+                      <ul>
+                        <li v-for="(pistas, slot) in resultados[jornada.id].slotsUtilizados" :key="slot">
+                          {{ slot }}: {{ pistas }} pista<span v-if="pistas !== 1">s</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </template>
                 </div>
-              </template>
+              </div>
             </div>
-          </div>
+          </section>
         </div>
       </div>
     </div>
@@ -172,7 +228,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, reactive } from 'vue';
+import { ref, onMounted, reactive, computed } from 'vue';
 import axios from 'axios';
 import { toast } from '../utils/toast';
 import { useAuth } from '../utils/auth';
@@ -184,6 +240,7 @@ const config = () => ({ headers: { Authorization: `Bearer ${state.jwt}` } });
 
 const jornadas = ref([]);
 const divisiones = ref([]);
+const busquedaDivision = ref('');
 const cargando = ref(true);
 const proyectando = ref(null);
 const procesando = ref(null);
@@ -192,6 +249,87 @@ const mostrandoPartidos = reactive({});
 const partidosJornada = reactive({});
 const formResultados = reactive({});
 const cargandoPartidos = reactive({});
+
+const ordenCategorias = ['Absoluto', 'Senior', 'Veterano', 'Juvenil', 'Infantil'];
+const ordenNiveles = ['Pro', 'Avanzado', 'Medio', 'Iniciado'];
+
+const getDivisionCategoria = (division) => division?.Categoria || division?.categoria || 'Sin categoría';
+const getDivisionNivel = (division) => division?.Nivel || division?.nivel || 'Sin nivel';
+const getTemporadaNombre = (division) => division?.temporada?.Nombre || division?.temporada?.nombre || 'Sin temporada';
+
+const normalizarTexto = (texto) => (texto || '').toString().trim().toLowerCase();
+
+const divisionesFiltradas = computed(() => {
+  const filtro = normalizarTexto(busquedaDivision.value);
+
+  return [...divisiones.value]
+    .filter((division) => {
+      if (!filtro) return true;
+
+      const nombre = normalizarTexto(division?.Nombre || division?.nombre);
+      const categoria = normalizarTexto(getDivisionCategoria(division));
+      const nivel = normalizarTexto(getDivisionNivel(division));
+
+      return nombre.includes(filtro) || categoria.includes(filtro) || nivel.includes(filtro);
+    })
+    .sort((a, b) => {
+      const categoriaA = getDivisionCategoria(a);
+      const categoriaB = getDivisionCategoria(b);
+      const ordenCategoriaA = ordenCategorias.indexOf(categoriaA);
+      const ordenCategoriaB = ordenCategorias.indexOf(categoriaB);
+
+      if (ordenCategoriaA !== ordenCategoriaB) {
+        return (ordenCategoriaA === -1 ? ordenCategorias.length : ordenCategoriaA) - (ordenCategoriaB === -1 ? ordenCategorias.length : ordenCategoriaB);
+      }
+
+      const nivelA = getDivisionNivel(a);
+      const nivelB = getDivisionNivel(b);
+      const ordenNivelA = ordenNiveles.indexOf(nivelA);
+      const ordenNivelB = ordenNiveles.indexOf(nivelB);
+
+      if (ordenNivelA !== ordenNivelB) {
+        return (ordenNivelA === -1 ? ordenNiveles.length : ordenNivelA) - (ordenNivelB === -1 ? ordenNiveles.length : ordenNivelB);
+      }
+
+      return normalizarTexto(a?.Nombre || a?.nombre).localeCompare(normalizarTexto(b?.Nombre || b?.nombre));
+    });
+});
+
+const divisionesAgrupadas = computed(() => {
+  const grupos = new Map();
+
+  for (const division of divisionesFiltradas.value) {
+    const temporadaNombre = getTemporadaNombre(division);
+    const key = `${temporadaNombre}`;
+
+    if (!grupos.has(key)) {
+      grupos.set(key, { key, temporadaNombre, items: [] });
+    }
+
+    grupos.get(key).items.push(division);
+  }
+
+  return Array.from(grupos.values()).sort((a, b) => a.temporadaNombre.localeCompare(b.temporadaNombre));
+});
+
+const getDivisionNombre = (j) => j?.division?.Nombre || j?.division?.nombre || 'Sin división';
+
+const jornadasAgrupadas = computed(() => {
+  const map = new Map();
+
+  for (const j of jornadas.value) {
+    const divId = j?.division?.id ?? (j?.division?.documentId || 'no-div');
+    const divNombre = getDivisionNombre(j);
+    const temporadaNombre = j?.division?.temporada?.Nombre || 'Sin temporada';
+    const key = `${divId}`;
+
+    if (!map.has(key)) map.set(key, { key, divisionId: divId, divisionNombre: divNombre, temporadaNombre, items: [] });
+    map.get(key).items.push(j);
+  }
+
+  // Optionally sort groups by division name
+  return Array.from(map.values()).sort((a, b) => a.divisionNombre.localeCompare(b.divisionNombre));
+});
 
 const cargarJornadas = async () => {
   try {
@@ -220,7 +358,7 @@ const cargarJornadas = async () => {
 
 const generarCalendarioDivision = async (division) => {
   if (procesando.value !== null) return;
-  if (!confirm(`¿Deseas generar el calendario completo para ${division.Nombre}? Esto creará jornadas y partidos automáticamente en base al número de jugadores.`)) return;
+  if (!confirm(`¿Deseas generar el calendario para ${division.Nombre}? Esto creará jornadas y partidos automáticamente.`)) return;
   
   procesando.value = 'div_' + division.id;
   try {
@@ -230,16 +368,7 @@ const generarCalendarioDivision = async (division) => {
   } catch (e) {
     console.error(e);
     const msg = e.response?.data?.error || e.response?.data?.message || '';
-    if (msg && msg.includes('ya tiene calendario generado')) {
-      const confirmar = confirm(`${division.Nombre} ya tiene calendario. ¿Quieres regenerarlo desde cero? (borra jornadas y partidos de esa división)`);
-      if (confirmar) {
-        const r2 = await axios.post(`${apiUrl}/api/divisions/${division.id}/regenerar-calendario`, {}, config());
-        toast(`Calendario regenerado. Jornadas: ${r2.data.jornadas}, partidos: ${r2.data.partidos}.`, 'success');
-        await cargarJornadas();
-      }
-    } else {
-      toast(msg || 'Error al generar calendario.', 'error');
-    }
+    toast(msg || 'Error al generar calendario.', 'error');
   } finally {
     procesando.value = null;
   }
@@ -470,6 +599,197 @@ onMounted(cargarJornadas);
   gap: 20px;
 }
 
+.section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.section-lead {
+  margin: 0;
+  color: #9a9a9a;
+  font-size: 0.95rem;
+}
+
+.section-counter {
+  color: var(--ball);
+  background: rgba(199, 255, 52, 0.08);
+  border: 1px solid rgba(199, 255, 52, 0.18);
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.division-toolbar {
+  margin-bottom: 18px;
+}
+
+.division-search {
+  width: 100%;
+  max-width: 420px;
+  background: #111;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: white;
+  padding: 12px 14px;
+  border-radius: 10px;
+  outline: none;
+}
+
+.division-search:focus {
+  border-color: var(--ball);
+  box-shadow: 0 0 0 3px rgba(199, 255, 52, 0.12);
+}
+
+.empty-search-state {
+  color: #bbb;
+  background: rgba(255,255,255,0.04);
+  border: 1px dashed rgba(255,255,255,0.12);
+  border-radius: 12px;
+  padding: 18px;
+  margin-top: 8px;
+}
+
+.division-group-list {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.division-group-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 18px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.divisions-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+.divisions-table thead th {
+  text-align: left;
+  color: #b8b8b8;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.divisions-table tbody td {
+  padding: 14px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  vertical-align: middle;
+}
+
+.divisions-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table-primary {
+  color: white;
+  font-weight: 800;
+}
+
+.table-secondary {
+  margin-top: 4px;
+  font-size: 0.82rem;
+  color: #8f8f8f;
+}
+
+.table-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-table {
+  padding: 10px 16px;
+  border-radius: 8px;
+}
+
+.division-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.division-group-header h3 {
+  margin: 0 0 4px;
+  color: white;
+}
+
+.division-group-header p {
+  margin: 0;
+  color: #8a8a8a;
+  font-size: 0.9rem;
+}
+
+.division-card {
+  background: #161616;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.jornada-admin-card.compact {
+  padding: 16px;
+  border-radius: 10px;
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.jornada-division-label {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #cfe79a;
+  margin-bottom: 6px;
+}
+
+.small-meta { font-size: 0.8rem; color: #9a9a9a; margin: 4px 0; }
+
+.division-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 6px;
+}
+
+.division-tag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--ball);
+  background: rgba(199, 255, 52, 0.08);
+  border: 1px solid rgba(199, 255, 52, 0.2);
+}
+
+.division-tag-alt {
+  color: #e0e0e0;
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.12);
+}
+
 .jornada-admin-card {
   background: #1a1a1a;
   border: 1px solid rgba(255,255,255,0.1);
@@ -483,6 +803,24 @@ onMounted(cargarJornadas);
 
 .card-info h3 { color: var(--ball); margin-bottom: 5px; }
 .card-info .meta { color: #888; font-size: 0.9rem; }
+
+.jornada-admin-card.compact .card-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.jornada-admin-card.compact .card-actions .btn-algorithm,
+.jornada-admin-card.compact .card-actions .btn-close-jornada,
+.jornada-admin-card.compact .card-actions .btn-delete-jornada,
+.jornada-admin-card.compact .card-actions .btn-view-matches {
+  width: 100%;
+}
+
+.jornada-admin-card.compact .matches-section,
+.jornada-admin-card.compact .results-log {
+  grid-column: auto;
+}
 
 .badge-estado {
   display: inline-block;
@@ -521,15 +859,16 @@ onMounted(cargarJornadas);
 }
 
 .results-log {
-  grid-column: span 2;
+  grid-column: auto;
   background: #000;
   padding: 15px;
   border-radius: 8px;
   font-family: monospace;
   font-size: 0.85rem;
-  max-height: 200px;
+  max-height: 220px;
   overflow-y: auto;
   border: 1px solid #333;
+  width: 100%;
 }
 
 .results-log h4 { color: #666; margin-bottom: 10px; }
@@ -542,7 +881,7 @@ onMounted(cargarJornadas);
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
   gap: 12px;
   margin-bottom: 12px;
 }
@@ -636,9 +975,10 @@ onMounted(cargarJornadas);
 }
 
 .matches-section {
-  grid-column: span 2;
+  grid-column: auto;
   border-top: 1px solid #333;
   padding-top: 20px;
+  width: 100%;
 }
 
 .matches-section h4 { margin-bottom: 15px; color: #888; }
@@ -653,7 +993,7 @@ onMounted(cargarJornadas);
   gap: 15px;
 }
 
-.match-main { display: flex; justify-content: space-between; align-items: center; }
+.match-main { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px; }
 .m-players { font-weight: 700; color: #fff; }
 .m-meta { font-size: 0.8rem; color: #555; }
 
