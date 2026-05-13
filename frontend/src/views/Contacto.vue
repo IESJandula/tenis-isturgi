@@ -20,7 +20,7 @@
 
           <div class="contacto-items">
             <div class="contacto-item">
-              <div class="item-icon">ðŸ“</div>
+              <div class="item-icon">📍</div>
               <div class="item-content">
                 <h4>Ubicación</h4>
                 <p>C. Egido del Puente, s/n<br/>23740 Andújar, Jaén<br/>España</p>
@@ -28,7 +28,7 @@
             </div>
 
             <div class="contacto-item">
-              <div class="item-icon">âœ‰ï¸</div>
+              <div class="item-icon">✉️</div>
               <div class="item-content">
                 <h4>Email</h4>
                 <a href="mailto:tenisturgi@gmail.com">tenisturgi@gmail.com</a>
@@ -37,7 +37,7 @@
             </div>
 
             <div class="contacto-item">
-              <div class="item-icon">ðŸ“ž</div>
+              <div class="item-icon">📞</div>
               <div class="item-content">
                 <h4>Teléfono</h4>
                 <a href="tel:+34697827244">+34 697 827 244</a>
@@ -130,7 +130,7 @@
 
         <div class="horarios-grid">
           <div class="horario-card">
-            <div class="horario-icon">â˜€ï¸</div>
+            <div class="horario-icon">☀️</div>
             <div class="horario-card-body">
               <h4>Temporada de Verano</h4>
               <p class="horario-periodo">Junio - Septiembre</p>
@@ -141,7 +141,7 @@
           </div>
 
           <div class="horario-card">
-            <div class="horario-icon">ðŸ‚</div>
+            <div class="horario-icon">❄️</div>
             <div class="horario-card-body">
               <h4>Temporada de Invierno</h4>
               <p class="horario-periodo">Octubre - Mayo</p>
@@ -152,7 +152,7 @@
           </div>
 
           <div class="horario-card">
-            <div class="horario-icon">ðŸŽ¾</div>
+            <div class="horario-icon">🎾</div>
               <div class="horario-card-body">
               <h4>Escuela Municipal</h4>
               <p class="horario-periodo">Todo el año</p>
@@ -176,7 +176,7 @@
           <div class="llegar-info">
             
             <div class="llegar-item">
-              <div class="llegar-icon">ðŸ“</div>
+              <div class="llegar-icon">📍</div>
               <div>
                 <h4>Dirección</h4>
                 <p><strong>C. Egido del Puente, s/n</strong><br/>
@@ -188,7 +188,7 @@
 
           <div class="mapa-placeholder">
               <div class="mapa-overlay">
-              <div class="mapa-icon">ðŸ—ºï¸</div>
+              <div class="mapa-icon">🗺️</div>
               <p>Pistas Municipales de Tenis</p>
               <p class="mapa-ubicacion">C. Egido del Puente, s/n, 23740 Andújar, Jaén</p>
               <a href="https://www.google.com/maps/search/C.+Egido+del+Puente,+s%2Fn,+23740+And%C3%BAjar,+Ja%C3%A9n" target="_blank" rel="noopener" class="btn btn-secondary">

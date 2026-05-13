@@ -6,8 +6,9 @@
         <div class="user-meta" v-if="state.user?.NumeroSocio">
           <span class="meta-tag">Socio #{{ state.user.NumeroSocio }}</span>
           <span class="meta-tag ranking">{{ state.user.Nivel }}</span>
-          <span class="meta-tag points">{{ state.user.Puntos || 0 }} pts</span>
+          <span class="meta-tag points">{{ puntosCalculados }} pts</span>
         </div>
+        <p v-else-if="isAdmin()">Administrador del Club de Tenis Isturgi</p>
         <p v-else>Miembro del Club de Tenis Isturgi</p>
       </div>
       <button @click="handleLogout" class="btn-logout">Cerrar Sesión</button>
@@ -89,12 +90,22 @@
       </router-link>
 
       <!-- Admin Mantenimiento Card (Only if Admin) -->
-      <router-link v-if="isAdmin()" to="/admin-mantenimiento" class="dashboard-card maintenance-card">
+      <router-link v-if="isAdmin()" to="/admin-mantenimiento" class="dashboard-card maintenance-card admin-card">
         <div class="card-icon">🛠️</div>
         <h3>Mantenimiento</h3>
         <p>Gestiona noticias, torneos y datos maestros de socios.</p>
         <span class="card-action">Administrar →</span>
       </router-link>
+
+      <!-- Admin Dashboard Card (Only if Admin) -->
+      <router-link v-if="isAdmin()" to="/admin/dashboard" class="dashboard-card admin-dashboard-card admin-card">
+        <div class="card-icon">📊</div>
+        <h3>Dashboard</h3>
+        <p>Visor global con métricas y accesos rápidos de administración.</p>
+        <span class="card-action">Ir al Dashboard →</span>
+      </router-link>
+
+
     </div>
   </div>
 </template>
@@ -114,6 +125,7 @@ const cargandoProximo = ref(false);
 const errorProximo = ref(null);
 const proximoPartido = ref(null);
 const jugadorId = ref(null);
+const puntosCalculados = ref(0);
 
 const displayName = computed(() => {
   const nombre = [state.user?.Nombre, state.user?.Apellidos].filter(Boolean).join(' ').trim();
@@ -212,6 +224,18 @@ const calcularProximo = (lista) => {
   return sinFecha[0] || null;
 };
 
+const cargarPuntos = async (jugadorId) => {
+  try {
+    const res = await axios.get(`${apiUrl}/api/clasificacions`);
+    const clasificacion = res.data?.data || [];
+    const jugadorClasif = clasificacion.find(c => c.jugador?.id === jugadorId || c.jugadorId === jugadorId);
+    puntosCalculados.value = jugadorClasif?.puntos || 0;
+  } catch (e) {
+    console.error('Error cargando puntos:', e);
+    puntosCalculados.value = 0;
+  }
+};
+
 const cargarProximoPartido = async () => {
   if (isAdmin()) return;
   if (!state.jwt) return;
@@ -235,6 +259,7 @@ const cargarProximoPartido = async () => {
     }
 
     jugadorId.value = pId;
+    await cargarPuntos(pId);
 
     const res = await axios.get(`${apiUrl}/api/partidos`, { ...config, params: { jugadorId: pId } });
     const data = res.data?.data || res.data || [];
@@ -489,6 +514,10 @@ watch(
 .card-icon {
   font-size: 2.5rem;
   margin-bottom: 20px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .dashboard-card h3 {

@@ -212,8 +212,8 @@ const fotoAlt = (fileName, index) => fotoTenisAlt(fileName, index);
   position: relative;
   min-height: 240px;
   display: flex;
-  align-items: flex-end;
-  justify-content: flex-start;
+  align-items: center;
+  justify-content: center;
   background:
     linear-gradient(to top, rgba(8,15,18,0.92) 0%, rgba(8,15,18,0.45) 55%, transparent 100%),
     url("https://images.unsplash.com/photo-1622163642998-1ea32b0bbc67?q=80&w=2400&auto=format&fit=crop") center/cover no-repeat;
