@@ -13,6 +13,48 @@
       <button @click="handleLogout" class="btn-logout">Cerrar Sesión</button>
     </header>
 
+    <!-- Próximo partido (solo socios, no admin) -->
+    <section v-if="!isAdmin()" class="next-match glass-card">
+      <div class="next-match-head">
+        <h2 class="headline">Próximo partido</h2>
+        <router-link to="/mis-partidos" class="next-match-link">Ver todos →</router-link>
+      </div>
+
+      <div v-if="cargandoProximo" class="next-match-state">
+        <div class="spinner"></div>
+        <p>Cargando tu próximo partido...</p>
+      </div>
+
+      <div v-else-if="errorProximo" class="next-match-state error">
+        <p>{{ errorProximo }}</p>
+      </div>
+
+      <div v-else-if="!proximoPartido" class="next-match-state">
+        <p>No tienes próximos partidos asignados.</p>
+      </div>
+
+      <div v-else class="next-match-card">
+        <div class="nm-top">
+          <div class="nm-title">
+            <span class="nm-jornada">{{ proximoPartido.jornada?.Nombre || 'Jornada' }}</span>
+            <span class="nm-estado" :class="estadoBadgeClass(proximoPartido.estado)">{{ proximoPartido.estado || 'Pendiente' }}</span>
+          </div>
+        </div>
+
+        <div class="nm-players">
+          <span class="nm-me">{{ formatNombre(yoEnPartido(proximoPartido)) }}</span>
+          <span class="nm-vs">vs</span>
+          <span class="nm-rival">{{ formatNombre(rivalEnPartido(proximoPartido)) }}</span>
+        </div>
+
+        <div class="nm-meta">
+          <span>📅 {{ fmtFecha(proximoPartido.fecha) }}</span>
+          <span>⏰ {{ fmtHora(proximoPartido.hora) }}</span>
+          <span>📍 Pista {{ proximoPartido.pista || '?' }}</span>
+        </div>
+      </div>
+    </section>
+
     <div class="dashboard-grid">
       <!-- Disponibilidad Card (Only if not Admin) -->
       <router-link v-if="!isAdmin()" to="/disponibilidad" class="dashboard-card">
@@ -58,12 +100,20 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuth } from '../utils/auth';
+import axios from 'axios';
 
 const { state, logout, isAdmin } = useAuth();
 const router = useRouter();
+
+const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+
+const cargandoProximo = ref(false);
+const errorProximo = ref(null);
+const proximoPartido = ref(null);
+const jugadorId = ref(null);
 
 const displayName = computed(() => {
   const nombre = [state.user?.Nombre, state.user?.Apellidos].filter(Boolean).join(' ').trim();
@@ -74,6 +124,136 @@ const handleLogout = async () => {
   await logout();
   router.push('/login');
 };
+
+const formatNombre = (jugador) => {
+  if (!jugador) return 'Por confirmar';
+  return `${jugador.Nombre || ''} ${jugador.Apellidos || ''}`.trim() || jugador.email || 'Jugador';
+};
+
+const fmtFecha = (value) => {
+  if (!value) return 'Por definir';
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return 'Por definir';
+  return d.toLocaleDateString('es-ES');
+};
+
+const fmtHora = (value) => {
+  if (!value) return 'Por definir';
+  return String(value).substring(0, 5);
+};
+
+const estadoBadgeClass = (estado) => {
+  const s = String(estado || '').toLowerCase();
+  if (s === 'jugado') return 'jugado';
+  if (s === 'programado') return 'programado';
+  if (s === 'aplazado') return 'aplazado';
+  return 'pendiente';
+};
+
+const yoEnPartido = (p) => {
+  if (!p) return null;
+  if (!jugadorId.value) return p.jugador1 || null;
+  if (p.jugador1?.id === jugadorId.value) return p.jugador1;
+  if (p.jugador2?.id === jugadorId.value) return p.jugador2;
+  return p.jugador1 || p.jugador2 || null;
+};
+
+const rivalEnPartido = (p) => {
+  if (!p) return null;
+  if (!jugadorId.value) return p.jugador2 || null;
+  if (p.jugador1?.id === jugadorId.value) return p.jugador2 || null;
+  if (p.jugador2?.id === jugadorId.value) return p.jugador1 || null;
+  return p.jugador2 || p.jugador1 || null;
+};
+
+const toDateTime = (fecha, hora) => {
+  if (!fecha) return null;
+  const base = new Date(fecha);
+  if (Number.isNaN(base.getTime())) return null;
+  const h = hora ? String(hora).substring(0, 5) : null;
+  if (h && h.includes(':')) {
+    const parts = h.split(':');
+    const hh = Number(parts[0]);
+    const mm = Number(parts[1]);
+    if (!Number.isNaN(hh)) base.setHours(hh);
+    if (!Number.isNaN(mm)) base.setMinutes(mm);
+  } else {
+    base.setHours(0, 0, 0, 0);
+  }
+  base.setSeconds(0, 0);
+  return base;
+};
+
+const calcularProximo = (lista) => {
+  if (!Array.isArray(lista) || lista.length === 0) return null;
+
+  const pendientes = lista.filter((p) => (p?.estado || '').toLowerCase() !== 'jugado');
+  if (pendientes.length === 0) return null;
+
+  const ahora = new Date();
+  const conFecha = [];
+  const sinFecha = [];
+
+  for (const p of pendientes) {
+    const dt = toDateTime(p.fecha, p.hora);
+    if (dt) conFecha.push({ p, dt });
+    else sinFecha.push(p);
+  }
+
+  // 1) Próximo futuro (fecha >= ahora)
+  const futuros = conFecha.filter((x) => x.dt >= ahora).sort((a, b) => a.dt - b.dt);
+  if (futuros.length) return futuros[0].p;
+
+  // 2) Si no hay futuros, el más cercano con fecha (aunque esté pasado)
+  conFecha.sort((a, b) => a.dt - b.dt);
+  if (conFecha.length) return conFecha[0].p;
+
+  // 3) Sin fecha programada
+  return sinFecha[0] || null;
+};
+
+const cargarProximoPartido = async () => {
+  if (isAdmin()) return;
+  if (!state.jwt) return;
+
+  cargandoProximo.value = true;
+  errorProximo.value = null;
+  proximoPartido.value = null;
+
+  const config = { headers: { Authorization: `Bearer ${state.jwt}` } };
+
+  try {
+    let pId = state.user?.id || null;
+    if (!pId) {
+      const resMe = await axios.get(`${apiUrl}/api/jugadors/me`, config);
+      pId = resMe.data?.data?.id || null;
+    }
+
+    if (!pId) {
+      errorProximo.value = 'No se encontró tu perfil de jugador.';
+      return;
+    }
+
+    jugadorId.value = pId;
+
+    const res = await axios.get(`${apiUrl}/api/partidos`, { ...config, params: { jugadorId: pId } });
+    const data = res.data?.data || res.data || [];
+    proximoPartido.value = calcularProximo(data);
+  } catch (e) {
+    console.error(e);
+    errorProximo.value = 'No se pudo cargar tu próximo partido.';
+  } finally {
+    cargandoProximo.value = false;
+  }
+};
+
+watch(
+  () => state.jwt,
+  (jwt) => {
+    if (jwt) cargarProximoPartido();
+  },
+  { immediate: true }
+);
 </script>
 
 <style scoped>
@@ -153,6 +333,140 @@ const handleLogout = async () => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 24px;
+}
+
+.next-match {
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.next-match-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.next-match-link {
+  color: var(--ball);
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+
+.next-match-state {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: rgba(234, 242, 239, 0.7);
+}
+
+.next-match-state.error {
+  color: rgba(255, 180, 180, 0.9);
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(199, 255, 52, 0.25);
+  border-top-color: var(--ball);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.next-match-card {
+  padding: 18px;
+  border-radius: 16px;
+  background: rgba(234, 242, 239, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.nm-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.nm-jornada {
+  font-weight: 900;
+  color: #fff;
+}
+
+.nm-estado {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.nm-estado.pendiente {
+  border-color: var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+}
+
+.nm-estado.programado {
+  border-color: var(--border-accent);
+  background: var(--ball-dim);
+  color: var(--ball);
+}
+
+.nm-estado.aplazado {
+  border-color: var(--clay-dim);
+  background: var(--clay-dim);
+  color: var(--clay);
+}
+
+.nm-estado.jugado {
+  border-color: var(--border-accent);
+  background: var(--ball-dim);
+  color: var(--ball);
+}
+
+.nm-players {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.25);
+}
+
+.nm-me {
+  font-weight: 900;
+  color: var(--ball);
+}
+
+.nm-vs {
+  color: rgba(232, 240, 236, 0.35);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.nm-rival {
+  font-weight: 900;
+  color: #fff;
+}
+
+.nm-meta {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 16px;
+  color: rgba(234, 242, 239, 0.7);
+  font-weight: 700;
 }
 
 .dashboard-card {
