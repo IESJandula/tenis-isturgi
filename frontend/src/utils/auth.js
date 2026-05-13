@@ -4,6 +4,7 @@ import { auth } from '../firebase';
 import axios from 'axios';
 
 const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+const AUTH_SOURCE_KEY = 'authSource';
 
 // Emails con permisos de administrador extraídos de .env o usando defaults
 const VIRTUAL_ADMINS = import.meta.env.VITE_ADMIN_EMAILS ? import.meta.env.VITE_ADMIN_EMAILS.split(',') : ['admin@isturgi.com', 'socio@isturgi.com', 'profe@isturgi.com'];
@@ -11,6 +12,7 @@ const VIRTUAL_ADMINS = import.meta.env.VITE_ADMIN_EMAILS ? import.meta.env.VITE_
 const state = reactive({
     user: JSON.parse(localStorage.getItem('user') || 'null'),
     jwt: localStorage.getItem('jwt') || null,
+    authSource: localStorage.getItem(AUTH_SOURCE_KEY) || null,
     loading: false,
     error: null,
     initialized: false
@@ -41,16 +43,59 @@ onAuthStateChanged(auth, async (firebaseUser) => {
 
         state.user = userData;
         state.jwt = token;
+        state.authSource = 'firebase';
         localStorage.setItem('user', JSON.stringify(userData));
         localStorage.setItem('jwt', token);
+        localStorage.setItem(AUTH_SOURCE_KEY, 'firebase');
     } else {
+        if (localStorage.getItem(AUTH_SOURCE_KEY) === 'local' && localStorage.getItem('jwt')) {
+            state.initialized = true;
+            return;
+        }
+
         state.user = null;
         state.jwt = null;
+        state.authSource = null;
         localStorage.removeItem('user');
         localStorage.removeItem('jwt');
+        localStorage.removeItem(AUTH_SOURCE_KEY);
     }
     state.initialized = true;
 });
+
+const normalizeAuthResponse = (data, fallbackIdentifier) => {
+    const payload = data?.data ?? data ?? {};
+    const token = payload.token || payload.jwt || null;
+    const user = payload.user || payload.data || payload.jugador || null;
+
+    if (!token) {
+        throw new Error('Respuesta de autenticación inválida');
+    }
+
+    const normalizedUser = user ? {
+        ...user,
+        email: user.email || user.Email || fallbackIdentifier,
+        uid: user.uid || user.firebaseUid || user.firebase_uid || user.id || null,
+        displayName: user.displayName || `${user.Nombre || user.nombre || ''} ${user.Apellidos || user.apellidos || ''}`.trim() || null,
+        isAdmin: VIRTUAL_ADMINS.includes(String(user.email || user.Email || fallbackIdentifier || '').toLowerCase())
+    } : {
+        email: fallbackIdentifier,
+        uid: null,
+        displayName: null,
+        isAdmin: VIRTUAL_ADMINS.includes(String(fallbackIdentifier || '').toLowerCase())
+    };
+
+    return { token, user: normalizedUser };
+};
+
+const setLocalSession = (token, userData) => {
+    state.user = userData;
+    state.jwt = token;
+    state.authSource = 'local';
+    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('jwt', token);
+    localStorage.setItem(AUTH_SOURCE_KEY, 'local');
+};
 
 const login = async (identifier, password) => {
     state.loading = true;
@@ -71,18 +116,44 @@ const login = async (identifier, password) => {
             };
             checkState();
         });
-    } catch (err) {
-        state.error = err.message || 'Error al iniciar sesión';
-        if (state.error.includes('auth/invalid-credential')) {
-            state.error = 'Correo o contraseña incorrectos';
+    } catch (firebaseErr) {
+        try {
+            const res = await axios.post(`${apiUrl}/api/jugadors/login`, {
+                identifier,
+                password
+            });
+
+            const { token, user } = normalizeAuthResponse(res.data, identifier);
+            setLocalSession(token, user);
+            state.loading = false;
+            return { success: true };
+        } catch (localErr) {
+            let message = firebaseErr?.message || 'Error al iniciar sesión';
+            if (message.includes('auth/invalid-credential') || message.includes('auth/user-not-found')) {
+                message = 'Correo o contraseña incorrectos';
+            }
+
+            const backendMessage = localErr?.response?.data?.message || localErr?.response?.data?.error || localErr?.message;
+            state.error = backendMessage || message;
+            state.loading = false;
+            return { success: false, error: state.error };
         }
-        state.loading = false;
-        return { success: false, error: state.error };
     }
 };
 
 const logout = async () => {
-    await fbSignOut(auth);
+    try {
+        await fbSignOut(auth);
+    } finally {
+        state.user = null;
+        state.jwt = null;
+        state.authSource = null;
+        state.loading = false;
+        state.error = null;
+        localStorage.removeItem('user');
+        localStorage.removeItem('jwt');
+        localStorage.removeItem(AUTH_SOURCE_KEY);
+    }
 };
 
 const refreshProfile = async () => {

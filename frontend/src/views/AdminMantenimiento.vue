@@ -71,7 +71,6 @@
                 </tr>
                 <tr v-if="activeTab === 'divisiones'">
                   <th>Nombre</th>
-                  <th>Categoría / Nivel</th>
                   <th>Temporada</th>
                   <th>Acciones</th>
                 </tr>
@@ -113,7 +112,6 @@
                   <!-- COLUMNAS DIVISIONES -->
                   <template v-if="activeTab === 'divisiones'">
                     <td><strong>{{ item.Nombre }}</strong></td>
-                    <td>{{ item.Categoria || 'Absoluto' }} - {{ item.Nivel || 'Medio' }}</td>
                     <td>{{ item.temporada?.Nombre || item.temporada?.nombre || 'Sin temporada' }}</td>
                   </template>
 
@@ -350,8 +348,8 @@
                   {{ div.Nombre }} ({{ div.Categoria }} - {{ div.Nivel }})
                 </option>
               </select>
-              <p v-if="!divisionesCompatibles.length && form.Categoria && form.Nivel" class="field-error">
-                ⚠️ No hay divisiones para {{ form.Categoria }} - {{ form.Nivel }}
+              <p v-if="!divisionesCompatibles.length" class="field-error">
+                ⚠️ No hay divisiones disponibles.
               </p>
               <p v-if="playerErrors.divisionId" class="field-error">{{ playerErrors.divisionId }}</p>
             </div>
@@ -382,29 +380,6 @@
                 </option>
               </select>
               <p v-if="formErrors.temporadaId" class="field-error">{{ formErrors.temporadaId }}</p>
-            </div>
-            <div class="form-group">
-              <label>Categoría *</label>
-              <select v-model="form.Categoria" required>
-                <option value="">Selecciona una categoría</option>
-                <option value="Absoluto">Absoluto</option>
-                <option value="Juvenil">Juvenil</option>
-                <option value="Infantil">Infantil</option>
-                <option value="Veterano">Veterano</option>
-                <option value="Senior">Senior</option>
-              </select>
-              <p v-if="formErrors.Categoria" class="field-error">{{ formErrors.Categoria }}</p>
-            </div>
-            <div class="form-group">
-              <label>Nivel *</label>
-              <select v-model="form.Nivel" required>
-                <option value="">Selecciona un nivel</option>
-                <option value="Iniciado">Iniciado</option>
-                <option value="Medio">Medio</option>
-                <option value="Avanzado">Avanzado</option>
-                <option value="Pro">Pro</option>
-              </select>
-              <p v-if="formErrors.Nivel" class="field-error">{{ formErrors.Nivel }}</p>
             </div>
           </template>
 
@@ -487,10 +462,7 @@ const activeTabSingular = computed(() => tabs.find(t => t.id === activeTab.value
 const activeEndpoint = computed(() => tabs.find(t => t.id === activeTab.value)?.endpoint);
 
 const divisionesCompatibles = computed(() => {
-  if (!form.Categoria || !form.Nivel) return divisiones.value;
-  return divisiones.value.filter(d => 
-    d.Categoria === form.Categoria && d.Nivel === form.Nivel
-  );
+  return divisiones.value;
 });
 
 const cargarDatos = async () => {
@@ -573,8 +545,6 @@ const abrirNuevo = () => {
   } else if (activeTab.value === 'divisiones') {
     form.Nombre = '';
     form.temporadaId = temporadas.value.length ? temporadas.value[0].id : '';
-    form.Categoria = 'Absoluto';
-    form.Nivel = 'Medio';
   } else if (activeTab.value === 'galeria') {
     form.titulo = '';
     form.categoria = 'Club';
@@ -670,8 +640,6 @@ const validateNonPlayerForm = (payload) => {
   } else if (activeTab.value === 'divisiones') {
     if (!payload.Nombre?.trim()) setFormError('Nombre', 'El nombre de la división es obligatorio');
     if (!payload.temporada?.id) setFormError('temporadaId', 'Debes seleccionar una temporada');
-    if (!payload.Categoria?.trim()) setFormError('Categoria', 'Debes seleccionar una categoría');
-    if (!payload.Nivel?.trim()) setFormError('Nivel', 'Debes seleccionar un nivel');
   } else if (activeTab.value === 'galeria') {
     if (!payload.titulo?.trim()) setFormError('titulo', 'El título es obligatorio');
     if (!payload.categoria?.trim()) setFormError('categoria', 'La categoría es obligatoria');
@@ -693,6 +661,10 @@ const guardarItem = async () => {
     if (activeTab.value === 'divisiones') {
       payload.temporada = { id: Number(payload.temporadaId) };
       delete payload.temporadaId;
+      delete payload.Categoria;
+      delete payload.Nivel;
+      delete payload.categoria;
+      delete payload.nivel;
     }
 
     if (activeTab.value === 'jugadores' && payload.divisionId) {

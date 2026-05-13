@@ -10,5 +10,7 @@ public interface JugadorRepository extends JpaRepository<Jugador, Long> {
     Optional<Jugador> findByEmail(String email);
     Optional<Jugador> findByEmailIgnoreCase(String email);
     Optional<Jugador> findByFirebaseUid(String firebaseUid);
+    Optional<Jugador> findByNumeroSocio(String numeroSocio);
+    Optional<Jugador> findByNumeroSocioIgnoreCase(String numeroSocio);
     java.util.List<Jugador> findByDivisionId(Long divisionId);
 }

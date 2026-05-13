@@ -25,7 +25,7 @@
           <div class="section-head">
             <div>
               <h2 style="color: white; margin-bottom: 8px; font-size: 1.5rem; border-bottom: 1px solid #333; padding-bottom: 10px;">Sorteo de Calendario (Por Temporada)</h2>
-              <p class="section-lead">Busca una división por nombre, categoría o nivel y ejecútala en su temporada correspondiente.</p>
+              <p class="section-lead">Busca una división por nombre y ejecútala en su temporada correspondiente.</p>
             </div>
             <div class="section-counter">{{ divisionesFiltradas.length }} división{{ divisionesFiltradas.length === 1 ? '' : 'es' }}</div>
           </div>
@@ -35,7 +35,7 @@
               v-model="busquedaDivision"
               type="search"
               class="division-search"
-              placeholder="Buscar por nombre, categoría o nivel"
+              placeholder="Buscar por nombre o temporada"
             >
           </div>
 
@@ -57,8 +57,7 @@
                   <thead>
                     <tr>
                       <th>División</th>
-                      <th>Categoría</th>
-                      <th>Nivel</th>
+                      <th>Temporada</th>
                       <th>Acciones</th>
                     </tr>
                   </thead>
@@ -68,8 +67,7 @@
                         <div class="table-primary">{{ div.Nombre }}</div>
                         <div class="table-secondary">Generación automática mediante Algoritmo Berger</div>
                       </td>
-                      <td><span class="division-tag">{{ getDivisionCategoria(div) }}</span></td>
-                      <td><span class="division-tag division-tag-alt">{{ getDivisionNivel(div) }}</span></td>
+                      <td>{{ getTemporadaNombre(div) }}</td>
                       <td>
                         <div class="table-actions">
                           <button 
@@ -250,11 +248,6 @@ const partidosJornada = reactive({});
 const formResultados = reactive({});
 const cargandoPartidos = reactive({});
 
-const ordenCategorias = ['Absoluto', 'Senior', 'Veterano', 'Juvenil', 'Infantil'];
-const ordenNiveles = ['Pro', 'Avanzado', 'Medio', 'Iniciado'];
-
-const getDivisionCategoria = (division) => division?.Categoria || division?.categoria || 'Sin categoría';
-const getDivisionNivel = (division) => division?.Nivel || division?.nivel || 'Sin nivel';
 const getTemporadaNombre = (division) => division?.temporada?.Nombre || division?.temporada?.nombre || 'Sin temporada';
 
 const normalizarTexto = (texto) => (texto || '').toString().trim().toLowerCase();
@@ -267,28 +260,16 @@ const divisionesFiltradas = computed(() => {
       if (!filtro) return true;
 
       const nombre = normalizarTexto(division?.Nombre || division?.nombre);
-      const categoria = normalizarTexto(getDivisionCategoria(division));
-      const nivel = normalizarTexto(getDivisionNivel(division));
+      const temporada = normalizarTexto(getTemporadaNombre(division));
 
-      return nombre.includes(filtro) || categoria.includes(filtro) || nivel.includes(filtro);
+      return nombre.includes(filtro) || temporada.includes(filtro);
     })
     .sort((a, b) => {
-      const categoriaA = getDivisionCategoria(a);
-      const categoriaB = getDivisionCategoria(b);
-      const ordenCategoriaA = ordenCategorias.indexOf(categoriaA);
-      const ordenCategoriaB = ordenCategorias.indexOf(categoriaB);
+      const temporadaA = normalizarTexto(getTemporadaNombre(a));
+      const temporadaB = normalizarTexto(getTemporadaNombre(b));
 
-      if (ordenCategoriaA !== ordenCategoriaB) {
-        return (ordenCategoriaA === -1 ? ordenCategorias.length : ordenCategoriaA) - (ordenCategoriaB === -1 ? ordenCategorias.length : ordenCategoriaB);
-      }
-
-      const nivelA = getDivisionNivel(a);
-      const nivelB = getDivisionNivel(b);
-      const ordenNivelA = ordenNiveles.indexOf(nivelA);
-      const ordenNivelB = ordenNiveles.indexOf(nivelB);
-
-      if (ordenNivelA !== ordenNivelB) {
-        return (ordenNivelA === -1 ? ordenNiveles.length : ordenNivelA) - (ordenNivelB === -1 ? ordenNiveles.length : ordenNivelB);
+      if (temporadaA !== temporadaB) {
+        return temporadaA.localeCompare(temporadaB);
       }
 
       return normalizarTexto(a?.Nombre || a?.nombre).localeCompare(normalizarTexto(b?.Nombre || b?.nombre));

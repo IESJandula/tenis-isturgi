@@ -1,5 +1,6 @@
 package com.isturgi.backend.security;
 
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.AuthErrorCode;
 import com.google.firebase.auth.UserRecord;
@@ -8,17 +9,27 @@ import org.springframework.stereotype.Service;
 @Service
 public class FirebaseService {
 
+    private FirebaseAuth firebaseAuth() {
+        if (FirebaseApp.getApps().isEmpty()) {
+            throw new IllegalStateException("Firebase Admin no está inicializado. Revisa firebase-service-account.json o FIREBASE_SERVICE_ACCOUNT_PATH.");
+        }
+
+        return FirebaseAuth.getInstance();
+    }
+
     /**
      * Crea un usuario en Firebase Authentication con una contraseña por defecto.
      * Si el usuario ya existe, simplemente retorna el UID existente.
      */
     public String createFirebaseUser(String email, String password, String displayName) {
         try {
+            FirebaseAuth auth = firebaseAuth();
+
             // Intentar ver si ya existe para evitar errores
             try {
-                UserRecord existingUser = FirebaseAuth.getInstance().getUserByEmail(email);
+                UserRecord existingUser = auth.getUserByEmail(email);
                 if (password != null && !password.isBlank()) {
-                    FirebaseAuth.getInstance().updateUser(new UserRecord.UpdateRequest(existingUser.getUid()).setPassword(password));
+                    auth.updateUser(new UserRecord.UpdateRequest(existingUser.getUid()).setPassword(password));
                 }
                 return existingUser.getUid();
             } catch (Exception e) {
@@ -32,7 +43,7 @@ public class FirebaseService {
                     .setEmailVerified(false)
                     .setDisabled(false);
 
-            UserRecord userRecord = FirebaseAuth.getInstance().createUser(request);
+            UserRecord userRecord = auth.createUser(request);
             System.out.println("Usuario de Firebase creado exitosamente: " + userRecord.getUid());
             return userRecord.getUid();
         } catch (Exception e) {
@@ -44,8 +55,9 @@ public class FirebaseService {
 
     public boolean deleteFirebaseUserByEmail(String email) {
         try {
-            UserRecord userRecord = FirebaseAuth.getInstance().getUserByEmail(email);
-            FirebaseAuth.getInstance().deleteUser(userRecord.getUid());
+            FirebaseAuth auth = firebaseAuth();
+            UserRecord userRecord = auth.getUserByEmail(email);
+            auth.deleteUser(userRecord.getUid());
             System.out.println("Usuario de Firebase eliminado: " + email);
             return true;
         } catch (com.google.firebase.auth.FirebaseAuthException e) {
@@ -65,10 +77,11 @@ public class FirebaseService {
 
     public boolean updateFirebaseUserPasswordByEmail(String email, String password) {
         try {
-            UserRecord userRecord = FirebaseAuth.getInstance().getUserByEmail(email);
+            FirebaseAuth auth = firebaseAuth();
+            UserRecord userRecord = auth.getUserByEmail(email);
             UserRecord.UpdateRequest request = new UserRecord.UpdateRequest(userRecord.getUid())
                     .setPassword(password);
-            FirebaseAuth.getInstance().updateUser(request);
+            auth.updateUser(request);
             return true;
         } catch (Exception e) {
             String message = "Error actualizando contraseña en Firebase: " + e.getMessage();

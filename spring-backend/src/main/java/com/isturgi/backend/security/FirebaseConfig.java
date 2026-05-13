@@ -20,15 +20,16 @@ public class FirebaseConfig {
             try {
                 // Configurable sin commitear el JSON al repo:
                 // - FIREBASE_SERVICE_ACCOUNT_PATH=C:\ruta\service-account.json
-                // - o fallback: ./firebase-service-account.json
+                // - o fallback: ./config/firebase-service-account.json
                 String envPath = System.getenv("FIREBASE_SERVICE_ACCOUNT_PATH");
                 Path serviceAccountPath;
                 if (envPath != null && !envPath.isBlank()) {
                     serviceAccountPath = Paths.get(envPath);
                 } else {
+                    Path configPath = Paths.get("spring-backend", "config", "firebase-service-account.json");
                     Path rootPath = Paths.get("firebase-service-account.json");
                     Path modulePath = Paths.get("spring-backend", "firebase-service-account.json");
-                    serviceAccountPath = Files.exists(rootPath) ? rootPath : modulePath;
+                    serviceAccountPath = Files.exists(configPath) ? configPath : Files.exists(rootPath) ? rootPath : modulePath;
                 }
 
                 if (!Files.exists(serviceAccountPath)) {

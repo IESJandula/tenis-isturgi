@@ -50,6 +50,28 @@ public class JugadorController {
         return ResponseEntity.ok(ApiResponse.of(list));
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> body) {
+        String identifier = firstNonBlank(body.get("identifier"), body.get("email"), body.get("usuario"), body.get("username"));
+        String password = body.get("password");
+
+        if (identifier == null || identifier.isBlank() || password == null || password.isBlank()) {
+            throw new ResponseStatusException(BAD_REQUEST, "Debes indicar usuario y contraseña");
+        }
+
+        Optional<Jugador> jugador = findJugadorByIdentifier(identifier);
+        if (jugador.isEmpty() || jugador.get().getContrasena() == null || !jugador.get().getContrasena().equals(password)) {
+            throw new ResponseStatusException(UNAUTHORIZED, "Credenciales inválidas");
+        }
+
+        Jugador found = jugador.get();
+        String token = createLocalAuthToken(found);
+        return ResponseEntity.ok(Map.of(
+                "token", token,
+                "user", found
+        ));
+    }
+
     @GetMapping("/me")
     public ResponseEntity<Map<String, Object>> getMe(HttpServletRequest request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -76,6 +98,9 @@ public class JugadorController {
         }
         if (jugador.isEmpty() && identity.firebaseUid() != null && !identity.firebaseUid().isBlank()) {
             jugador = repository.findByFirebaseUid(identity.firebaseUid());
+        }
+        if (jugador.isEmpty()) {
+            jugador = repository.findByNumeroSocio(identity.firebaseUid());
         }
 
         if (jugador.isPresent()) {
@@ -130,9 +155,66 @@ public class JugadorController {
         if (identity.firebaseUid() != null && !identity.firebaseUid().isBlank()) {
             Optional<Jugador> byUid = repository.findByFirebaseUid(identity.firebaseUid());
             if (byUid.isPresent()) return byUid.get();
+
+            Optional<Jugador> byNumeroSocio = repository.findByNumeroSocioIgnoreCase(identity.firebaseUid());
+            if (byNumeroSocio.isPresent()) return byNumeroSocio.get();
         }
 
         throw new ResponseStatusException(NOT_FOUND, "No se encontró un perfil de jugador vinculado a tu cuenta");
+    }
+
+    private Optional<Jugador> findJugadorByIdentifier(String identifier) {
+        if (identifier == null || identifier.isBlank()) {
+            return Optional.empty();
+        }
+
+        if (identifier.contains("@")) {
+            Optional<Jugador> byEmail = repository.findByEmailIgnoreCase(identifier);
+            if (byEmail.isPresent()) return byEmail;
+            return repository.findByEmail(identifier);
+        }
+
+        Optional<Jugador> byNumeroSocio = repository.findByNumeroSocioIgnoreCase(identifier);
+        if (byNumeroSocio.isPresent()) return byNumeroSocio;
+
+        byNumeroSocio = repository.findByNumeroSocio(identifier);
+        if (byNumeroSocio.isPresent()) return byNumeroSocio;
+
+        Optional<Jugador> byEmail = repository.findByEmailIgnoreCase(identifier);
+        if (byEmail.isPresent()) return byEmail;
+        return repository.findByEmail(identifier);
+    }
+
+    private String createLocalAuthToken(Jugador jugador) {
+        String email = jugador.getEmail();
+        String principal = (email != null && !email.isBlank())
+                ? email
+                : (jugador.getNumeroSocio() != null && !jugador.getNumeroSocio().isBlank()
+                ? jugador.getNumeroSocio()
+                : String.valueOf(jugador.getId()));
+
+        String payload = String.format(
+                "{\"email\":%s,\"user_id\":\"%s\",\"uid\":\"%s\"}",
+                email != null && !email.isBlank() ? "\"" + escapeJson(email) + "\"" : "null",
+                escapeJson(principal),
+                escapeJson(principal)
+        );
+
+        String encodedPayload = Base64.getUrlEncoder().withoutPadding().encodeToString(payload.getBytes(StandardCharsets.UTF_8));
+        return "local." + encodedPayload + ".token";
+    }
+
+    private String firstNonBlank(String... values) {
+        for (String value : values) {
+            if (value != null && !value.isBlank()) {
+                return value;
+            }
+        }
+        return null;
+    }
+
+    private String escapeJson(String value) {
+        return value.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
     private AuthIdentity extractIdentity(HttpServletRequest request, String fallbackEmail) {
@@ -190,8 +272,12 @@ public class JugadorController {
                                 (item.getApellidos() != null ? " " + item.getApellidos() : "");
             
             String uid = firebaseService.createFirebaseUser(item.getEmail(), item.getContrasena(), displayName);
-            System.out.println("Vinvulando Firebase UID: " + uid);
-            item.setFirebaseUid(uid);
+            if (uid != null && !uid.isBlank()) {
+                System.out.println("Vinculando Firebase UID: " + uid);
+                item.setFirebaseUid(uid);
+            } else {
+                System.out.println("Firebase no disponible; el jugador se guardará solo en la base local.");
+            }
         } else {
             System.out.println("Omitiendo creación en Firebase: Email no proporcionado.");
         }
