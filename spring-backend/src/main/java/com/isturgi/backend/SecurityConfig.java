@@ -12,6 +12,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@org.springframework.stereotype.Component
 public class SecurityConfig {
 
     @Bean
