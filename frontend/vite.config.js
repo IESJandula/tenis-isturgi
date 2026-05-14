@@ -7,5 +7,6 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: true,
+    allowedHosts: ['tenis-isturgi.51.210.104.106.sslip.io']
   },
 })
