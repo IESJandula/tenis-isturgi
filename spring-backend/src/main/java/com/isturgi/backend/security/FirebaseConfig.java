@@ -36,7 +36,7 @@ public class FirebaseConfig {
                     throw new IllegalStateException("No existe el service account en: " + serviceAccountPath.toAbsolutePath());
                 }
 
-                FileInputStream serviceAccount = new FileInputStream(serviceAccountPath.toFile());
+                FileInputStream serviceAccount = new FileInputStream("firebase-service-account.json");                
                 
                 FirebaseOptions options = FirebaseOptions.builder()
                         .setCredentials(GoogleCredentials.fromStream(serviceAccount))
