@@ -36,3 +36,5 @@ public class SecurityConfig {
         return new CorsFilter(source);
     }
 }
+
+// Comentario para forzar compilación 0.0.3
