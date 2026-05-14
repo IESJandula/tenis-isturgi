@@ -22,8 +22,7 @@ public class SecurityConfig {
     @Autowired
     private FirebaseTokenFilter firebaseTokenFilter;
 
-    @Value("${app.cors.allowed-origins:http://localhost:5173,https://tenis-isturgi.51.210.104.106.sslip.io}")
-    private String allowedOrigins;
+    @Value("${app.cors.allowed-origins:https://tenis-isturgi.51.210.104.106.sslip.io,http://localhost:5173}")    private String allowedOrigins;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
