@@ -48,7 +48,7 @@
         </div>
 
         <!-- Formulario de Contacto -->
-        <div class="contacto-form-container">
+        <div id="formulario" class="contacto-form-container">
             <div class="form-card">
             <h3>Envíanos un mensaje</h3>
             <p class="form-subtitle">Completa el formulario y nos pondremos en contacto contigo</p>

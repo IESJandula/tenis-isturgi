@@ -55,10 +55,12 @@
           
           <div class="card-content">
             <div class="card-meta">
-              <span class="card-edicion">Edición {{ torneo.Edicion || 'I' }}</span>
-              <span v-if="torneo.Estado" class="card-estado" :class="'estado-' + torneo.Estado.toLowerCase()">
-                {{ torneo.Estado }}
-              </span>
+              <time v-if="torneo.FechaInicio" class="card-date">
+                {{ formatearFecha(torneo.FechaInicio) }}
+              </time>
+              <time v-else-if="torneo.createdAt" class="card-date">
+                {{ formatearFecha(torneo.createdAt) }}
+              </time>
             </div>
             
             <h3 class="card-title">{{ torneo.Nombre }}</h3>
@@ -117,9 +119,11 @@
       <div class="cta-content">
         <h2>¿Quieres participar?</h2>
         <p>Hazte socio del club y participa en todos nuestros torneos y competiciones. Juega, compete y disfruta del tenis en Andújar.</p>
-        <router-link to="/contacto" class="btn btn-primary btn-large">Más información</router-link>
+        <router-link to="/contacto#formulario" class="btn btn-primary btn-large">Inscribirse al Torneo</router-link>
       </div>
     </section>
+
+    
     </template>
   </div>
 </template>
@@ -141,6 +145,10 @@ const torneosGrid = computed(() => {
   return torneos.value;
 });
 
+
+
+
+
 onMounted(async () => {
   try {
     const respuesta = await axios.get(`${apiUrl}/api/torneos`);
@@ -155,6 +163,7 @@ onMounted(async () => {
     cargando.value = false;
   }
 });
+
 </script>
 
 <style scoped>
@@ -392,6 +401,7 @@ onMounted(async () => {
   background: linear-gradient(135deg, rgba(199, 255, 52, 0.08), rgba(201, 106, 58, 0.08));
 }
 
+
 .card-image-container,
 .card-image {
   width: 100%;
@@ -447,7 +457,8 @@ onMounted(async () => {
   flex-wrap: wrap;
 }
 
-.card-edicion {
+.card-edicion,
+.card-date {
   background: rgba(199, 255, 52, 0.15);
   color: var(--ball);
   padding: 6px 14px;
@@ -457,34 +468,6 @@ onMounted(async () => {
   text-transform: uppercase;
   letter-spacing: 1px;
   border: 1px solid rgba(199, 255, 52, 0.3);
-}
-
-.card-estado {
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  border: 1px solid;
-}
-
-.card-estado.estado-en\ curso {
-  background: rgba(199, 255, 52, 0.2);
-  color: var(--ball);
-  border-color: rgba(199, 255, 52, 0.4);
-}
-
-.card-estado.estado-próximamente {
-  background: rgba(100, 150, 255, 0.2);
-  color: rgba(100, 150, 255, 1);
-  border-color: rgba(100, 150, 255, 0.4);
-}
-
-.card-estado.estado-finalizado {
-  background: rgba(180, 180, 180, 0.2);
-  color: rgba(200, 200, 200, 1);
-  border-color: rgba(180, 180, 180, 0.4);
 }
 
 .card-title {
@@ -535,6 +518,8 @@ onMounted(async () => {
 .card-link:hover .arrow {
   transform: translateX(4px);
 }
+
+
 
 /* Eventos */
 .eventos-grid {

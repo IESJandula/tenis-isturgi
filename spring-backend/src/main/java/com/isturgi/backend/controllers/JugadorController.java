@@ -13,6 +13,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.MediaType;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
@@ -137,11 +139,70 @@ public class JugadorController {
         if (patch.getFoto() != null) existing.setFoto(patch.getFoto());
         if (patch.getFechaNacimiento() != null) existing.setFechaNacimiento(patch.getFechaNacimiento());
 
-        // email y firebaseUid no se modifican desde /me
+        // Permitir modificación del email desde /me: intentamos sincronizar con Firebase
+        if (patch.getEmail() != null && !patch.getEmail().isBlank() && !patch.getEmail().equals(existing.getEmail())) {
+            try {
+                if (existing.getFirebaseUid() != null && !existing.getFirebaseUid().isBlank()) {
+                    firebaseService.updateFirebaseUserEmailByUid(existing.getFirebaseUid(), patch.getEmail());
+                } else if (existing.getEmail() != null && !existing.getEmail().isBlank()) {
+                    firebaseService.updateFirebaseUserEmailByEmail(existing.getEmail(), patch.getEmail());
+                }
+                existing.setEmail(patch.getEmail());
+            } catch (Exception e) {
+                System.err.println("Error actualizando email en Firebase desde /me: " + e.getMessage());
+                throw new ResponseStatusException(INTERNAL_SERVER_ERROR, "No se pudo actualizar el email en Firebase: " + e.getMessage());
+            }
+        }
 
         existing.setUpdatedAt(LocalDateTime.now());
         Jugador updated = repository.save(existing);
         return ResponseEntity.ok(ApiResponse.of(updated));
+    }
+
+    @PostMapping(value = "/me/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String, Object>> uploadPhoto(HttpServletRequest request, @RequestPart("file") MultipartFile file) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String authName = (auth != null) ? auth.getName() : null;
+
+        AuthIdentity identity = extractIdentity(request, authName);
+        if ((identity.email() == null || identity.email().isBlank())
+                && (identity.firebaseUid() == null || identity.firebaseUid().isBlank())) {
+            throw new ResponseStatusException(UNAUTHORIZED, "No autenticado");
+        }
+
+        Jugador existing = resolveCurrentJugador(identity);
+
+        if (file == null || file.isEmpty()) {
+            throw new ResponseStatusException(BAD_REQUEST, "Archivo vacío");
+        }
+
+        try {
+            java.io.File uploadsDir = new java.io.File("uploads");
+            if (!uploadsDir.exists()) uploadsDir.mkdirs();
+
+            String original = file.getOriginalFilename();
+            String ext = "";
+            if (original != null && original.contains(".")) {
+                ext = original.substring(original.lastIndexOf('.'));
+            }
+            String filename = "foto_" + existing.getId() + "_" + System.currentTimeMillis() + ext;
+            java.io.File out = new java.io.File(uploadsDir, filename);
+            try (java.io.InputStream in = file.getInputStream(); java.io.OutputStream os = new java.io.FileOutputStream(out)) {
+                byte[] buffer = new byte[8192];
+                int len;
+                while ((len = in.read(buffer)) != -1) os.write(buffer, 0, len);
+            }
+
+            String urlPath = "/uploads/" + filename;
+            existing.setFoto(urlPath);
+            existing.setUpdatedAt(LocalDateTime.now());
+            repository.save(existing);
+
+            return ResponseEntity.ok(ApiResponse.of(java.util.Map.of("url", urlPath)));
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ResponseStatusException(INTERNAL_SERVER_ERROR, "No se pudo guardar la imagen: " + e.getMessage());
+        }
     }
 
     private Jugador resolveCurrentJugador(AuthIdentity identity) {

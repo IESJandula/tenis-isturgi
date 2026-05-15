@@ -608,7 +608,7 @@ onUnmounted(() => {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.95);
-  z-index: 9999;
+  z-index: 50; /* debajo del nav (nav usa z-index:100) */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -628,7 +628,7 @@ onUnmounted(() => {
   border-radius: 50%;
   font-size: 1.5rem;
   cursor: pointer;
-  z-index: 10001;
+  z-index: 51; /* ligeramente por encima del overlay, pero por debajo del nav */
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
@@ -654,7 +654,7 @@ onUnmounted(() => {
   border-radius: 50%;
   font-size: 1.3rem;
   cursor: pointer;
-  z-index: 10001;
+  z-index: 51;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;

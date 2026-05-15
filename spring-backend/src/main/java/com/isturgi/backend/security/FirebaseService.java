@@ -89,4 +89,37 @@ public class FirebaseService {
             throw new IllegalStateException(message, e);
         }
     }
+
+    public boolean updateFirebaseUserEmailByEmail(String currentEmail, String newEmail) {
+        try {
+            FirebaseAuth auth = firebaseAuth();
+            UserRecord userRecord = auth.getUserByEmail(currentEmail);
+            UserRecord.UpdateRequest request = new UserRecord.UpdateRequest(userRecord.getUid())
+                    .setEmail(newEmail)
+                    .setEmailVerified(false);
+            auth.updateUser(request);
+            System.out.println("Email de Firebase actualizado: " + currentEmail + " -> " + newEmail);
+            return true;
+        } catch (Exception e) {
+            String message = "Error actualizando email en Firebase: " + e.getMessage();
+            System.err.println(message);
+            throw new IllegalStateException(message, e);
+        }
+    }
+
+    public boolean updateFirebaseUserEmailByUid(String uid, String newEmail) {
+        try {
+            FirebaseAuth auth = firebaseAuth();
+            UserRecord.UpdateRequest request = new UserRecord.UpdateRequest(uid)
+                    .setEmail(newEmail)
+                    .setEmailVerified(false);
+            auth.updateUser(request);
+            System.out.println("Email de Firebase actualizado por UID: " + uid + " -> " + newEmail);
+            return true;
+        } catch (Exception e) {
+            String message = "Error actualizando email en Firebase (uid): " + e.getMessage();
+            System.err.println(message);
+            throw new IllegalStateException(message, e);
+        }
+    }
 }

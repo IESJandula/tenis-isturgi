@@ -184,9 +184,9 @@
             </div>
             <!-- IMAGEN TORNEO -->
             <div class="form-group">
-              <label>URL Cartel / Imagen</label>
+              <label>Cartel / Imagen</label>
               <div class="input-with-preview">
-                <input v-model="form.Cartel" placeholder="https://...">
+                <input type="file" accept="image/*" @change="onAdminFileChange($event, 'Cartel')">
                 <div v-if="form.Cartel" class="image-preview-box">
                   <img :src="form.Cartel" @error="(e) => e.target.style.display = 'none'" @load="(e) => e.target.style.display = 'block'">
                 </div>
@@ -239,9 +239,9 @@
             </div>
             <!-- IMAGEN NOTICIA -->
             <div class="form-group">
-              <label>URL Imagen</label>
+              <label>Imagen</label>
               <div class="input-with-preview">
-                <input v-model="form.Imagen" placeholder="https://...">
+                <input type="file" accept="image/*" @change="onAdminFileChange($event, 'Imagen')">
                 <div v-if="form.Imagen" class="image-preview-box">
                   <img :src="form.Imagen" @error="(e) => e.target.style.display = 'none'" @load="(e) => e.target.style.display = 'block'">
                 </div>
@@ -332,9 +332,9 @@
               <input type="number" v-model="form.Puntos">
             </div>
             <div class="form-group">
-              <label>URL Foto de Perfil</label>
+              <label>Foto de Perfil</label>
               <div class="input-with-preview">
-                <input v-model="form.Foto" placeholder="https://...">
+                <input type="file" accept="image/*" @change="onAdminFileChange($event, 'Foto')">
                 <div v-if="form.Foto" class="image-preview-box">
                   <img :src="form.Foto" @error="(e) => e.target.style.display = 'none'" @load="(e) => e.target.style.display = 'block'">
                 </div>
@@ -402,9 +402,9 @@
               <input v-model="form.texto">
             </div>
             <div class="form-group">
-              <label>URL de la imagen *</label>
+              <label>Imagen *</label>
               <div class="input-with-preview">
-                <input v-model="form.src" required placeholder="https://...">
+                <input type="file" accept="image/*" @change="onAdminFileChange($event, 'src')">
                 <div v-if="form.src" class="image-preview-box">
                   <img :src="form.src" @error="(e) => e.target.style.display = 'none'" @load="(e) => e.target.style.display = 'block'">
                 </div>
@@ -456,6 +456,13 @@ const playerErrors = reactive({});
 const showModal = ref(false);
 const editandoId = ref(null);
 const form = reactive({});
+const selectedFiles = reactive({});
+
+const onAdminFileChange = (e, field) => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  selectedFiles[field] = file;
+};
 
 const activeTabLabel = computed(() => tabs.find(t => t.id === activeTab.value)?.label);
 const activeTabSingular = computed(() => tabs.find(t => t.id === activeTab.value)?.singular);
@@ -652,6 +659,27 @@ const validateNonPlayerForm = (payload) => {
 const guardarItem = async () => {
   guardando.value = true;
   try {
+    // Si hay archivos seleccionados, subirlos primero
+    const uploadsMap = {};
+    for (const key of Object.keys(selectedFiles)) {
+      const file = selectedFiles[key];
+      if (!file) continue;
+      const fd = new FormData();
+      fd.append('file', file);
+      try {
+        const res = await axios.post(`${apiUrl}/api/uploads`, fd, config());
+        const url = res.data?.data?.url;
+        if (url) {
+          uploadsMap[key] = url;
+          form[key] = url; // actualizar el form para enviarlo luego
+        }
+      } catch (e) {
+        console.error('Error subiendo archivo', e);
+        toast('Error subiendo archivo: ' + (e.response?.data?.error || e.message), 'error');
+        throw e;
+      }
+    }
+
     const payload = { ...form };
     
     // Limpiar campos internos de Strapi y relaciones si se colaron
@@ -697,6 +725,8 @@ const guardarItem = async () => {
     toast('Guardado correctamente.', 'success');
     cerrarModal();
     cargarDatos();
+    // limpiar archivos seleccionados
+    Object.keys(selectedFiles).forEach(k => delete selectedFiles[k]);
   } catch (error) {
     console.error(error);
     let serverMsg = error.response?.data?.error?.message || error.response?.data?.message || error.response?.data || error.message || 'Error desconocido';

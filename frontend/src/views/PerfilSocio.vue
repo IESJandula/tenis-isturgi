@@ -50,9 +50,17 @@
                 <input v-model="form.Telefono" placeholder="Ej: 600000000" />
               </div>
               <div class="form-group">
-                <label>URL Foto</label>
-                <input v-model="form.Foto" placeholder="https://..." />
+                <label>Foto (subir archivo)</label>
+                <input type="file" accept="image/*" @change="onFileChange" />
+                <p class="muted">Seleciona una imagen para subir; se guardará y usará como foto de perfil.</p>
+                <p v-if="subiendoFoto" class="muted">Subiendo foto...</p>
               </div>
+            </div>
+
+            <div class="form-group">
+              <label>Email</label>
+              <input v-model="form.Email" type="email" placeholder="tu@correo.com" />
+              <p class="muted">El email se sincroniza con Firebase; cambiarlo actualizará tu cuenta.</p>
             </div>
 
             <div class="actions">
@@ -140,6 +148,30 @@ const cargar = async () => {
   }
 };
 
+const subiendoFoto = ref(false);
+const onFileChange = async (e) => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  subiendoFoto.value = true;
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
+    const config = { headers: { Authorization: `Bearer ${state.jwt}` } };
+    const res = await axios.post(`${apiUrl}/api/jugadors/me/photo`, fd, config);
+    const url = res.data?.data?.url;
+    if (url) {
+      form.Foto = url;
+    }
+  } catch (err) {
+    console.error('Error subiendo foto', err);
+    mensaje.value = 'No se pudo subir la foto.';
+    ok.value = false;
+    setTimeout(() => (mensaje.value = ''), 4000);
+  } finally {
+    subiendoFoto.value = false;
+  }
+};
+
 const guardar = async () => {
   guardando.value = true;
   mensaje.value = '';
@@ -150,7 +182,8 @@ const guardar = async () => {
       Nombre: form.Nombre,
       Apellidos: form.Apellidos,
       Telefono: form.Telefono,
-      Foto: form.Foto
+      Foto: form.Foto,
+      Email: form.Email
     }, config);
 
     await refreshProfile();
