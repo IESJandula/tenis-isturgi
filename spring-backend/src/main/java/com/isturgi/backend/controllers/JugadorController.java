@@ -261,32 +261,40 @@ public class JugadorController {
     public ResponseEntity<Map<String, Object>> create(@RequestBody Jugador item) {
         System.out.println("Recibida petición de creación de Jugador: " + item.getNombre() + " (" + item.getEmail() + ")");
         
-        // 1. Crear usuario en Firebase si tiene email
+        // 1. Intentar crear usuario en Firebase si tiene email
         if (item.getEmail() != null && !item.getEmail().isEmpty()) {
             if (item.getContrasena() == null || item.getContrasena().isBlank()) {
-                throw new ResponseStatusException(BAD_REQUEST, "Debes indicar una contraseña para poder crear el usuario en Firebase");
+                throw new ResponseStatusException(BAD_REQUEST, "Debes indicar una contraseña");
             }
 
-            System.out.println("Intentando crear usuario en Firebase para: " + item.getEmail());
-            String displayName = (item.getNombre() != null ? item.getNombre() : "") + 
-                                (item.getApellidos() != null ? " " + item.getApellidos() : "");
-            
-            String uid = firebaseService.createFirebaseUser(item.getEmail(), item.getContrasena(), displayName);
-            if (uid != null && !uid.isBlank()) {
-                System.out.println("Vinculando Firebase UID: " + uid);
-                item.setFirebaseUid(uid);
-            } else {
-                System.out.println("Firebase no disponible; el jugador se guardará solo en la base local.");
+            try {
+                System.out.println("Intentando crear usuario en Firebase para: " + item.getEmail());
+                String displayName = (item.getNombre() != null ? item.getNombre() : "") + 
+                                     (item.getApellidos() != null ? " " + item.getApellidos() : "");
+                
+                String uid = firebaseService.createFirebaseUser(item.getEmail(), item.getContrasena(), displayName);
+                
+                if (uid != null && !uid.isBlank()) {
+                    System.out.println("Vinculando Firebase UID: " + uid);
+                    item.setFirebaseUid(uid);
+                }
+            } catch (Exception e) {
+                // IMPORTANTE: Si Firebase falla, solo avisamos en el log, pero NO matamos la petición
+                System.err.println("ERROR CRÍTICO FIREBASE: " + e.getMessage());
+                System.out.println("El jugador se guardará solo en local debido al fallo de Firebase.");
             }
-        } else {
-            System.out.println("Omitiendo creación en Firebase: Email no proporcionado.");
         }
         
-        // 2. Guardar en DB local
-        Jugador saved = repository.save(item);
-        return ResponseEntity.ok(ApiResponse.of(saved));
+        // 2. Guardar en DB local (Esto siempre se ejecutará ahora)
+        try {
+            Jugador saved = repository.save(item);
+            return ResponseEntity.ok(ApiResponse.of(saved));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("error", "Error en DB local: " + e.getMessage()));
+        }
     }
-
+    
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, Object>> update(@PathVariable Long id, @RequestBody Jugador item) {
         Jugador existing = repository.findById(id).orElse(null);
