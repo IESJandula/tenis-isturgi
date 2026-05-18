@@ -174,8 +174,8 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   background:
-    linear-gradient(135deg, rgba(8, 15, 18, 0.9), rgba(15, 45, 35, 0.85)),
-    url("https://images.unsplash.com/photo-1554068865-24cecd4e34b8?q=80&w=2400&auto=format&fit=crop") center/cover no-repeat;
+    linear-gradient(rgba(0,0,0,0.58), rgba(0,0,0,0.58)),
+    url('/cancha.jpg') center/cover no-repeat;
   margin-bottom: 60px;
   border-radius: 0 0 24px 24px;
 }

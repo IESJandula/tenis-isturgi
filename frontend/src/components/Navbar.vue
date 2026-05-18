@@ -60,6 +60,7 @@
           <router-link to="/socio-dashboard" class="dropdown-item" role="menuitem" @click="closeAllMenus">Mi panel</router-link>
           <router-link v-if="!isAdminFlag" to="/mi-perfil" class="dropdown-item" role="menuitem" @click="closeAllMenus">Mi perfil</router-link>
           <router-link v-if="!isAdminFlag" to="/mis-partidos" class="dropdown-item" role="menuitem" @click="closeAllMenus">Mis partidos</router-link>
+          <router-link v-if="!isAdminFlag" to="/disponibilidad" class="dropdown-item" role="menuitem" @click="closeAllMenus">Mi disponibilidad</router-link>
           <router-link v-if="isAdminFlag" to="/admin/dashboard" class="dropdown-item" role="menuitem" @click="closeAllMenus">Dashboard</router-link>
           <router-link v-if="isAdminFlag" to="/admin/calendario" class="dropdown-item" role="menuitem" @click="closeAllMenus">Jornadas</router-link>
           <router-link v-if="isAdminFlag" to="/admin-mantenimiento" class="dropdown-item" role="menuitem" @click="closeAllMenus">Mantenimiento</router-link>

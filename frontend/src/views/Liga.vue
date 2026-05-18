@@ -317,16 +317,23 @@ onMounted(() => {
   flex-direction: column;
   gap: 24px;
   padding: 40px;
-  border-radius: var(--radius-xl);
-  background: var(--glass);
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+  background:
+    linear-gradient(rgba(0,0,0,0.58), rgba(0,0,0,0.58)),
+    url('/cancha.jpg') center/cover no-repeat;
   border: 1px solid var(--glass-stroke);
   backdrop-filter: blur(20px);
 }
 
+.header > div:first-child {
+  width: 100%;
+  text-align: center;
+}
+
 .header h1 {
-  margin: 0 0 8px;
+  margin: 0 0 14px;
   color: #fff;
-  font-size: 2.5rem;
+  font-size: clamp(2.5rem, 5vw, 4rem);
   font-family: "Syne", sans-serif;
   font-weight: 800;
   letter-spacing: -1px;
@@ -334,8 +341,11 @@ onMounted(() => {
 
 .header p {
   margin: 0;
-  color: var(--text-muted);
-  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 1.2rem;
+  line-height: 1.7;
+  max-width: 760px;
+  margin-inline: auto;
 }
 
 .header-actions {
@@ -344,6 +354,7 @@ onMounted(() => {
   align-items: center;
   gap: 24px;
   flex-wrap: wrap;
+  width: 100%;
 }
 
 /* TABS */

@@ -1,17 +1,13 @@
 <template>
   <section class="galeria-view fade-in">
     <header class="galeria-hero glass-card">
-      <div>
+      <div class="hero-copy">
         <span class="tag">Vista multimedia</span>
         <h1 class="headline">Galería del Club Isturgi</h1>
         <p>
           Fotos seleccionadas de entrenos, torneos y vida social. Una mirada real a las
           pistas de Andújar.
         </p>
-      </div>
-      <div class="hero-actions">
-        <router-link to="/contacto" class="btn btn-primary">Enviar fotos</router-link>
-        <router-link to="/liga" class="btn btn-secondary">Ver liga</router-link>
       </div>
     </header>
 
@@ -152,24 +148,34 @@ onBeforeUnmount(() => {
 .galeria-hero {
   padding: 32px;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 18px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
   background:
-    linear-gradient(120deg, rgba(8, 12, 14, 0.9), rgba(8, 12, 14, 0.4)),
-    url("https://images.unsplash.com/photo-1503945438517-f65904a52ce6?q=80&w=2000&auto=format&fit=crop")
-      center/cover no-repeat;
+    linear-gradient(rgba(0,0,0,0.58), rgba(0,0,0,0.58)),
+    url('/cancha.jpg') center/cover no-repeat;
+  border-radius: 0 0 20px 20px;
+  text-align: center;
+}
+
+.hero-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
 }
 
 .galeria-hero p {
   max-width: 520px;
   color: rgba(234, 242, 239, 0.75);
+  font-size: 1.2rem;
+  line-height: 1.7;
 }
 
-.hero-actions {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
+.galeria-hero .headline {
+  font-size: clamp(2.5rem, 5vw, 4rem);
 }
 
 .filter-bar {

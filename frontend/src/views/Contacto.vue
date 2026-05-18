@@ -314,8 +314,8 @@ const handleSubmit = async () => {
   align-items: center;
   justify-content: center;
   background:
-    linear-gradient(to top, rgba(7, 16, 13, 0.97) 0%, rgba(7, 16, 13, 0.5) 55%, rgba(7,16,13,0.3) 100%),
-    url("https://images.unsplash.com/photo-1622163642998-1ea32b0bbc67?q=80&w=2400&auto=format&fit=crop") center/cover no-repeat;
+    linear-gradient(rgba(0,0,0,0.58), rgba(0,0,0,0.58)),
+    url('/cancha.jpg') center/cover no-repeat;
   border-radius: 0 0 20px 20px;
   overflow: hidden;
 }

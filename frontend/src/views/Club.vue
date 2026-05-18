@@ -215,8 +215,8 @@ const fotoAlt = (fileName, index) => fotoTenisAlt(fileName, index);
   align-items: center;
   justify-content: center;
   background:
-    linear-gradient(to top, rgba(8,15,18,0.92) 0%, rgba(8,15,18,0.45) 55%, transparent 100%),
-    url("https://images.unsplash.com/photo-1622163642998-1ea32b0bbc67?q=80&w=2400&auto=format&fit=crop") center/cover no-repeat;
+    linear-gradient(rgba(0,0,0,0.58), rgba(0,0,0,0.58)),
+    url('/cancha.jpg') center/cover no-repeat;
   margin-bottom: 48px;
   border-radius: 0 0 20px 20px;
 }
