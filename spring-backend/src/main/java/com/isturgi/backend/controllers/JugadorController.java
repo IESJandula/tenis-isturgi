@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static org.springframework.http.HttpStatus.*;
 
 @RestController
-@RequestMapping("/api/jugadors")
+@RequestMapping("/api/jugadores")
 public class JugadorController {
 
     @Autowired
@@ -264,6 +264,7 @@ public class JugadorController {
         String encodedPayload = Base64.getUrlEncoder().withoutPadding().encodeToString(payload.getBytes(StandardCharsets.UTF_8));
         return "local." + encodedPayload + ".token";
     }
+
 
     private String firstNonBlank(String... values) {
         for (String value : values) {
