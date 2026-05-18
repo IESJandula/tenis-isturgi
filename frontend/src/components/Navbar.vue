@@ -34,9 +34,9 @@
         <span class="hamburger-inner"></span>
       </button>
 
-      <router-link v-if="!isAuthenticated()" to="/login" class="btn-login" @click="closeAllMenus">Soy Socio</router-link>
+      <router-link v-if="!isAuth" to="/login" class="btn-login" @click="closeAllMenus">Soy Socio</router-link>
 
-      <div v-else class="user-area" ref="userAreaRef">
+      <div v-if="isAuth" class="user-area" ref="userAreaRef">
         <button
           type="button"
           class="user-trigger"
@@ -58,11 +58,11 @@
 
         <div v-if="userMenuOpen" class="user-dropdown" role="menu">
           <router-link to="/socio-dashboard" class="dropdown-item" role="menuitem" @click="closeAllMenus">Mi panel</router-link>
-          <router-link v-if="!isAdmin()" to="/mi-perfil" class="dropdown-item" role="menuitem" @click="closeAllMenus">Mi perfil</router-link>
-          <router-link v-if="!isAdmin()" to="/mis-partidos" class="dropdown-item" role="menuitem" @click="closeAllMenus">Mis partidos</router-link>
-          <router-link v-if="isAdmin()" to="/admin/dashboard" class="dropdown-item" role="menuitem" @click="closeAllMenus">Dashboard</router-link>
-          <router-link v-if="isAdmin()" to="/admin/calendario" class="dropdown-item" role="menuitem" @click="closeAllMenus">Jornadas</router-link>
-          <router-link v-if="isAdmin()" to="/admin-mantenimiento" class="dropdown-item" role="menuitem" @click="closeAllMenus">Mantenimiento</router-link>
+          <router-link v-if="!isAdminFlag" to="/mi-perfil" class="dropdown-item" role="menuitem" @click="closeAllMenus">Mi perfil</router-link>
+          <router-link v-if="!isAdminFlag" to="/mis-partidos" class="dropdown-item" role="menuitem" @click="closeAllMenus">Mis partidos</router-link>
+          <router-link v-if="isAdminFlag" to="/admin/dashboard" class="dropdown-item" role="menuitem" @click="closeAllMenus">Dashboard</router-link>
+          <router-link v-if="isAdminFlag" to="/admin/calendario" class="dropdown-item" role="menuitem" @click="closeAllMenus">Jornadas</router-link>
+          <router-link v-if="isAdminFlag" to="/admin-mantenimiento" class="dropdown-item" role="menuitem" @click="closeAllMenus">Mantenimiento</router-link>
           <button type="button" class="dropdown-item danger" role="menuitem" @click="handleLogout">Cerrar sesión</button>
         </div>
       </div>
@@ -82,60 +82,14 @@
         <router-link to="/torneos" @click="closeTopMenu">Torneos</router-link>
         <router-link to="/contacto" @click="closeTopMenu">Contacto</router-link>
         <!-- En móvil: si estamos autenticados mostramos un botón compacto de cuenta (avatar + nombre), si no el CTA de login -->
-        <template v-if="isAuthenticated()">
-          <router-link to="/socio-dashboard" class="dropdown-account" @click="closeTopMenu">
-            <img :src="avatarUrl" class="dropdown-account-avatar" alt="avatar" loading="lazy" @error="onAvatarError" />
-            <span class="dropdown-account-name">{{ displayName }}</span>
-          </router-link>
-        </template>
-        <router-link v-else to="/login" class="dropdown-cta" @click="closeTopMenu">Soy Socio</router-link>
+        <router-link v-if="isAuth" to="/socio-dashboard" class="dropdown-account" @click="closeTopMenu">
+          <img :src="avatarUrl" class="dropdown-account-avatar" alt="avatar" loading="lazy" @error="onAvatarError" />
+          <span class="dropdown-account-name">{{ displayName }}</span>
+        </router-link>
+        <router-link v-if="!isAuth" to="/login" class="dropdown-cta" @click="closeTopMenu">Soy Socio</router-link>
       </nav>
     </div>
   </Transition>
-
-  <!-- ② Bottom nav: solo móvil -->
-  <nav class="bottom-nav" aria-label="Navegación principal">
-    <router-link to="/" class="bnav-item" @click="closeAllMenus">
-      <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-      </svg>
-      <span>Inicio</span>
-    </router-link>
-
-    <router-link to="/liga" class="bnav-item" @click="closeAllMenus">
-      <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
-      </svg>
-      <span>Liga</span>
-    </router-link>
-
-    <router-link to="/torneos" class="bnav-item" @click="closeAllMenus">
-      <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M6 9H4.5a2.5 2.5 0 000 5H6"/><path d="M18 9h1.5a2.5 2.5 0 010 5H18"/><path d="M8 9h8v10H8z"/><path d="M12 19v3"/><path d="M8 22h8"/>
-      </svg>
-      <span>Torneos</span>
-    </router-link>
-
-    <router-link to="/escuela" class="bnav-item" @click="closeAllMenus">
-      <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
-      </svg>
-      <span>Escuela</span>
-    </router-link>
-
-    <button
-      type="button"
-      class="bnav-item"
-      :class="{ 'bnav-active': menuOpen }"
-      @click="toggleMenu"
-      aria-label="Más opciones"
-    >
-      <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
-      </svg>
-      <span>Más</span>
-    </button>
-  </nav>
 
   <!-- ③ Panel deslizante (sheet) para las rutas secundarias en móvil -->
   <Transition name="sheet">
@@ -146,7 +100,7 @@
         <router-link to="/galeria"  class="sheet-link" @click="closeMenu"><span class="sheet-icon">🖼️</span>Galería</router-link>
         <router-link to="/noticias" class="sheet-link" @click="closeMenu"><span class="sheet-icon">📰</span>Noticias</router-link>
         <router-link to="/contacto" class="sheet-link" @click="closeMenu"><span class="sheet-icon">📍</span>Contacto</router-link>
-        <router-link v-if="!isAuthenticated()" to="/login" class="sheet-link sheet-cta" @click="closeMenu">Soy Socio →</router-link>
+        <router-link v-if="!isAuth" to="/login" class="sheet-link sheet-cta" @click="closeMenu">Soy Socio →</router-link>
       </nav>
     </div>
   </Transition>
@@ -163,6 +117,9 @@ import { useAuth } from '../utils/auth';
 
 const router = useRouter();
 const { state, isAuthenticated, isAdmin, logout } = useAuth();
+
+const isAuth = computed(() => isAuthenticated());
+const isAdminFlag = computed(() => isAdmin());
 
 const menuOpen = ref(false);
 const topMenuOpen = ref(false);
@@ -753,6 +710,9 @@ const handleLogout = async () => {
 
   /* Mostrar el área de usuario en desktop */
   .user-area { display: inline-flex; align-items: center; gap: 8px; }
+
+  /* Restaurar CTA de login en desktop (se oculta en móvil) */
+  .btn-login { display: inline-flex !important; }
 
   .user-name {
     font-weight: 700;

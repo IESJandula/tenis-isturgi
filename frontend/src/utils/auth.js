@@ -1,4 +1,4 @@
-import { reactive, readonly } from 'vue';
+import { reactive, readonly, computed } from 'vue';
 import { signInWithEmailAndPassword, signOut as fbSignOut, onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../firebase';
 import axios from 'axios';
@@ -174,12 +174,15 @@ const refreshProfile = async () => {
 };
 
 export const useAuth = () => {
+    const isAuthComputed = computed(() => !!state.jwt);
+    const isAdminComputed = computed(() => state.user?.isAdmin === true);
+
     return {
         state: readonly(state),
         login,
         logout,
         refreshProfile,
-        isAuthenticated: () => !!state.jwt,
-        isAdmin: () => state.user?.isAdmin === true
+        isAuthenticated: () => isAuthComputed.value,
+        isAdmin: () => isAdminComputed.value
     };
 };
