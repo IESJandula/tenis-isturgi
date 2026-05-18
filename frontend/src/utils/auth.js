@@ -6,8 +6,11 @@ import axios from 'axios';
 const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 const AUTH_SOURCE_KEY = 'authSource';
 
-// Emails con permisos de administrador extraídos de .env o usando defaults
-const VIRTUAL_ADMINS = import.meta.env.VITE_ADMIN_EMAILS ? import.meta.env.VITE_ADMIN_EMAILS.split(',') : ['admin@isturgi.com', 'socio@isturgi.com', 'profe@isturgi.com'];
+// Forzamos que todos los emails de administración de la lista estén en minúsculas para evitar fallos de matching
+const VIRTUAL_ADMINS = (import.meta.env.VITE_ADMIN_EMAILS 
+    ? import.meta.env.VITE_ADMIN_EMAILS.split(',') 
+    : ['admin@isturgi.com', 'socio@isturgi.com', 'profe@isturgi.com']
+).map(email => email.trim().toLowerCase());
 
 const state = reactive({
     user: JSON.parse(localStorage.getItem('user') || 'null'),
@@ -23,13 +26,12 @@ onAuthStateChanged(auth, async (firebaseUser) => {
     if (firebaseUser) {
         const token = await firebaseUser.getIdToken();
         let userData = {
-            email: firebaseUser.email,
+            email: firebaseUser.email.toLowerCase(),
             uid: firebaseUser.uid,
             displayName: firebaseUser.displayName || null,
-            isAdmin: VIRTUAL_ADMINS.includes(firebaseUser.email)
+            isAdmin: VIRTUAL_ADMINS.includes(firebaseUser.email.toLowerCase())
         };
 
-        // Intentar obtener perfil extendido desde Spring Boot
         try {
             const res = await axios.get(`${apiUrl}/api/jugadors/me`, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -48,7 +50,8 @@ onAuthStateChanged(auth, async (firebaseUser) => {
         localStorage.setItem('jwt', token);
         localStorage.setItem(AUTH_SOURCE_KEY, 'firebase');
     } else {
-        if (localStorage.getItem(AUTH_SOURCE_KEY) === 'local' && localStorage.getItem('jwt')) {
+        // Corrección del flujo local: Si ya estamos en sesión local, ignoramos el evento vacío de Firebase
+        if (state.authSource === 'local' && state.jwt) {
             state.initialized = true;
             return;
         }
@@ -72,17 +75,19 @@ const normalizeAuthResponse = (data, fallbackIdentifier) => {
         throw new Error('Respuesta de autenticación inválida');
     }
 
+    const emailNormalizado = String(user?.email || user?.Email || fallbackIdentifier || '').toLowerCase();
+
     const normalizedUser = user ? {
         ...user,
-        email: user.email || user.Email || fallbackIdentifier,
+        email: emailNormalizado,
         uid: user.uid || user.firebaseUid || user.firebase_uid || user.id || null,
         displayName: user.displayName || `${user.Nombre || user.nombre || ''} ${user.Apellidos || user.apellidos || ''}`.trim() || null,
-        isAdmin: VIRTUAL_ADMINS.includes(String(user.email || user.Email || fallbackIdentifier || '').toLowerCase())
+        isAdmin: VIRTUAL_ADMINS.includes(emailNormalizado)
     } : {
-        email: fallbackIdentifier,
+        email: emailNormalizado,
         uid: null,
         displayName: null,
-        isAdmin: VIRTUAL_ADMINS.includes(String(fallbackIdentifier || '').toLowerCase())
+        isAdmin: VIRTUAL_ADMINS.includes(emailNormalizado)
     };
 
     return { token, user: normalizedUser };
@@ -103,14 +108,19 @@ const login = async (identifier, password) => {
     try {
         await signInWithEmailAndPassword(auth, identifier, password);
         
-        // Esperar a que onAuthStateChanged actualice el estado (jwt y user)
-        return new Promise((resolve) => {
+        // Control de tiempo máximo (timeout) de 5 segundos para evitar congelar la app
+        return new Promise((resolve, reject) => {
+            let attempts = 0;
             const checkState = () => {
+                attempts++;
                 if (state.jwt && state.user) {
                     state.loading = false;
                     resolve({ success: true });
+                } else if (attempts > 100) { // 100 * 50ms = 5 segundos máximo
+                    state.loading = false;
+                    state.error = "Error de sincronización con el servidor de autenticación.";
+                    resolve({ success: false, error: state.error });
                 } else {
-                    // Reintentar después de 50ms
                     setTimeout(checkState, 50);
                 }
             };
@@ -143,16 +153,20 @@ const login = async (identifier, password) => {
 
 const logout = async () => {
     try {
-        await fbSignOut(auth);
-    } finally {
+        // Primero reseteamos el estado reactivo para evitar que onAuthStateChanged intente evaluar una sesión intermedia
         state.user = null;
         state.jwt = null;
         state.authSource = null;
-        state.loading = false;
-        state.error = null;
         localStorage.removeItem('user');
         localStorage.removeItem('jwt');
         localStorage.removeItem(AUTH_SOURCE_KEY);
+        
+        await fbSignOut(auth);
+    } catch (err) {
+        console.error("Error durante el cierre de sesión:", err);
+    } finally {
+        state.loading = false;
+        state.error = null;
     }
 };
 
