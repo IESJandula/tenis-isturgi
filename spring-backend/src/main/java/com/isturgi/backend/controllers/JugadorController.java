@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static org.springframework.http.HttpStatus.*;
 
 @RestController
-@RequestMapping("/api/jugadores")
+@RequestMapping({"/api/jugadors", "/api/jugadores"})
 public class JugadorController {
 
     @Autowired
