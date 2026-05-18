@@ -5,6 +5,7 @@
         <span class="mini-tag">Área de Socio</span>
         <h1>Mi Perfil</h1>
         <p class="hero-lead">Revisa y actualiza tus datos personales.</p>
+        <button type="button" class="btn-algorithm" style="text-decoration: none; display: inline-block;" @click="goPanel">Ir a Mi Panel</button>
       </div>
     </section>
 
@@ -117,6 +118,13 @@ const form = reactive({
 
 const previewFoto = computed(() => form.Foto || '/logo-isturgi.jpg');
 
+const goPerfil = () => {
+  router.push('/mi-perfil');
+};
+const goPanel = () => {
+  router.push('/socio-dashboard');
+};
+
 const onAvatarError = (e) => {
   e.target.src = '/logo-isturgi.jpg';
 };
@@ -213,15 +221,29 @@ onMounted(async () => {
 .perfil-page { padding-bottom: 80px; }
 
 .hero-section {
-  background: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)),
-    url('https://images.unsplash.com/photo-1595435066311-66632490b6c6?q=80&w=2000&auto=format&fit=crop');
+  background: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('/fotos-tenis/photo-1558365849-6ebd8b0454b2.avif');
   background-size: cover;
-  background-position: center;
-  padding: 80px 20px;
+  background-position: center 40%;
+  padding: 60px 20px;
   text-align: center;
   color: white;
   margin-bottom: 40px;
-  border-radius: 0 0 40px 40px;
+  border-radius: 0 0 28px 28px;
+  overflow: hidden;
+}
+
+/* Responsive tweaks to avoid hero clipping on mobile */
+.hero-content h1 {
+  font-size: clamp(2rem, 6vw, 3rem);
+  line-height: 1.02;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 480px) {
+  .hero-section { padding: 90px 16px; border-radius: 0 0 28px 28px; }
+  .hero-content h1 { font-size: 2.2rem; }
+  .mini-tag { margin-bottom: 14px; }
+  .btn-algorithm { margin-top: 18px; }
 }
 
 .mini-tag {
@@ -234,6 +256,21 @@ onMounted(async () => {
   text-transform: uppercase;
   margin-bottom: 20px;
   display: inline-block;
+}
+
+.btn-algorithm {
+  background: #fff;
+  color: #000;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-algorithm:hover {
+  background: var(--ball);
 }
 
 .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }

@@ -169,6 +169,7 @@ onMounted(async () => {
 <style scoped>
 .torneos-page {
   width: 100%;
+  overflow-x: hidden;
 }
 
 /* States: Loading, Error, Empty */
@@ -695,8 +696,20 @@ onMounted(async () => {
 }
 
 @media (max-width: 1024px) {
+  .torneos-grid-section,
+  .info-general-section,
+  .cta-section {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
   .torneos-grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .torneo-destacado-card {
+    padding: 40px 32px;
   }
 }
 
@@ -707,20 +720,20 @@ onMounted(async () => {
   }
   
   .hero-content {
-    padding: 40px 20px;
+    padding: 40px 16px;
   }
 
   .torneos-grid-section {
-    padding: 0 20px 60px;
+    padding: 0 16px 48px;
   }
   
   .torneos-grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
+    grid-template-columns: 1fr;
+    gap: 18px;
   }
   
   .card-image-wrapper {
-    height: 220px;
+    height: 210px;
   }
   
   .card-title {
@@ -732,11 +745,11 @@ onMounted(async () => {
   }
 
   .info-general-section {
-    padding: 40px 20px;
+    padding: 32px 16px;
   }
 
   .cta-section {
-    padding: 60px 20px;
+    padding: 48px 16px;
   }
 }
 
@@ -747,6 +760,10 @@ onMounted(async () => {
 
   .torneos-grid-section {
     padding: 0 16px 40px;
+  }
+
+  .hero-content {
+    padding: 32px 14px;
   }
   
   .hero-content h1 {
@@ -771,6 +788,10 @@ onMounted(async () => {
 
   .section-header {
     margin-bottom: 32px;
+  }
+
+  .torneo-destacado-card {
+    padding: 28px 18px;
   }
 
   .loading-state,

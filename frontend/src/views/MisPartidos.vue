@@ -5,6 +5,7 @@
         <span class="mini-tag">Panel Deportivo</span>
         <h1>Mis Partidos</h1>
         <p class="hero-lead">Consulta tu calendario y sube los resultados de los partidos jugados.</p>
+        <button type="button" class="btn-algorithm" style="text-decoration: none; display: inline-block;" @click="goPanel">Ir a Mi Panel</button>
       </div>
     </section>
 
@@ -27,9 +28,9 @@
           <p>Aún no se ha generado el calendario o no estás inscrito en ninguna división activa.</p>
         </div>
 
-        <div v-else v-for="partido in partidos" :key="partido.id" class="partido-card">
+          <div v-else v-for="partido in partidos" :key="partido.id" class="partido-card">
           <div class="card-header">
-            <h4>{{ partido.jornada?.Nombre || 'Jornada N/A' }}</h4>
+            <h4 v-if="partido.jornada?.Nombre">{{ partido.jornada.Nombre }}</h4>
             <span class="estado-tag" :class="partido.estado.toLowerCase()">{{ partido.estado }}</span>
           </div>
 
@@ -118,6 +119,12 @@ import axios from 'axios';
 import { useAuth } from '../utils/auth';
 import { toast } from '../utils/toast';
 
+const goPerfil = () => {
+  router.push('/mi-perfil');
+};
+const goPanel = () => {
+  router.push('/socio-dashboard');
+};
 const router = useRouter();
 const { state, isAuthenticated } = useAuth();
 const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
@@ -241,12 +248,14 @@ onMounted(() => {
 .mis-partidos-page { padding-bottom: 80px; }
 
 .hero-section {
-  background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1595113330663-e1293a1059f3?q=80&w=2000&auto=format&fit=crop');
+  background: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('/fotos-tenis/photo-1558365849-6ebd8b0454b2.avif');
   background-size: cover;
+  background-position: center;
   padding: 60px 20px;
   text-align: center;
   color: white;
   margin-bottom: 40px;
+  border-radius: 0 0 40px 40px;
 }
 
 .mini-tag {
@@ -262,6 +271,37 @@ onMounted(() => {
 }
 
 .hero-lead { color: #ccc; max-width: 600px; margin: 10px auto 0; }
+
+.btn-algorithm {
+  background: #fff;
+  color: #000;
+  border: none;
+  margin-top: 22px;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-algorithm:hover {
+  background: var(--ball);
+}
+
+/* Responsive tweaks to avoid the hero content being clipped on small screens */
+.hero-content h1 {
+  font-size: clamp(2rem, 6vw, 3rem);
+  line-height: 1.02;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 480px) {
+  .hero-section { padding: 90px 16px; border-radius: 0 0 28px 28px; }
+  .hero-content h1 { font-size: 2.2rem; }
+  .hero-lead { font-size: 0.98rem; }
+  .btn-algorithm { margin-top: 18px; }
+}
+
 .container { max-width: 900px; margin: 0 auto; padding: 0 20px; }
 
 .loading-state, .error-state, .empty-state {

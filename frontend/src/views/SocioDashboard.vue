@@ -37,7 +37,7 @@
       <div v-else class="next-match-card">
         <div class="nm-top">
           <div class="nm-title">
-            <span class="nm-jornada">{{ proximoPartido.jornada?.Nombre || 'Jornada' }}</span>
+            <span class="nm-jornada" v-if="proximoPartido.jornada?.Nombre">{{ proximoPartido.jornada.Nombre }}</span>
             <span class="nm-estado" :class="estadoBadgeClass(proximoPartido.estado)">{{ proximoPartido.estado || 'Pendiente' }}</span>
           </div>
         </div>

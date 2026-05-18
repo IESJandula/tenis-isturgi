@@ -5,6 +5,7 @@
         <span class="mini-tag">Área de Jugador</span>
         <h1>Mi Disponibilidad Semanal</h1>
         <p class="hero-lead">Selecciona las franjas horarias en las que puedes jugar el próximo fin de semana.</p>
+        <button type="button" class="btn-algorithm" style="text-decoration: none; display: inline-block;" @click="goPanel">Ir a Mi Panel</button>
       </div>
     </section>
 
@@ -84,10 +85,12 @@
 <script setup>
 // Final fix to ensure form reactive state is detected
 import { ref, onMounted, reactive } from 'vue';
+import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { useAuth } from '../utils/auth';
 import { toast } from '../utils/toast';
 
+const router = useRouter();
 const { state } = useAuth();
 
 const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
@@ -113,6 +116,14 @@ const form = reactive({
 });
 
 const jugadorId = ref(null);
+
+const goPerfil = () => {
+  router.push('/mi-perfil');
+};
+
+const goPanel = () => {
+  router.push('/socio-dashboard');
+};
 
 const cargarDatos = async () => {
   cargando.value = true;
@@ -244,14 +255,43 @@ onMounted(cargarDatos);
 }
 
 .hero-section {
-  background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1595435066311-66632490b6c6?q=80&w=2000&auto=format&fit=crop');
+  background: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('/fotos-tenis/photo-1558365849-6ebd8b0454b2.avif');
   background-size: cover;
-  background-position: center;
-  padding: 80px 20px;
+  background-position: center 40%;
+  padding: 60px 20px;
   text-align: center;
   color: white;
   margin-bottom: 40px;
-  border-radius: 0 0 40px 40px;
+  border-radius: 0 0 28px 28px;
+  overflow: hidden;
+}
+
+/* Responsive tweaks to avoid hero clipping on mobile */
+.hero-content h1 {
+  font-size: clamp(2rem, 6vw, 3rem);
+  line-height: 1.02;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 480px) {
+  .hero-section { padding: 90px 20px; border-radius: 0 0 28px 28px; }
+  /* Ensure the heading does not overflow the rounded container */
+  .hero-content { padding: 0 8px; box-sizing: border-box; }
+  .hero-content { padding: 0 24px; box-sizing: border-box; }
+  .hero-content h1 { font-size: 1.45rem !important; max-width: 80%; margin: 0 auto 12px; word-break: break-word; white-space: normal; line-height: 1.04; letter-spacing: 0; font-weight: 700; }
+  /* extra small viewport tweak */
+  @media (max-width: 360px) {
+    .hero-content { padding: 0 20px; }
+    .hero-content h1 { font-size: 1.05rem !important; max-width: 86%; }
+  }
+  .mini-tag { margin-bottom: 14px; }
+  .btn-algorithm { margin-top: 18px; }
+}
+
+/* Fix for mid-size mobile / small tablet where text starts to be clipped (~620px) */
+@media (max-width: 640px) {
+  .hero-content { padding-left: 28px; padding-right: 28px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .hero-content h1 { font-size: 2.1rem !important; max-width: 86% !important; text-align: center; }
 }
 
 .mini-tag {
@@ -267,8 +307,26 @@ onMounted(cargarDatos);
 }
 
 .hero-content h1 {
-  font-size: 3rem;
   margin-bottom: 15px;
+}
+
+@media (min-width: 481px) {
+  .hero-content h1 { font-size: 3rem; }
+}
+
+.btn-algorithm {
+  background: #fff;
+  color: #000;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-algorithm:hover {
+  background: var(--ball);
 }
 
 .container {

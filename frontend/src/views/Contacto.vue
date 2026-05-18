@@ -311,7 +311,8 @@ const handleSubmit = async () => {
   position: relative;
   min-height: 240px;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
+  justify-content: center;
   background:
     linear-gradient(to top, rgba(7, 16, 13, 0.97) 0%, rgba(7, 16, 13, 0.5) 55%, rgba(7,16,13,0.3) 100%),
     url("https://images.unsplash.com/photo-1622163642998-1ea32b0bbc67?q=80&w=2400&auto=format&fit=crop") center/cover no-repeat;
@@ -330,7 +331,8 @@ const handleSubmit = async () => {
   z-index: 2;
   padding: 28px 20px 32px;
   width: 100%;
-  max-width: 760px;
+  max-width: 900px;
+  text-align: center;
 }
 
 .mini-tag {
@@ -359,10 +361,10 @@ const handleSubmit = async () => {
 
 .hero-lead {
   font-size: clamp(0.88rem, 2vw, 1.02rem);
-  color: rgba(232, 240, 236, 0.8);
+  color: rgba(232, 240, 236, 0.95);
   line-height: 1.65;
-  margin: 0;
-  max-width: 500px;
+  margin: 0 auto;
+  max-width: 760px;
 }
 
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•

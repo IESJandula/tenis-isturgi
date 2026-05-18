@@ -5,11 +5,7 @@
         <span class="mini-tag">Panel de Administración</span>
         <h1>Gestión de Jornadas</h1>
         <p class="hero-lead">Configuración de horarios y asignación de pistas para la Liga Social.</p>
-        <div style="margin-top: 20px;">
-          <router-link to="/admin-mantenimiento" class="btn-algorithm" style="text-decoration: none; display: inline-block;">
-            Ir a Gestión de Contenidos
-          </router-link>
-        </div>
+        <button type="button" class="btn-algorithm" style="text-decoration: none; display: inline-block;" @click="goBack">Ir a Mi Panel</button>
       </div>
     </section>
 
@@ -227,14 +223,25 @@
 
 <script setup>
 import { ref, onMounted, reactive, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { toast } from '../utils/toast';
 import { useAuth } from '../utils/auth';
 
 const { state } = useAuth();
+const router = useRouter();
 
 const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 const config = () => ({ headers: { Authorization: `Bearer ${state.jwt}` } });
+
+const goBack = () => {
+  if (window.history.length > 1) {
+    router.back();
+    return;
+  }
+
+  router.push('/socio-dashboard');
+};
 
 const jornadas = ref([]);
 const divisiones = ref([]);
@@ -552,12 +559,16 @@ onMounted(cargarJornadas);
 .admin-gestion-page { padding-bottom: 80px; }
 
 .hero-section {
-  background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1595113330663-e1293a1059f3?q=80&w=2000&auto=format&fit=crop');
+  background: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('/fotos-tenis/photo-1558365849-6ebd8b0454b2.avif');
+  background-position: center 40%;
   background-size: cover;
+  background-position: center center;
   padding: 60px 20px;
   text-align: center;
   color: white;
   margin-bottom: 40px;
+  border-radius: 0 0 28px 28px;
+  overflow: hidden;
 }
 
 .mini-tag {
@@ -570,6 +581,13 @@ onMounted(cargarJornadas);
   text-transform: uppercase;
   margin-bottom: 15px;
   display: inline-block;
+}
+
+.hero-section .hero-content h1,
+.hero-section .hero-content .hero-lead,
+.hero-section .hero-content .mini-tag,
+.hero-section .hero-content p {
+  color: #fff !important;
 }
 
 .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }

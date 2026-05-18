@@ -232,4 +232,24 @@
     justify-content: space-between;
   }
 }
+
+@media (max-width: 639px) {
+  .footer-brand {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .footer-logo {
+    width: 52px;
+    height: 52px;
+  }
+
+  .footer-cta {
+    gap: 12px;
+  }
+
+  .footer-cta .btn {
+    width: 100%;
+  }
+}
 </style>

@@ -272,6 +272,7 @@ onUnmounted(() => {
   min-height: 100vh;
   background: linear-gradient(135deg, #080d0f 0%, #0f1416 100%);
   color: #fff;
+  overflow-x: hidden;
 }
 
 /* Header compacto */
@@ -645,6 +646,7 @@ onUnmounted(() => {
   .torneo-content { max-width: 1200px; }
   .article-layout { gap: 30px; }
   .article-title { font-size: clamp(1.6rem, 3.5vw, 2.5rem); }
+  .article-content { padding: 32px; }
 }
 
 @media (max-width: 900px) {
@@ -664,8 +666,41 @@ onUnmounted(() => {
   .imagen-completa { max-height: 450px; }
   .article-content { padding: 30px 20px; }
   .article-text { font-size: 1.05rem; line-height: 1.8; }
+  .info-grid { grid-template-columns: 1fr; gap: 12px; }
   .lightbox-close, .lightbox-fullscreen { width: 45px; height: 45px; font-size: 1.2rem; }
   .lightbox-fullscreen { right: 75px; }
+}
+
+@media (max-width: 640px) {
+  .header-detalle { padding: 16px 0; }
+
+  .container,
+  .torneo-content {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .torneo-content {
+    padding-top: 32px;
+    padding-bottom: 52px;
+  }
+
+  .article-meta {
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .article-content {
+    padding: 24px 16px;
+  }
+
+  .info-item {
+    padding: 14px;
+  }
+
+  .lightbox-content {
+    padding: 0 12px;
+  }
 }
 
 @media (max-width: 480px) {

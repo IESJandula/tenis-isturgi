@@ -24,11 +24,16 @@
       <router-link to="/noticias" @click="closeMenu">Noticias</router-link>
       <router-link to="/torneos" @click="closeMenu">Torneos</router-link>
       <router-link to="/contacto" @click="closeMenu">Contacto</router-link>
-      <router-link v-if="isAuthenticated() && !isAdmin()" to="/disponibilidad" @click="closeMenu">Mi Disponibilidad</router-link>
     </div>
+
+    
 
     <!-- Zona usuario (visible siempre) -->
     <div class="navbar-right">
+      <button type="button" class="hamburger" aria-label="Abrir menú" :aria-expanded="topMenuOpen" @click="toggleTopMenu">
+        <span class="hamburger-inner"></span>
+      </button>
+
       <router-link v-if="!isAuthenticated()" to="/login" class="btn-login" @click="closeAllMenus">Soy Socio</router-link>
 
       <div v-else class="user-area" ref="userAreaRef">
@@ -55,14 +60,38 @@
           <router-link to="/socio-dashboard" class="dropdown-item" role="menuitem" @click="closeAllMenus">Mi panel</router-link>
           <router-link v-if="!isAdmin()" to="/mi-perfil" class="dropdown-item" role="menuitem" @click="closeAllMenus">Mi perfil</router-link>
           <router-link v-if="!isAdmin()" to="/mis-partidos" class="dropdown-item" role="menuitem" @click="closeAllMenus">Mis partidos</router-link>
-          <router-link v-if="isAdmin()" to="/admin/dashboard" class="dropdown-item" role="menuitem" @click="closeAllMenus">Admin · Dashboard</router-link>
-          <router-link v-if="isAdmin()" to="/admin/calendario" class="dropdown-item" role="menuitem" @click="closeAllMenus">Admin · Calendario</router-link>
-          <router-link v-if="isAdmin()" to="/admin-mantenimiento" class="dropdown-item" role="menuitem" @click="closeAllMenus">Admin · Mantenimiento</router-link>
+          <router-link v-if="isAdmin()" to="/admin/dashboard" class="dropdown-item" role="menuitem" @click="closeAllMenus">Dashboard</router-link>
+          <router-link v-if="isAdmin()" to="/admin/calendario" class="dropdown-item" role="menuitem" @click="closeAllMenus">Jornadas</router-link>
+          <router-link v-if="isAdmin()" to="/admin-mantenimiento" class="dropdown-item" role="menuitem" @click="closeAllMenus">Mantenimiento</router-link>
           <button type="button" class="dropdown-item danger" role="menuitem" @click="handleLogout">Cerrar sesión</button>
         </div>
       </div>
     </div>
   </nav>
+
+  <!-- Mobile: top dropdown menu (hamburger) -->
+  <Transition name="dropdown">
+    <div v-if="topMenuOpen" class="mobile-dropdown" role="menu" aria-label="Navegación móvil superior">
+      <nav class="dropdown-links">
+        <router-link to="/" @click="closeTopMenu">Inicio</router-link>
+        <router-link to="/club" @click="closeTopMenu">El Club</router-link>
+        <router-link to="/galeria" @click="closeTopMenu">Galería</router-link>
+        <router-link to="/escuela" @click="closeTopMenu">Escuela</router-link>
+        <router-link to="/liga" @click="closeTopMenu">Liga</router-link>
+        <router-link to="/noticias" @click="closeTopMenu">Noticias</router-link>
+        <router-link to="/torneos" @click="closeTopMenu">Torneos</router-link>
+        <router-link to="/contacto" @click="closeTopMenu">Contacto</router-link>
+        <!-- En móvil: si estamos autenticados mostramos un botón compacto de cuenta (avatar + nombre), si no el CTA de login -->
+        <template v-if="isAuthenticated()">
+          <router-link to="/socio-dashboard" class="dropdown-account" @click="closeTopMenu">
+            <img :src="avatarUrl" class="dropdown-account-avatar" alt="avatar" loading="lazy" @error="onAvatarError" />
+            <span class="dropdown-account-name">{{ displayName }}</span>
+          </router-link>
+        </template>
+        <router-link v-else to="/login" class="dropdown-cta" @click="closeTopMenu">Soy Socio</router-link>
+      </nav>
+    </div>
+  </Transition>
 
   <!-- ② Bottom nav: solo móvil -->
   <nav class="bottom-nav" aria-label="Navegación principal">
@@ -117,7 +146,6 @@
         <router-link to="/galeria"  class="sheet-link" @click="closeMenu"><span class="sheet-icon">🖼️</span>Galería</router-link>
         <router-link to="/noticias" class="sheet-link" @click="closeMenu"><span class="sheet-icon">📰</span>Noticias</router-link>
         <router-link to="/contacto" class="sheet-link" @click="closeMenu"><span class="sheet-icon">📍</span>Contacto</router-link>
-        <router-link v-if="isAuthenticated() && !isAdmin()" to="/disponibilidad" class="sheet-link" @click="closeMenu"><span class="sheet-icon">📅</span>Mi Disponibilidad</router-link>
         <router-link v-if="!isAuthenticated()" to="/login" class="sheet-link sheet-cta" @click="closeMenu">Soy Socio →</router-link>
       </nav>
     </div>
@@ -137,6 +165,7 @@ const router = useRouter();
 const { state, isAuthenticated, isAdmin, logout } = useAuth();
 
 const menuOpen = ref(false);
+const topMenuOpen = ref(false);
 const userMenuOpen = ref(false);
 const userAreaRef = ref(null);
 
@@ -159,12 +188,26 @@ const closeMenu = () => {
 
 const closeAllMenus = () => {
   menuOpen.value = false;
+  topMenuOpen.value = false;
   userMenuOpen.value = false;
 };
 
 const toggleMenu = () => {
   menuOpen.value = !menuOpen.value;
   if (!menuOpen.value) userMenuOpen.value = false;
+};
+
+const toggleTopMenu = () => {
+  topMenuOpen.value = !topMenuOpen.value;
+  // cerrar otros menús cuando se abre el top menu
+  if (topMenuOpen.value) {
+    menuOpen.value = false;
+    userMenuOpen.value = false;
+  }
+};
+
+const closeTopMenu = () => {
+  topMenuOpen.value = false;
 };
 
 const toggleUserMenu = () => {
@@ -243,6 +286,39 @@ const handleLogout = async () => {
   gap: 1px;
   line-height: 1;
 }
+
+  .hamburger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.04);
+    margin-left: 8px;
+    cursor: pointer;
+  }
+
+  .hamburger-inner {
+    width: 18px;
+    height: 2px;
+    background: rgba(232,240,236,0.9);
+    position: relative;
+  }
+
+  .hamburger-inner::before,
+  .hamburger-inner::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 18px;
+    height: 2px;
+    background: rgba(232,240,236,0.9);
+  }
+
+  .hamburger-inner::before { top: -6px; }
+  .hamburger-inner::after { top: 6px; }
 
 .brand-mark {
   font-size: 1.3rem;
@@ -389,6 +465,75 @@ const handleLogout = async () => {
   padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
+/* Mobile top dropdown */
+.mobile-dropdown {
+  position: absolute;
+  top: 64px; /* justo debajo de la navbar */
+  right: 8px; /* alineado a la derecha */
+  left: auto;
+  background: rgba(7,16,13,0.98);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  z-index: 120;
+  padding: 12px 8px;
+}
+
+.dropdown-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dropdown-links a {
+  color: rgba(232,240,236,0.95);
+  padding: 10px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+/* Cuenta compacta en el dropdown (móvil) */
+.dropdown-account {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.02);
+  color: rgba(232,240,236,0.95);
+  text-decoration: none;
+  font-weight: 700;
+}
+.dropdown-account-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid rgba(199, 255, 52, 0.35);
+}
+.dropdown-account-name {
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdown-links a.dropdown-cta {
+  background: var(--ball);
+  color: #000;
+  font-weight: 800;
+  text-align: center;
+}
+
+/* Hide hamburger on desktop (already showing desktop links) */
+@media (min-width: 769px) {
+  .hamburger { display: none; }
+  .mobile-dropdown { display: none; }
+}
+
+@media (max-width: 768px) {
+  /* hide the bottom sheet backdrop overlap when top dropdown open */
+  .sheet-backdrop[style] { display: none; }
+}
+
 .bnav-item {
   flex: 1;
   display: flex;
@@ -497,6 +642,12 @@ const handleLogout = async () => {
 }
 
 .sheet-cta:hover {
+.dropdown-links a.dropdown-cta {
+  background: var(--ball);
+  color: #000;
+  font-weight: 800;
+  text-align: center;
+}
   filter: brightness(1.06);
 }
 
@@ -506,6 +657,10 @@ const handleLogout = async () => {
   z-index: 140;
   background: rgba(0, 0, 0, 0.55);
 }
+  /* En móvil ocultar el área de usuario y mostrar el hamburger en la derecha; ocultar el CTA de login */
+  .user-area { display: none; }
+  .btn-login { display: none !important; }
+  .user-name { display: inline; font-weight: 700; font-size: 0.85rem; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ── Transiciones ── */
 .sheet-enter-active,
@@ -596,6 +751,9 @@ const handleLogout = async () => {
     display: inline;
   }
 
+  /* Mostrar el área de usuario en desktop */
+  .user-area { display: inline-flex; align-items: center; gap: 8px; }
+
   .user-name {
     font-weight: 700;
     font-size: 0.88rem;
@@ -610,6 +768,31 @@ const handleLogout = async () => {
   .mobile-sheet,
   .sheet-backdrop {
     display: none !important;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .navbar {
+    padding: 12px 16px;
+    gap: 12px;
+  }
+
+  .brand-sub {
+    display: none;
+  }
+
+  .enlaces {
+    gap: 2px;
+  }
+
+  .enlaces a {
+    padding: 6px 8px;
+    font-size: 0.76rem;
+    letter-spacing: 0.35px;
+  }
+
+  .user-name {
+    max-width: 110px;
   }
 }
 </style>

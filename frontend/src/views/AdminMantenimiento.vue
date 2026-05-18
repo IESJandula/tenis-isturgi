@@ -5,11 +5,7 @@
         <span class="mini-tag">Mantenimiento Global</span>
         <h1>Gestión de Contenidos</h1>
         <p class="hero-lead">Crea y modifica torneos, noticias y perfiles de socios.</p>
-        <div style="margin-top: 20px;">
-          <router-link to="/admin-gestion" class="btn-secondary" style="text-decoration: none; display: inline-block;">
-            Ir a Gestión de Ligas
-          </router-link>
-        </div>
+        <button type="button" class="btn-algorithm" style="text-decoration: none; display: inline-block;" @click="goBack">Ir a Mi Panel</button>
       </div>
     </section>
 
@@ -427,14 +423,25 @@
 
 <script setup>
 import { ref, watch, onMounted, computed, reactive } from 'vue';
+import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { toast } from '../utils/toast';
 import { useAuth } from '../utils/auth';
 
 const { state } = useAuth();
+const router = useRouter();
 
 const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 const config = () => ({ headers: { Authorization: `Bearer ${state.jwt}` } });
+
+const goBack = () => {
+  if (window.history.length > 1) {
+    router.back();
+    return;
+  }
+
+  router.push('/socio-dashboard');
+};
 
 const activeTab = ref('torneos');
 const tabs = [
@@ -784,11 +791,15 @@ onMounted(() => {
 .admin-mantenimiento-page { padding-bottom: 80px; color: white; }
 
 .hero-section {
-  background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('https://images.unsplash.com/photo-1596484552834-6a58f850e0a1?q=80&w=2000&auto=format&fit=crop');
+  background: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('/fotos-tenis/photo-1558365849-6ebd8b0454b2.avif');
+  background-position: center 40%;
   background-size: cover;
+  background-position: center center;
   padding: 60px 20px;
   text-align: center;
   margin-bottom: 40px;
+  border-radius: 0 0 28px 28px;
+  overflow: hidden;
 }
 
 .mini-tag {
@@ -803,7 +814,14 @@ onMounted(() => {
   display: inline-block;
 }
 
-.hero-lead { color: #888; }
+.hero-lead { color: #fff !important; }
+
+.hero-section .hero-content h1,
+.hero-section .hero-content .hero-lead,
+.hero-section .hero-content .mini-tag,
+.hero-section .hero-content p {
+  color: #fff !important;
+}
 
 .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
 
@@ -815,11 +833,14 @@ onMounted(() => {
   background: rgba(255,255,255,0.05);
   padding: 8px;
   border-radius: 12px;
-  width: fit-content;
+  width: 100%;
+  flex-wrap: wrap;
 }
 
 .tab-btn {
-  padding: 10px 25px;
+  flex: 1 1 140px;
+  min-height: 44px;
+  padding: 10px 16px;
   border-radius: 8px;
   border: none;
   background: transparent;
@@ -827,6 +848,9 @@ onMounted(() => {
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s;
+  white-space: normal;
+  line-height: 1.15;
+  text-align: center;
 }
 
 .tab-btn.active {
@@ -852,6 +876,81 @@ onMounted(() => {
 }
 
 .section-header h2 { color: var(--ball); font-size: 1.5rem; }
+
+@media (max-width: 1024px) {
+  .tabs-container {
+    gap: 8px;
+  }
+
+  .tab-btn {
+    flex-basis: calc(33.333% - 8px);
+    padding: 10px 12px;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 48px 16px;
+    margin-bottom: 28px;
+  }
+
+  .container {
+    padding: 0 16px;
+  }
+
+  .tabs-container {
+    padding: 6px;
+    gap: 6px;
+  }
+
+  .tab-btn {
+    flex-basis: calc(50% - 6px);
+    padding: 10px 10px;
+    font-size: 0.9rem;
+  }
+
+  .glass-card {
+    padding: 20px;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .section-header h2 {
+    font-size: 1.25rem;
+  }
+
+  .section-header .btn-primary {
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .tab-btn {
+    flex-basis: 100%;
+  }
+
+  .hero-content h1 {
+    font-size: clamp(2rem, 9vw, 2.8rem);
+  }
+
+  .hero-lead {
+    font-size: 0.95rem;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .modal-actions .btn-primary,
+  .modal-actions .btn-secondary {
+    width: 100%;
+  }
+}
 
 .btn-primary {
   background: var(--ball);
@@ -942,6 +1041,21 @@ onMounted(() => {
   color: #ff8f8f;
   font-size: 0.82rem;
   font-weight: 600;
+}
+
+.btn-algorithm {
+  background: #fff;
+  color: #000;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-algorithm:hover {
+  background: var(--ball);
 }
 
 .btn-secondary {

@@ -1,7 +1,15 @@
 <template>
   <div class="admin-dashboard page fade-in">
-    <header class="dashboard-header">
-      <h1 class="headline">Dashboard Administrativo</h1>
+    <section class="hero-section">
+      <div class="hero-content">
+        <span class="mini-tag">Panel de Administración</span>
+        <h1>Dashboard Administrativo</h1>
+        <p class="hero-lead">Resumen rápido del estado de partidos y socios del club.</p>
+        <button type="button" class="btn-algorithm" style="text-decoration: none; display: inline-block;" @click="goBack">Ir a Mi Panel</button>
+      </div>
+    </section>
+
+    <div class="container main-content">
       <div class="quick-stats">
         <div class="stat-card glass-card">
           <span class="val">{{ stats.partidosPendientes }}</span>
@@ -12,39 +20,49 @@
           <span class="lbl">Socios Activos</span>
         </div>
       </div>
-    </header>
 
-    <div class="dashboard-grid">
-      <section class="proximos-partidos glass-card">
-        <h2 class="headline">Últimos Partidos Jugados</h2>
-        <div v-if="ultimosPartidos.length === 0" class="vacio">No hay partidos recientes.</div>
-        <table v-else class="admin-table">
-          <thead>
-            <tr>
-              <th>Jugadores</th>
-              <th>Resultado</th>
-              <th>Fecha</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="p in ultimosPartidos" :key="p.id">
-              <td>{{ p.jugador1?.Nombre }} {{ p.jugador1?.Apellidos }} vs {{ p.jugador2?.Nombre }} {{ p.jugador2?.Apellidos }}</td>
-              <td><span class="res-badge">{{ p.resultado }}</span></td>
-              <td>{{ new Date(p.fecha).toLocaleDateString() }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
+      <div class="dashboard-grid">
+        <section class="proximos-partidos glass-card">
+          <h2 class="headline">Últimos Partidos Jugados</h2>
+          <div v-if="ultimosPartidos.length === 0" class="vacio">No hay partidos recientes.</div>
+          <table v-else class="admin-table">
+            <thead>
+              <tr>
+                <th>Jugadores</th>
+                <th>Resultado</th>
+                <th>Fecha</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="p in ultimosPartidos" :key="p.id">
+                <td>{{ p.jugador1?.Nombre }} {{ p.jugador1?.Apellidos }} vs {{ p.jugador2?.Nombre }} {{ p.jugador2?.Apellidos }}</td>
+                <td><span class="res-badge">{{ p.resultado }}</span></td>
+                <td>{{ new Date(p.fecha).toLocaleDateString() }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref, reactive } from 'vue';
+import { useRouter } from 'vue-router';
 import axios from 'axios';
 
+const router = useRouter();
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+
+const goBack = () => {
+  if (window.history.length > 1) {
+    router.back();
+    return;
+  }
+
+  router.push('/socio-dashboard');
+};
 
 const stats = reactive({
   partidosPendientes: 0,
@@ -73,15 +91,74 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.dashboard-header {
+.admin-dashboard {
+  padding-bottom: 80px;
+}
+
+.hero-section {
+  background: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('/fotos-tenis/photo-1558365849-6ebd8b0454b2.avif');
+  background-position: center 40%;
+  background-size: cover;
+  padding: 60px 20px;
+  text-align: center;
   margin-bottom: 40px;
+  border-radius: 0 0 28px 28px;
+  overflow: hidden;
+}
+
+.btn-algorithm {
+  background: #fff;
+  color: #000;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-algorithm:hover {
+  background: var(--ball);
+}
+
+.mini-tag {
+  background: #ff3c3c;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-weight: 800;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  margin-bottom: 15px;
+  display: inline-block;
+}
+
+.hero-content h1 {
+  color: white;
+}
+
+.hero-lead {
+  color: #fff !important;
+}
+
+.hero-section .hero-content h1,
+.hero-section .hero-content .hero-lead,
+.hero-section .hero-content .mini-tag,
+.hero-section .hero-content p {
+  color: #fff !important;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
 .quick-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 24px;
-  margin-top: 32px;
+  margin-bottom: 32px;
 }
 
 .stat-card {
