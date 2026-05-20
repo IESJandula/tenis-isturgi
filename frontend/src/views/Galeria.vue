@@ -60,11 +60,13 @@
         >
           Cerrar
         </button>
-        <img :src="lightboxActivo.src" :alt="lightboxActivo.titulo" />
-        <div class="lightbox-info">
-          <span class="media-tag">{{ lightboxActivo.categoria }}</span>
-          <h3>{{ lightboxActivo.titulo }}</h3>
-          <p>{{ lightboxActivo.texto }}</p>
+        <div class="lightbox-body">
+          <img :src="lightboxActivo.src" :alt="lightboxActivo.titulo" />
+          <div class="lightbox-info">
+            <span class="media-tag">{{ lightboxActivo.categoria }}</span>
+            <h3>{{ lightboxActivo.titulo }}</h3>
+            <p>{{ lightboxActivo.texto }}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -109,11 +111,9 @@ const cargando = ref(true);
 
 watch(lightboxActivo, async (value) => {
   if (value) {
-    document.body.style.overflow = 'hidden';
     await nextTick();
     lightboxCloseRef.value?.focus?.();
   } else {
-    document.body.style.overflow = '';
     lastFocusedElement.value?.focus?.();
   }
 });
@@ -125,7 +125,15 @@ onMounted(async () => {
   try {
     const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
     const res = await axios.get(`${apiUrl}/api/galeria`);
-    const apiItems = res.data.data || [];
+    let apiItems = res.data.data || [];
+    // Ensure src paths are absolute (backend returns '/uploads/...' paths)
+    apiItems = apiItems.map(it => {
+      const src = it.src;
+      if (typeof src === 'string' && src.startsWith('/')) {
+        return { ...it, src: `${apiUrl.replace(/\/$/, '')}${src}` };
+      }
+      return it;
+    });
     mediaItems.value = [...fotosLocal, ...apiItems];
   } catch (error) {
     console.error('Error cargando galería:', error);
@@ -319,10 +327,12 @@ onBeforeUnmount(() => {
 .lightbox {
   position: fixed;
   inset: 0;
-  background: rgba(5, 8, 10, 0.75);
+  background: rgba(0, 0, 0, 0.92);
   backdrop-filter: blur(12px);
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
   padding: 24px;
   z-index: 2000;
 }
@@ -333,22 +343,28 @@ onBeforeUnmount(() => {
   background: rgba(9, 13, 15, 0.92);
   border-radius: var(--radius-lg);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  overflow: hidden;
   display: grid;
   gap: 16px;
   padding: 18px;
+  margin: auto 0;
 }
 
-.lightbox-card img {
+.lightbox-body {
+  /* The scrollable area containing the image and text */
+  display: grid;
+  gap: 12px;
+}
+
+.lightbox-body img {
   width: 100%;
   border-radius: var(--radius-md);
-  max-height: 520px;
+  max-height: 75vh;
   object-fit: contain;
   background: rgba(9, 13, 15, 0.6);
 }
 
 .lightbox-close {
-  align-self: flex-end;
+  align-self: center;
   border: 1px solid rgba(255, 255, 255, 0.2);
   background: transparent;
   color: #ffffff;

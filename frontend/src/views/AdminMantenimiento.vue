@@ -479,6 +479,11 @@ const divisionesCompatibles = computed(() => {
   return divisiones.value;
 });
 
+const normalizeMediaUrl = (url) => {
+  if (typeof url !== 'string' || !url.startsWith('/')) return url;
+  return `${apiUrl.replace(/\/$/, '')}${url}`;
+};
+
 const cargarDatos = async () => {
   // Esperar a que el estado de auth esté inicializado y haya un token válido
   if (!state.initialized) return;
@@ -486,7 +491,13 @@ const cargarDatos = async () => {
   cargando.value = true;
   try {
     const res = await axios.get(`${apiUrl}/api/${activeEndpoint.value}?sort=createdAt:desc`, config());
-    items.value = res.data.data || [];
+    const loadedItems = res.data.data || [];
+    items.value = activeTab.value === 'galeria'
+      ? loadedItems.map((item) => ({
+          ...item,
+          src: normalizeMediaUrl(item.src),
+        }))
+      : loadedItems;
 
     if (activeTab.value === 'divisiones') {
       try {
@@ -672,13 +683,47 @@ const guardarItem = async () => {
       const file = selectedFiles[key];
       if (!file) continue;
       const fd = new FormData();
-      fd.append('file', file);
+      // Strapi /upload expects the field name 'files' (and returns different shapes depending on version)
+      fd.append('files', file);
       try {
-        const res = await axios.post(`${apiUrl}/api/uploads`, fd, config());
-        const url = res.data?.data?.url;
+        // Try local Spring upload endpoint first: POST /api/uploads with field 'file'
+        let res = null;
+        let url = null;
+        try {
+          const fdLocal = new FormData();
+          fdLocal.append('file', file);
+          res = await axios.post(`${apiUrl.replace(/\/$/, '')}/api/uploads`, fdLocal, config());
+          url = res?.data?.data?.url || res?.data?.url || null;
+        } catch (localErr) {
+          // If local upload fails, fallback to Strapi-style /api/upload with 'files'
+          try {
+            const fdStrapi = new FormData();
+            fdStrapi.append('files', file);
+            res = await axios.post(`${apiUrl.replace(/\/$/, '')}/api/upload`, fdStrapi, config());
+            // Normalize possible response shapes to extract a usable URL
+            if (res?.data) {
+              if (Array.isArray(res.data) && res.data[0]) url = res.data[0].url || res.data[0]?.attributes?.url;
+              if (!url && res.data?.data) {
+                const first = Array.isArray(res.data.data) ? res.data.data[0] : res.data.data;
+                url = first?.url || first?.attributes?.url || first?.attributes?.formats?.small?.url || null;
+              }
+            }
+          } catch (e) {
+            throw e; // rethrow to outer catch
+          }
+        }
         if (url) {
+          // Normalize to absolute URL when backend returns a relative path like '/uploads/..'
+          if (typeof url === 'string' && url.startsWith('/')) {
+            const base = apiUrl.replace(/\/$/, '');
+            url = base + url;
+          }
           uploadsMap[key] = url;
           form[key] = url; // actualizar el form para enviarlo luego
+        } else {
+          // Fallback: if server didn't return a URL, still attempt to continue but warn
+          console.warn('No se obtuvo URL al subir archivo, respuesta:', res.data);
+          toast('Subida completada pero no se pudo obtener la URL del archivo.', 'warning');
         }
       } catch (e) {
         console.error('Error subiendo archivo', e);
